@@ -6,194 +6,209 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="履音">
-<title>履音 · 教學助手</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<title>履音 · 教學手記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyCNonPT0mdrzI9p8Qlh-iKbkqpJciJ64lQ",
     authDomain: "walking-melody.firebaseapp.com",
     projectId: "walking-melody",
     storageBucket: "walking-melody.firebasestorage.app",
     messagingSenderId: "906826621436",
-    appId: "1:906826621436:web:96850e4bff2d470c7e5279",
-    measurementId: "G-BNVWVLBXV7"
+    appId: "1:906826621436:web:96850e4bff2d470c7e5279"
   };
-
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window._db = db;
-  window._fbModules = { collection, doc, setDoc, deleteDoc, onSnapshot };
-
-  window.addEventListener('DOMContentLoaded', () => window._appInit());
+  window._db = getFirestore(app);
+  window._fb = { collection, doc, setDoc, deleteDoc, onSnapshot };
+  window.addEventListener('DOMContentLoaded', () => window._init());
 </script>
 
 <style>
-  :root {
-    --ink:#1a1208; --paper:#fdf8f0; --warm:#f5ede0; --accent:#c8562a;
-    --accent2:#4a7c6f; --gold:#d4a853; --muted:#8a7d6b;
-    --border:#e2d8cc; --card:#fffdf9; --shadow:rgba(26,18,8,0.08);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { font-family:'Noto Sans TC',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; overflow-x:hidden; }
+:root {
+  --ink:#1c1408; --ink2:#2e2010; --paper:#f7f0e3; --paper2:#ede4d0;
+  --silk:#faf6ee; --vermil:#9b2a1a; --vermil2:#c0392b;
+  --gold:#b8922a; --gold2:#d4ac45; --jade:#3d6b5a;
+  --muted:#7a6a52; --border:#d4c4a8; --border2:#c8b898;
+  --shadow:rgba(28,20,8,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 20% 50%,rgba(184,146,42,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(155,42,26,.03) 0%,transparent 50%)}
 
-  /* SPLASH */
-  #splash { position:fixed; inset:0; background:var(--ink); z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .6s; }
-  .splash-logo { font-family:'Noto Serif TC',serif; font-size:2.8rem; color:var(--gold); letter-spacing:.2em; }
-  .splash-sub { font-size:.85rem; color:var(--muted); letter-spacing:.3em; margin-top:.5rem; }
-  .splash-status { font-size:.75rem; color:var(--muted); margin-top:1.8rem; display:flex; align-items:center; gap:8px; }
-  .splash-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s ease;
+  background-image:radial-gradient(ellipse at 30% 40%,rgba(184,146,42,.08) 0%,transparent 60%)}
+.splash-seal{width:88px;height:88px;border:2px solid var(--vermil);display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:22px;animation:sealPulse 2.5s ease infinite}
+.splash-seal::before{content:'';position:absolute;inset:5px;border:1px solid rgba(184,146,42,.25)}
+@keyframes sealPulse{0%,100%{opacity:1}50%{opacity:.65}}
+.splash-char{font-family:'Noto Serif TC',serif;font-size:2.5rem;color:var(--vermil);font-weight:700}
+.splash-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.55em;margin-bottom:5px}
+.splash-sub{font-size:.7rem;color:rgba(184,146,42,.45);letter-spacing:.3em;margin-bottom:26px}
+.splash-divider{width:1px;height:36px;background:linear-gradient(to bottom,var(--gold),transparent)}
+.splash-status{font-size:.7rem;color:rgba(184,146,42,.45);margin-top:12px;letter-spacing:.12em}
 
-  /* BANNER */
-  #banner { position:fixed; top:0; left:0; right:0; z-index:300; background:var(--accent2); color:#fff; font-size:.75rem; text-align:center; padding:7px; display:none; }
-  #banner.show { display:block; }
-  #banner.err { background:#b54040; }
+/* BANNER */
+#banner{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--jade);color:#fff;font-size:.73rem;text-align:center;padding:7px;display:none;letter-spacing:.06em}
+#banner.show{display:block}
+#banner.err{background:var(--vermil)}
 
-  /* HEADER */
-  header { position:fixed; top:0; left:0; right:0; z-index:100; background:var(--card); border-bottom:1px solid var(--border); padding:env(safe-area-inset-top) 0 0; box-shadow:0 2px 12px var(--shadow); }
-  .header-inner { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; }
-  .header-title { font-family:'Noto Serif TC',serif; font-size:1.15rem; letter-spacing:.1em; }
-  .header-right { display:flex; align-items:center; gap:10px; }
-  .hbtn { background:none; border:none; cursor:pointer; color:var(--accent); font-size:.9rem; font-family:'Noto Sans TC',sans-serif; font-weight:500; }
-  .sync-dot { width:8px; height:8px; border-radius:50%; background:#ccc; flex-shrink:0; }
-  .sync-dot.online { background:#4a7c6f; }
-  .sync-dot.syncing { background:var(--gold); animation:pulse 1s infinite; }
-  .sync-dot.error { background:#c05050; }
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--ink);padding:env(safe-area-inset-top) 0 0;
+  box-shadow:0 2px 20px rgba(0,0,0,.4);border-bottom:1px solid rgba(184,146,42,.2)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-seal{width:30px;height:30px;border:1px solid var(--vermil);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-seal span{font-family:'Noto Serif TC',serif;font-size:.9rem;color:var(--vermil);font-weight:700}
+.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.2em}
+.header-right{display:flex;align-items:center;gap:10px}
+.hbtn{background:none;border:1px solid rgba(184,146,42,.4);cursor:pointer;color:var(--gold2);font-size:.8rem;font-family:'Noto Sans TC',sans-serif;padding:5px 11px;letter-spacing:.05em}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#444;flex-shrink:0}
+.sync-dot.online{background:var(--jade);box-shadow:0 0 5px var(--jade)}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
+.sync-dot.error{background:var(--vermil2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  /* NAV */
-  nav { position:fixed; bottom:0; left:0; right:0; z-index:100; background:var(--card); border-top:1px solid var(--border); display:flex; padding-bottom:env(safe-area-inset-bottom); box-shadow:0 -4px 20px var(--shadow); }
-  nav button { flex:1; border:none; background:none; padding:12px 4px 10px; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--muted); cursor:pointer; font-family:'Noto Sans TC',sans-serif; }
-  nav button.active { color:var(--accent); }
-  nav button svg { width:22px; height:22px; }
-  nav button span { font-size:.65rem; letter-spacing:.05em; }
+/* NAV */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--ink);border-top:1px solid rgba(184,146,42,.2);display:flex;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 20px rgba(0,0,0,.35)}
+nav button{flex:1;border:none;background:none;padding:11px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(184,146,42,.3);cursor:pointer;font-family:'Noto Sans TC',sans-serif;position:relative;transition:.2s}
+nav button.active{color:var(--gold2)}
+nav button.active::after{content:'';position:absolute;bottom:0;left:25%;right:25%;height:1px;background:var(--vermil)}
+nav button svg{width:20px;height:20px}
+nav button span{font-size:.6rem;letter-spacing:.08em}
 
-  /* PAGES */
-  main { padding-top:72px; padding-bottom:80px; min-height:100vh; }
-  .page { display:none; animation:fadeIn .3s ease; }
-  .page.active { display:block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+main{padding-top:66px;padding-bottom:73px;min-height:100vh}
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  /* DASHBOARD */
-  .pad { padding:20px; }
-  .greeting { font-family:'Noto Serif TC',serif; font-size:1.4rem; margin-bottom:4px; }
-  .greeting span { color:var(--accent); }
-  .date-line { color:var(--muted); font-size:.8rem; margin-bottom:24px; }
-  .stat-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
-  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; position:relative; overflow:hidden; }
-  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent); }
-  .stat-card:nth-child(2)::before { background:var(--accent2); }
-  .stat-num { font-family:'Noto Serif TC',serif; font-size:2rem; font-weight:700; }
-  .stat-label { font-size:.72rem; color:var(--muted); margin-top:2px; }
-  .sec-title { font-family:'Noto Serif TC',serif; font-size:1rem; letter-spacing:.1em; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-  .sec-title::after { content:''; flex:1; height:1px; background:var(--border); }
+.pad{padding:16px}
+.sec-title{font-family:'Noto Serif TC',serif;font-size:.85rem;letter-spacing:.2em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.sec-title::before{content:'';width:3px;height:13px;background:var(--vermil);flex-shrink:0}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
-  /* TODAY LIST */
-  .today-item { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; margin-bottom:10px; }
-  .today-item:active { opacity:.7; }
-  .tdot { width:10px; height:10px; border-radius:50%; background:var(--accent); flex-shrink:0; }
-  .tdot.g { background:var(--accent2); }
+/* STATS */
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.stat-card{background:var(--ink2);border:1px solid rgba(184,146,42,.2);padding:13px 8px;text-align:center;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
+.stat-num{font-family:'Noto Serif TC',serif;font-size:1.7rem;font-weight:700;color:var(--gold2)}
+.stat-label{font-size:.6rem;color:rgba(184,146,42,.45);margin-top:2px;letter-spacing:.1em}
 
-  /* STUDENT GRID */
-  .search-bar { display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 14px; margin-bottom:20px; }
-  .search-bar input { flex:1; border:none; background:none; font-size:.9rem; color:var(--ink); font-family:'Noto Sans TC',sans-serif; outline:none; }
-  .s-card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; cursor:pointer; margin-bottom:12px; }
-  .s-card:active { opacity:.7; }
-  .s-card-top { padding:16px; display:flex; align-items:center; gap:14px; }
-  .avatar { width:46px; height:46px; border-radius:50%; font-size:1.2rem; display:flex; align-items:center; justify-content:center; font-family:'Noto Serif TC',serif; font-weight:700; flex-shrink:0; }
-  .s-name { font-size:.95rem; font-weight:600; margin-bottom:2px; }
-  .s-meta { font-size:.75rem; color:var(--muted); }
-  .prog-wrap { padding:0 16px 14px; }
-  .prog-label { display:flex; justify-content:space-between; font-size:.7rem; color:var(--muted); margin-bottom:5px; }
-  .prog-bar { height:5px; background:var(--border); border-radius:99px; overflow:hidden; }
-  .prog-fill { height:100%; border-radius:99px; background:var(--accent); transition:.6s; }
+/* TODAY */
+.today-item{background:var(--silk);border:1px solid var(--border);border-left:3px solid var(--vermil);padding:11px 13px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px;box-shadow:1px 2px 6px var(--shadow);transition:.15s}
+.today-item:active{opacity:.7}
+.today-item.jade-l{border-left-color:var(--jade)}
 
-  /* DETAIL */
-  .d-header { display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:20px; }
-  .d-avatar { width:64px; height:64px; border-radius:50%; font-size:1.8rem; display:flex; align-items:center; justify-content:center; }
-  .d-name { font-family:'Noto Serif TC',serif; font-size:1.3rem; }
-  .d-sub { font-size:.8rem; color:var(--muted); margin-top:3px; }
-  .tab-row { display:flex; gap:8px; margin-bottom:18px; overflow-x:auto; scrollbar-width:none; }
-  .tab-row::-webkit-scrollbar { display:none; }
-  .tab-btn { border:1px solid var(--border); background:var(--card); border-radius:99px; padding:7px 18px; font-size:.8rem; cursor:pointer; white-space:nowrap; font-family:'Noto Sans TC',sans-serif; color:var(--muted); }
-  .tab-btn.active { background:var(--ink); color:#fff; border-color:var(--ink); }
-  .rec-item { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; }
-  .rec-date { font-size:.72rem; color:var(--muted); margin-bottom:6px; }
-  .rec-body { font-size:.88rem; line-height:1.6; }
-  .tag { font-size:.68rem; padding:3px 10px; border-radius:99px; background:var(--warm); color:var(--accent); border:1px solid var(--border); display:inline-block; margin-top:8px; }
+/* CHIPS */
+.school-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.school-scroll::-webkit-scrollbar{display:none}
+.school-chip{border:1px solid var(--border2);background:var(--silk);padding:5px 13px;font-size:.75rem;cursor:pointer;white-space:nowrap;font-family:'Noto Serif TC',serif;color:var(--muted);letter-spacing:.06em;flex-shrink:0}
+.school-chip.active{background:var(--ink);color:var(--gold2);border-color:var(--gold)}
 
-  /* SETTINGS */
-  .settings-row { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
-  .settings-label { font-size:.9rem; font-weight:600; margin-bottom:3px; }
-  .settings-sub { font-size:.78rem; color:var(--muted); }
+/* STUDENT CARD */
+.s-card{background:var(--silk);border:1px solid var(--border);overflow:hidden;cursor:pointer;margin-bottom:9px;box-shadow:2px 2px 8px var(--shadow)}
+.s-card:active{opacity:.7}
+.s-card-inner{padding:13px 15px;display:flex;align-items:center;gap:13px}
+.avatar{width:42px;height:42px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:700;flex-shrink:0;background:var(--paper2);color:var(--ink)}
+.s-name{font-family:'Noto Serif TC',serif;font-size:.92rem;font-weight:600;margin-bottom:2px;letter-spacing:.05em}
+.s-meta{font-size:.7rem;color:var(--muted)}
+.school-badge{font-size:.6rem;padding:1px 7px;background:var(--ink);color:var(--gold2);letter-spacing:.08em;font-family:'Noto Serif TC',serif;display:inline-block;margin-top:3px}
+.prog-wrap{padding:0 15px 11px}
+.prog-label{display:flex;justify-content:space-between;font-size:.67rem;color:var(--muted);margin-bottom:4px;letter-spacing:.05em}
+.prog-track{height:3px;background:var(--border)}
+.prog-fill{height:100%;background:linear-gradient(to right,var(--vermil),var(--gold));transition:.6s}
 
-  /* MODALS */
-  .overlay { display:none; position:fixed; inset:0; z-index:200; background:rgba(26,18,8,.5); backdrop-filter:blur(4px); }
-  .overlay.open { display:flex; align-items:flex-end; }
-  .modal { background:var(--paper); border-radius:24px 24px 0 0; width:100%; padding:20px 20px calc(20px + env(safe-area-inset-bottom)); animation:slideUp .35s cubic-bezier(.32,1.16,.54,1); max-height:90vh; overflow-y:auto; }
-  @keyframes slideUp { from{transform:translateY(100%)} to{transform:none} }
-  .modal-handle { width:40px; height:4px; background:var(--border); border-radius:99px; margin:0 auto 20px; }
-  .modal-title { font-family:'Noto Serif TC',serif; font-size:1.15rem; margin-bottom:18px; }
-  .modal input, .modal textarea, .modal select { width:100%; border:1px solid var(--border); background:var(--card); border-radius:12px; padding:12px 14px; font-size:.9rem; color:var(--ink); margin-bottom:12px; font-family:'Noto Sans TC',sans-serif; outline:none; appearance:auto; }
-  .modal textarea { height:110px; resize:none; }
-  .modal label { display:block; font-size:.8rem; color:var(--muted); margin-bottom:5px; margin-top:4px; }
-  .mbtn { width:100%; background:var(--ink); color:#fff; border:none; border-radius:14px; padding:15px; font-size:.95rem; font-weight:600; cursor:pointer; margin-top:8px; font-family:'Noto Serif TC',sans-serif; letter-spacing:.08em; }
-  .mbtn.sec { background:none; color:var(--muted); border:1px solid var(--border); }
-  .mbtn:disabled { opacity:.4; cursor:not-allowed; }
+/* DETAIL */
+.d-header{background:var(--ink2);border:1px solid rgba(184,146,42,.2);padding:18px 16px;display:flex;align-items:center;gap:14px;margin-bottom:16px;position:relative;overflow:hidden}
+.d-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
+.d-avatar{width:52px;height:52px;border:1px solid rgba(184,146,42,.35);background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:1.4rem;color:var(--gold2);flex-shrink:0}
+.d-name{font-family:'Noto Serif TC',serif;font-size:1.15rem;color:var(--gold2);letter-spacing:.1em}
+.d-sub{font-size:.72rem;color:rgba(184,146,42,.55);margin-top:4px;letter-spacing:.05em}
+.d-school{font-size:.65rem;color:var(--vermil);margin-top:4px;letter-spacing:.08em}
 
-  .empty { text-align:center; padding:50px 20px; color:var(--muted); }
-  .empty .icon { font-size:3rem; margin-bottom:12px; }
-  .empty p { font-size:.85rem; line-height:1.7; }
+.tab-row{display:flex;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.tab-btn{border:none;background:none;padding:8px 16px;font-size:.76rem;cursor:pointer;font-family:'Noto Serif TC',serif;color:var(--muted);letter-spacing:.1em;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab-btn.active{color:var(--vermil);border-bottom-color:var(--vermil)}
 
-  /* Avatar colours */
-  .c1{background:#f0e8d8;color:#8b5a2b} .c2{background:#d8e8d8;color:#2b6b4a}
-  .c3{background:#d8e0f0;color:#2b4a8b} .c4{background:#f0d8e8;color:#8b2b6b} .c5{background:#f0f0d8;color:#6b6b2b}
+.rec-item{background:var(--silk);border:1px solid var(--border);border-left:3px solid var(--border2);padding:13px;margin-bottom:9px;box-shadow:1px 2px 6px var(--shadow)}
+.rec-date{font-size:.67rem;color:var(--muted);margin-bottom:6px;letter-spacing:.08em}
+.rec-body{font-size:.85rem;line-height:1.75}
+.hw-line{margin-top:8px;font-size:.78rem;padding-top:8px;border-top:1px dashed var(--border2)}
+.hw-line span{color:var(--vermil)}
+.rating-tag{display:inline-block;margin-top:8px;font-size:.63rem;padding:2px 9px;background:var(--ink);color:var(--gold2);letter-spacing:.08em}
 
-  /* Danger btn */
-  .danger-btn { width:100%; background:none; border:1px solid #e0a0a0; color:#c05050; border-radius:12px; padding:12px; font-size:.88rem; cursor:pointer; font-family:'Noto Sans TC',sans-serif; margin-top:10px; }
+/* SEARCH */
+.ink-search{display:flex;align-items:center;gap:10px;border:1px solid var(--border2);background:var(--silk);padding:8px 13px;margin-bottom:14px;box-shadow:inset 1px 1px 4px rgba(0,0,0,.05)}
+.ink-search input{flex:1;border:none;background:none;font-size:.86rem;color:var(--ink);font-family:'Noto Sans TC',sans-serif;outline:none}
+.ink-search input::placeholder{color:var(--muted)}
+
+/* SETTINGS */
+.setting-block{background:var(--silk);border:1px solid var(--border);padding:13px 15px;margin-bottom:9px}
+.setting-label{font-family:'Noto Serif TC',serif;font-size:.86rem;margin-bottom:2px;letter-spacing:.05em}
+.setting-sub{font-size:.72rem;color:var(--muted)}
+.danger-btn{width:100%;background:none;border:1px solid rgba(155,42,26,.4);color:var(--vermil);padding:11px;font-size:.83rem;cursor:pointer;font-family:'Noto Serif TC',sans-serif;margin-top:8px;letter-spacing:.05em}
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,6,2,.72);backdrop-filter:blur(3px)}
+.overlay.open{display:flex;align-items:flex-end}
+.modal{background:var(--paper);width:100%;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:slideUp .32s cubic-bezier(.32,1.16,.54,1);max-height:92vh;overflow-y:auto;border-top:2px solid rgba(184,146,42,.3);box-shadow:0 -4px 30px rgba(0,0,0,.4)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal-grip{width:34px;height:3px;background:var(--border2);margin:0 auto 16px}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;margin-bottom:14px;letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+.modal-title::before{content:'';width:3px;height:16px;background:var(--vermil);flex-shrink:0}
+
+.ink-label{display:block;font-size:.73rem;color:var(--muted);margin-bottom:4px;margin-top:9px;letter-spacing:.05em}
+.ink-input,.ink-select,.ink-textarea{width:100%;border:1px solid var(--border2);background:var(--silk);padding:9px 11px;font-size:.86rem;color:var(--ink);margin-bottom:3px;font-family:'Noto Sans TC',sans-serif;outline:none;box-shadow:inset 1px 1px 4px rgba(0,0,0,.05);appearance:auto}
+.ink-textarea{height:100px;resize:none;line-height:1.7}
+.ink-btn{width:100%;background:var(--ink);color:var(--gold2);border:1px solid rgba(184,146,42,.3);padding:13px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:11px;font-family:'Noto Serif TC',serif;letter-spacing:.15em}
+.ink-btn:active{background:var(--ink2)}
+.ink-btn:disabled{opacity:.4;cursor:not-allowed}
+.ink-btn.sec{background:transparent;color:var(--muted);border-color:var(--border);margin-top:5px}
+
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty .e-char{font-family:'Noto Serif TC',serif;font-size:2.8rem;color:var(--border2);margin-bottom:9px}
+.empty p{font-size:.8rem;line-height:1.85;letter-spacing:.05em}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
-  <div class="splash-logo">履音</div>
-  <div class="splash-sub">Walking Melody</div>
-  <div class="splash-status"><div class="splash-dot"></div><span id="splashMsg">連接 Firebase 中...</span></div>
+  <div class="splash-seal"><div class="splash-char">履</div></div>
+  <div class="splash-title">履　音</div>
+  <div class="splash-sub">素履往　無咎</div>
+  <div class="splash-divider"></div>
+  <div class="splash-status" id="splashMsg">連接中⋯</div>
 </div>
 
-<!-- BANNER -->
 <div id="banner"></div>
 
-<!-- HEADER -->
 <header>
   <div class="header-inner">
-    <div class="header-title" id="pageTitle">今日概覽</div>
+    <div class="header-logo">
+      <div class="header-seal"><span>履</span></div>
+      <div class="header-title" id="pageTitle">教學手記</div>
+    </div>
     <div class="header-right">
-      <div class="sync-dot syncing" id="syncDot" title="同步狀態"></div>
+      <div class="sync-dot syncing" id="syncDot"></div>
       <button class="hbtn" id="headerAction" onclick="handleAdd()">＋ 新增</button>
     </div>
   </div>
 </header>
 
-<!-- MAIN -->
 <main>
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="pad">
-      <div class="greeting">你好，<span>老師</span> 👋</div>
-      <div class="date-line" id="dateDisplay"></div>
       <div class="stat-row">
+        <div class="stat-card"><div class="stat-num" id="statSchools">–</div><div class="stat-label">所屬學校</div></div>
         <div class="stat-card"><div class="stat-num" id="statStudents">–</div><div class="stat-label">學生人數</div></div>
         <div class="stat-card"><div class="stat-num" id="statToday">–</div><div class="stat-label">今日課堂</div></div>
       </div>
       <div class="sec-title">今日課表</div>
       <div id="todayList"></div>
-      <div class="sec-title">最近進度更新</div>
+      <div class="sec-title" style="margin-top:6px">近期記錄</div>
       <div id="recentList"></div>
     </div>
   </div>
@@ -201,10 +216,11 @@
   <!-- STUDENTS -->
   <div class="page" id="page-students">
     <div class="pad">
-      <div class="search-bar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="searchInput" placeholder="搜尋學生..." oninput="filterStudents()">
+      <div class="ink-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" style="color:var(--muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="搜尋學生姓名⋯" oninput="filterStudents()">
       </div>
+      <div class="school-scroll" id="schoolChips"></div>
       <div id="studentGrid"></div>
     </div>
   </div>
@@ -217,460 +233,267 @@
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
     <div class="pad">
-      <div class="sec-title">雲端同步狀態</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-label">Firebase · Walking Melody</div>
-          <div class="settings-sub" id="syncStatusText">連接中...</div>
+      <div class="sec-title">同步狀態</div>
+      <div class="setting-block">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div class="setting-label">Firebase · Walking Melody</div><div class="setting-sub" id="syncStatusText">連接中⋯</div></div>
+          <div class="sync-dot syncing" id="syncDot2"></div>
         </div>
-        <div class="sync-dot syncing" id="syncDot2"></div>
       </div>
-      <div class="sec-title" style="margin-top:24px">資料管理</div>
-      <button onclick="exportData()" style="width:100%;background:none;border:1px solid var(--border);color:var(--ink);border-radius:12px;padding:12px;font-size:.88rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">📤 匯出資料備份（JSON）</button>
-      <button class="danger-btn" onclick="confirmClear()">🗑 清除本機快取資料</button>
-      <div style="margin-top:28px;font-size:.75rem;color:var(--muted);line-height:1.7;text-align:center;">
-        資料儲存於 Firebase Firestore<br>walking-melody · 雲端即時同步
-      </div>
+      <div class="sec-title" style="margin-top:18px">學校管理</div>
+      <div id="schoolManageList"></div>
+      <button class="ink-btn" style="margin-top:6px" onclick="openAddSchool()">＋ 新增學校</button>
+      <div class="sec-title" style="margin-top:20px">資料管理</div>
+      <button onclick="exportData()" style="width:100%;background:none;border:1px solid var(--border2);color:var(--ink);padding:11px;font-size:.83rem;cursor:pointer;font-family:'Noto Serif TC',sans-serif;letter-spacing:.05em">匯出備份（JSON）</button>
+      <button class="danger-btn" onclick="confirmClear()">清除本機快取</button>
+      <div style="margin-top:22px;text-align:center;font-size:.67rem;color:var(--muted);line-height:2.2;letter-spacing:.12em">素履往　無咎<br>履音教學手記</div>
     </div>
   </div>
 </main>
 
-<!-- NAV -->
 <nav>
-  <button class="active" onclick="showPage('dashboard',this,'今日概覽',true)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>概覽</span>
+  <button class="active" onclick="showPage('dashboard',this,'教學手記',true)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>總覽</span>
   </button>
-  <button onclick="showPage('students',this,'學生管理',true)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <button onclick="showPage('students',this,'學生名冊',true)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span>學生</span>
   </button>
   <button onclick="showPage('settings',this,'設定',false)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>設定</span>
   </button>
 </nav>
 
-<!-- MODAL: Add Student -->
-<div class="overlay" id="modalStudent" onclick="closeModal('modalStudent',event)">
+<!-- MODAL: School -->
+<div class="overlay" id="modalSchool" onclick="closeModal('modalSchool',event)">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">新增學生</div>
-    <label>學生姓名 *</label>
-    <input type="text" id="sName" placeholder="例：陳小明">
-    <label>學習樂器</label>
-    <select id="sInstrument">
-      <option>鋼琴</option><option>小提琴</option><option>結他</option>
-      <option>長笛</option><option>大提琴</option><option>聲樂</option><option>其他</option>
-    </select>
-    <label>每週上課時間</label>
-    <input type="text" id="sTime" placeholder="例：週三 4:00 PM">
-    <label>程度</label>
-    <select id="sLevel">
-      <option>初級</option><option>中級</option><option>高級</option><option>考級準備</option>
-    </select>
-    <label>備註（可選）</label>
-    <textarea id="sNote" placeholder="例：需特別注意節拍，手指靈活度待加強..."></textarea>
-    <button class="mbtn" id="btnStudent" onclick="addStudent()">儲存學生</button>
-    <button class="mbtn sec" onclick="closeModal('modalStudent')">取消</button>
+    <div class="modal-grip"></div>
+    <div class="modal-title">新增學校</div>
+    <label class="ink-label">學校名稱 *</label>
+    <input type="text" class="ink-input" id="schName" placeholder="例：培道中學、民生書院⋯">
+    <button class="ink-btn" id="btnSchool" onclick="addSchool()">新增學校</button>
+    <button class="ink-btn sec" onclick="closeModal('modalSchool')">取消</button>
   </div>
 </div>
 
-<!-- MODAL: Add Record -->
+<!-- MODAL: Student -->
+<div class="overlay" id="modalStudent" onclick="closeModal('modalStudent',event)">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-title">新增學生</div>
+    <label class="ink-label">學生姓名 *</label>
+    <input type="text" class="ink-input" id="sName" placeholder="例：陳小明">
+    <label class="ink-label">所屬學校</label>
+    <select class="ink-select" id="sSchool"></select>
+    <label class="ink-label">學習樂器</label>
+    <select class="ink-select" id="sInstrument">
+      <optgroup label="── 西洋樂器 ──">
+        <option>鋼琴</option><option>小提琴</option><option>大提琴</option>
+        <option>結他</option><option>長笛</option><option>聲樂</option>
+      </optgroup>
+      <optgroup label="── 中國樂器 ──">
+        <option>二胡</option><option>琵琶</option><option>古琴</option>
+        <option>古箏</option><option>笛子／簫</option><option>揚琴</option>
+        <option>中阮／大阮</option><option>中胡</option><option>板胡</option>
+        <option>三弦</option><option>嗩吶</option>
+      </optgroup>
+      <optgroup label="── 其他 ──">
+        <option>敲擊樂</option><option>其他</option>
+      </optgroup>
+    </select>
+    <label class="ink-label">每週上課時間</label>
+    <input type="text" class="ink-input" id="sTime" placeholder="例：週三 4:00 PM">
+    <label class="ink-label">程度</label>
+    <select class="ink-select" id="sLevel">
+      <option>初級</option><option>中級</option><option>高級</option><option>考級準備</option><option>專業進修</option>
+    </select>
+    <label class="ink-label">備註（可選）</label>
+    <textarea class="ink-textarea" id="sNote" placeholder="例：手指靈活度待加強，節拍感良好⋯"></textarea>
+    <button class="ink-btn" id="btnStudent" onclick="addStudent()">儲存學生</button>
+    <button class="ink-btn sec" onclick="closeModal('modalStudent')">取消</button>
+  </div>
+</div>
+
+<!-- MODAL: Record -->
 <div class="overlay" id="modalRecord" onclick="closeModal('modalRecord',event)">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="recordModalTitle">新增課堂記錄</div>
-    <label>今日學習內容 *</label>
-    <textarea id="rContent" placeholder="例：練習 C 大調音階，學習《小星星》第一段，左右手配合..."></textarea>
-    <label>進度評估</label>
-    <select id="rRating">
-      <option value="5">⭐⭐⭐⭐⭐ 非常出色</option>
-      <option value="4">⭐⭐⭐⭐ 良好</option>
-      <option value="3" selected>⭐⭐⭐ 一般</option>
-      <option value="2">⭐⭐ 需要加強</option>
-      <option value="1">⭐ 需要特別輔導</option>
+    <div class="modal-grip"></div>
+    <div class="modal-title" id="recordTitle">課堂記錄</div>
+    <label class="ink-label">今日學習內容 *</label>
+    <textarea class="ink-textarea" id="rContent" placeholder="例：練習 D 大調音階，學習《梅花三弄》第一段，左右手配合⋯"></textarea>
+    <label class="ink-label">進度評估</label>
+    <select class="ink-select" id="rRating">
+      <option value="5">★★★★★　非常出色</option>
+      <option value="4">★★★★　　良好</option>
+      <option value="3" selected>★★★　　　一般</option>
+      <option value="2">★★　　　　需要加強</option>
+      <option value="1">★　　　　　需特別輔導</option>
     </select>
-    <label>下堂功課 / 重點</label>
-    <input type="text" id="rHomework" placeholder="例：每天練習右手旋律 10 分鐘">
-    <button class="mbtn" id="btnRecord" onclick="addRecord()">儲存記錄</button>
-    <button class="mbtn sec" onclick="closeModal('modalRecord')">取消</button>
+    <label class="ink-label">下堂功課 ／ 重點</label>
+    <input type="text" class="ink-input" id="rHomework" placeholder="例：每天練習右手旋律 15 分鐘">
+    <button class="ink-btn" id="btnRecord" onclick="addRecord()">記錄入冊</button>
+    <button class="ink-btn sec" onclick="closeModal('modalRecord')">取消</button>
   </div>
 </div>
 
 <script>
-// ── STATE ──
-let state = { students: [], records: {} };
-let currentStudentId = null;
-let currentDetailTab = 'records';
-let currentPage = 'dashboard';
+let state={schools:[],students:[],records:{}};
+let currentStudentId=null,currentDetailTab='records',currentPage='dashboard',selectedSchool='all';
+const CHINESE_INST=['二胡','琵琶','古琴','古箏','笛子／簫','揚琴','中阮／大阮','中胡','板胡','三弦','嗩吶'];
+const RATING_LABEL=['','需特別輔導','需要加強','一般','良好','非常出色'];
 
-const COLORS = { 鋼琴:'c1', 小提琴:'c2', 結他:'c3', 長笛:'c5', 大提琴:'c4', 聲樂:'c2', 其他:'c5' };
-const RATING_LABEL = ['','需要輔導','需加強','一般','良好','非常出色'];
+function loadLocal(){try{const s=localStorage.getItem('luyin_v1');if(s)state=JSON.parse(s);}catch(e){}}
+function saveLocal(){try{localStorage.setItem('luyin_v1',JSON.stringify(state));}catch(e){}}
 
-// Local cache
-function loadLocal() { try { const s = localStorage.getItem('mta_wm'); if(s) state = JSON.parse(s); } catch(e){} }
-function saveLocal() { try { localStorage.setItem('mta_wm', JSON.stringify(state)); } catch(e){} }
-
-// ── INIT ──
-window._appInit = function() {
+window._init=function(){
   loadLocal();
-  updateDate();
-
-  // Dismiss splash after Firebase connects (or 3s timeout)
-  let splashDone = false;
-  const dismissSplash = (msg) => {
-    if (splashDone) return;
-    splashDone = true;
-    document.getElementById('splashMsg').textContent = msg;
-    setTimeout(() => {
-      const el = document.getElementById('splash');
-      if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 600); }
-    }, 400);
-  };
-  setTimeout(() => dismissSplash('載入完成'), 3000);
-
-  // Start Firebase listeners
-  const db = window._db;
-  const { collection, onSnapshot } = window._fbModules;
-
+  let done=false;
+  const dismiss=msg=>{if(done)return;done=true;document.getElementById('splashMsg').textContent=msg;setTimeout(()=>{const el=document.getElementById('splash');if(el){el.style.opacity='0';setTimeout(()=>el.remove(),700);}},500);};
+  setTimeout(()=>dismiss('載入完成'),3500);
+  const db=window._db,{collection,onSnapshot}=window._fb;
   setSyncStatus('syncing');
-
-  // Students listener
-  onSnapshot(collection(db, 'students'),
-    snap => {
-      state.students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      saveLocal(); renderAll();
-      setSyncStatus('online');
-      dismissSplash('已連接 ✓');
-    },
-    err => {
-      console.error('Students sync error:', err);
-      setSyncStatus('error');
-      dismissSplash('使用本機資料');
-      showBanner('⚠️ 雲端同步失敗，請檢查網絡', true);
-      renderAll();
-    }
-  );
-
-  // Records listener
-  onSnapshot(collection(db, 'records'),
-    snap => {
-      state.records = {};
-      snap.docs.forEach(d => {
-        const data = d.data();
-        if (!state.records[data.studentId]) state.records[data.studentId] = [];
-        state.records[data.studentId].push({ id: d.id, ...data });
-      });
-      // Sort each student's records by createdAt ascending
-      Object.keys(state.records).forEach(k =>
-        state.records[k].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
-      );
-      saveLocal(); renderAll();
-    },
-    err => console.error('Records sync error:', err)
-  );
+  onSnapshot(collection(db,'schools'),snap=>{state.schools=snap.docs.map(d=>({id:d.id,...d.data()}));saveLocal();renderAll();setSyncStatus('online');dismiss('已連接 ✓');},err=>{console.error(err);setSyncStatus('error');dismiss('使用本機資料');renderAll();});
+  onSnapshot(collection(db,'students'),snap=>{state.students=snap.docs.map(d=>({id:d.id,...d.data()}));saveLocal();renderAll();},err=>console.error(err));
+  onSnapshot(collection(db,'records'),snap=>{state.records={};snap.docs.forEach(d=>{const data=d.data();if(!state.records[data.studentId])state.records[data.studentId]=[];state.records[data.studentId].push({id:d.id,...data});});Object.keys(state.records).forEach(k=>state.records[k].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)));saveLocal();renderAll();},err=>console.error(err));
 };
 
-// ── FIREBASE WRITE ──
-async function fbSet(col, id, data) {
-  const { doc, setDoc } = window._fbModules;
-  try { await setDoc(doc(window._db, col, id), data); }
-  catch(e) { console.error('fbSet error:', e); showBanner('⚠️ 儲存失敗：' + e.message, true); }
-}
-async function fbDel(col, id) {
-  const { doc, deleteDoc } = window._fbModules;
-  try { await deleteDoc(doc(window._db, col, id)); }
-  catch(e) { console.error('fbDel error:', e); }
-}
+async function fbSet(col,id,data){const{doc,setDoc}=window._fb;try{await setDoc(doc(window._db,col,id),data);}catch(e){showBanner('儲存失敗：'+e.message,true);}}
+async function fbDel(col,id){const{doc,deleteDoc}=window._fb;try{await deleteDoc(doc(window._db,col,id));}catch(e){console.error(e);}}
 
-// ── SYNC STATUS ──
-function setSyncStatus(s) {
-  ['syncDot','syncDot2'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.className = 'sync-dot' + (s==='online'?' online': s==='syncing'?' syncing': s==='error'?' error':'');
-  });
-  const t = document.getElementById('syncStatusText');
-  if (t) t.textContent = s==='online'?'已連接 · 即時同步中 ✓': s==='syncing'?'連接中...': '同步失敗 · 使用本機資料';
+function setSyncStatus(s){
+  ['syncDot','syncDot2'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.className='sync-dot'+(s==='online'?' online':s==='syncing'?' syncing':s==='error'?' error':'');});
+  const t=document.getElementById('syncStatusText');if(t)t.textContent=s==='online'?'已連接 · 即時同步 ✓':s==='syncing'?'連接中⋯':'同步失敗 · 本機模式';
 }
+function showBanner(msg,isErr){const b=document.getElementById('banner');b.textContent=msg;b.className='show'+(isErr?' err':'');setTimeout(()=>b.className='',4000);}
 
-function showBanner(msg, isErr) {
-  const b = document.getElementById('banner');
-  b.textContent = msg; b.className = 'show' + (isErr?' err':'');
-  setTimeout(() => b.className = '', 4000);
+function showPage(id,btn,title,showAdd){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent=title;
+  currentPage=id;
+  document.getElementById('headerAction').style.display=showAdd?'block':'none';
 }
-
-// ── NAVIGATION ──
-function showPage(id, btn, title, showAdd) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  document.getElementById('pageTitle').textContent = title;
-  currentPage = id;
-  document.getElementById('headerAction').style.display = showAdd ? 'block' : 'none';
-}
-
-function showDetail(sid) {
-  currentStudentId = sid;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+function showDetail(sid){
+  currentStudentId=sid;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-detail').classList.add('active');
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  const s = state.students.find(x => x.id === sid);
-  document.getElementById('pageTitle').textContent = s ? s.name : '學生詳情';
-  document.getElementById('headerAction').textContent = '＋ 記錄';
-  document.getElementById('headerAction').style.display = 'block';
-  currentPage = 'detail';
-  renderDetail(sid, 'records');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  const s=state.students.find(x=>x.id===sid);
+  document.getElementById('pageTitle').textContent=s?s.name:'';
+  document.getElementById('headerAction').textContent='＋ 記錄';
+  document.getElementById('headerAction').style.display='block';
+  currentPage='detail';renderDetail(sid,'records');
 }
-
-function handleAdd() {
-  if (currentPage === 'detail') openAddRecord();
+function handleAdd(){
+  if(currentPage==='detail')openAddRecord();
+  else if(currentPage==='settings')openAddSchool();
   else openAddStudent();
 }
+function renderAll(){renderDashboard();renderStudents();renderSchoolChips();renderSchoolManage();if(currentPage==='detail'&&currentStudentId)renderDetail(currentStudentId,currentDetailTab);}
 
-// ── RENDER ALL ──
-function renderAll() {
-  renderDashboard();
-  renderStudents();
-  if (currentPage === 'detail' && currentStudentId) renderDetail(currentStudentId, currentDetailTab);
+function renderDashboard(){
+  document.getElementById('statSchools').textContent=state.schools.length;
+  document.getElementById('statStudents').textContent=state.students.length;
+  const d=new Date(),days=['日','一','二','三','四','五','六'],today='週'+days[d.getDay()];
+  const ts=state.students.filter(s=>s.time&&s.time.includes(today));
+  document.getElementById('statToday').textContent=ts.length;
+  document.getElementById('todayList').innerHTML=ts.length===0
+    ?'<div class="empty"><div class="e-char">休</div><p>今日暫無課堂安排</p></div>'
+    :ts.map(s=>{const sch=state.schools.find(x=>x.id===s.schoolId);return`<div class="today-item${CHINESE_INST.includes(s.instrument)?' jade-l':''}" onclick="showDetail('${s.id}')"><div style="flex:1"><div style="font-family:'Noto Serif TC',serif;font-size:.88rem;font-weight:600;letter-spacing:.05em">${s.name}</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px">${s.instrument} · ${s.level}</div>${sch?`<div style="font-size:.63rem;color:var(--gold);margin-top:2px">${sch.name}</div>`:''}</div><div style="font-size:.72rem;color:var(--muted);margin-right:5px">${s.time?s.time.replace(/週./,'').trim():''}</div><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>`;}).join('');
+  let all=[];state.students.forEach(s=>(state.records[s.id]||[]).forEach(r=>all.push({...r,studentName:s.name,studentId:s.id})));
+  all.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  document.getElementById('recentList').innerHTML=all.length===0
+    ?'<div class="empty"><div class="e-char">靜</div><p>尚未有課堂記錄<br>選擇學生後記錄今日課堂</p></div>'
+    :all.slice(0,4).map(r=>`<div class="rec-item" style="cursor:pointer" onclick="showDetail('${r.studentId}')"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-family:'Noto Serif TC',serif;font-size:.86rem;font-weight:600;letter-spacing:.05em">${r.studentName}</span><span style="font-size:.67rem;color:var(--muted)">${r.date}</span></div><div style="font-size:.79rem;color:var(--muted);line-height:1.6">${(r.content||'').slice(0,55)}${(r.content||'').length>55?'⋯':''}</div></div>`).join('');
 }
 
-function updateDate() {
-  const d = new Date(), days = ['日','一','二','三','四','五','六'];
-  document.getElementById('dateDisplay').textContent =
-    `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 星期${days[d.getDay()]}`;
+function renderSchoolChips(){
+  const el=document.getElementById('schoolChips');if(!el)return;
+  el.innerHTML=[{id:'all',name:'全部學校'},...state.schools].map(s=>`<div class="school-chip${selectedSchool===s.id?' active':''}" onclick="selectSchool('${s.id}')">${s.name}</div>`).join('');
+}
+function selectSchool(id){selectedSchool=id;renderSchoolChips();renderStudents();}
+
+function renderStudents(){
+  const grid=document.getElementById('studentGrid');
+  let students=selectedSchool==='all'?state.students:state.students.filter(s=>s.schoolId===selectedSchool);
+  if(!students.length){grid.innerHTML=`<div class="empty"><div class="e-char">待</div><p>${state.students.length===0?'尚未有學生資料<br>點擊右上角新增第一位學生':'此學校暫無學生記錄'}</p></div>`;return;}
+  grid.innerHTML=students.map(s=>{const recs=state.records[s.id]||[],sch=state.schools.find(x=>x.id===s.schoolId);return`<div class="s-card" onclick="showDetail('${s.id}')"><div class="s-card-inner"><div class="avatar">${s.name[0]}</div><div style="flex:1"><div class="s-name">${s.name}</div><div class="s-meta">${s.instrument} · ${s.level}</div>${sch?`<div class="school-badge">${sch.name}</div>`:''}</div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg></div><div class="prog-wrap"><div class="prog-label"><span>課堂記錄</span><span>${recs.length} 堂</span></div><div class="prog-track"><div class="prog-fill" style="width:${Math.min(100,recs.length*8)}%"></div></div></div></div>`;}).join('');
+}
+function filterStudents(){const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.s-card').forEach(c=>c.style.display=c.textContent.toLowerCase().includes(q)?'':'none');}
+
+function renderSchoolManage(){
+  const el=document.getElementById('schoolManageList');if(!el)return;
+  if(!state.schools.length){el.innerHTML='<div style="font-size:.78rem;color:var(--muted);padding:6px 0;letter-spacing:.05em">尚未新增學校</div>';return;}
+  el.innerHTML=state.schools.map(s=>`<div class="setting-block" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><div class="setting-label">${s.name}</div><button onclick="deleteSchool('${s.id}')" style="background:none;border:none;color:var(--vermil);font-size:.78rem;cursor:pointer;font-family:'Noto Serif TC',sans-serif">刪除</button></div>`).join('');
 }
 
-// ── DASHBOARD ──
-function renderDashboard() {
-  const count = state.students.length;
-  document.getElementById('statStudents').textContent = count;
-
-  const d = new Date(), days = ['日','一','二','三','四','五','六'];
-  const today = '週' + days[d.getDay()];
-  const todayS = state.students.filter(s => s.time && s.time.includes(today));
-  document.getElementById('statToday').textContent = todayS.length;
-
-  // Today list
-  document.getElementById('todayList').innerHTML = todayS.length === 0
-    ? '<div class="empty"><div class="icon">🎵</div><p>今日暫無課堂安排<br>點擊右上角新增學生</p></div>'
-    : todayS.map(s => `
-        <div class="today-item" onclick="showDetail('${s.id}')">
-          <div class="tdot ${['鋼琴','小提琴'].includes(s.instrument) ? '' : 'g'}"></div>
-          <div style="flex:1">
-            <div style="font-size:.9rem;font-weight:500">${s.name}</div>
-            <div style="font-size:.75rem;color:var(--muted)">${s.instrument} · ${s.level}</div>
-          </div>
-          <div style="font-size:.75rem;color:var(--muted);margin-right:6px">${s.time ? s.time.replace(/週./,'').trim() : ''}</div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>`).join('');
-
-  // Recent records
-  let all = [];
-  state.students.forEach(s => (state.records[s.id]||[]).forEach(r => all.push({...r, studentName:s.name, studentId:s.id})));
-  all.sort((a, b) => (b.createdAt||0) - (a.createdAt||0));
-
-  document.getElementById('recentList').innerHTML = all.length === 0
-    ? '<div class="empty"><div class="icon">📝</div><p>尚未有任何記錄<br>選擇學生後新增今日課堂記錄</p></div>'
-    : all.slice(0, 4).map(r => `
-        <div class="rec-item" style="cursor:pointer" onclick="showDetail('${r.studentId}')">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-            <span style="font-size:.85rem;font-weight:600">${r.studentName}</span>
-            <span style="font-size:.72rem;color:var(--muted)">${r.date}</span>
-          </div>
-          <div style="font-size:.82rem;color:var(--muted);line-height:1.5">${(r.content||'').slice(0,65)}${(r.content||'').length>65?'...':''}</div>
-        </div>`).join('');
-}
-
-// ── STUDENTS ──
-function renderStudents() {
-  const grid = document.getElementById('studentGrid');
-  if (!state.students.length) {
-    grid.innerHTML = '<div class="empty"><div class="icon">🎼</div><p>未有學生資料<br>點擊右上角新增第一位學生</p></div>';
-    return;
-  }
-  grid.innerHTML = state.students.map(s => {
-    const recs = state.records[s.id] || [];
-    return `
-      <div class="s-card" onclick="showDetail('${s.id}')">
-        <div class="s-card-top">
-          <div class="avatar ${COLORS[s.instrument]||'c1'}">${s.name[0]}</div>
-          <div style="flex:1">
-            <div class="s-name">${s.name}</div>
-            <div class="s-meta">${s.instrument} · ${s.level} · ${s.time||'未定'}</div>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="prog-wrap">
-          <div class="prog-label"><span>學習記錄</span><span>${recs.length} 堂</span></div>
-          <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(100,recs.length*8)}%"></div></div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function filterStudents() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.s-card').forEach(c =>
-    c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none');
-}
-
-// ── DETAIL ──
-function renderDetail(sid, tab) {
-  currentDetailTab = tab;
-  const s = state.students.find(x => x.id === sid);
-  if (!s) return;
-  const recs = state.records[sid] || [];
-
-  let tabContent = '';
-  if (tab === 'records') {
-    tabContent = !recs.length
-      ? '<div class="empty"><div class="icon">📝</div><p>尚未有課堂記錄<br>點擊右上角新增今日記錄</p></div>'
-      : [...recs].reverse().map(r => `
-          <div class="rec-item">
-            <div class="rec-date">${r.date}</div>
-            <div class="rec-body">${r.content}</div>
-            ${r.homework ? `<div style="margin-top:8px;font-size:.8rem"><span style="color:var(--accent)">📌 功課：</span>${r.homework}</div>` : ''}
-            <span class="tag">${'⭐'.repeat(parseInt(r.rating)||3)} ${RATING_LABEL[r.rating]||''}</span>
-          </div>`).join('');
+function renderDetail(sid,tab){
+  currentDetailTab=tab;
+  const s=state.students.find(x=>x.id===sid);if(!s)return;
+  const recs=state.records[sid]||[],sch=state.schools.find(x=>x.id===s.schoolId);
+  let tabContent='';
+  if(tab==='records'){
+    tabContent=!recs.length?'<div class="empty"><div class="e-char">靜</div><p>尚未有課堂記錄<br>點擊右上角記錄今日課堂</p></div>'
+      :[...recs].reverse().map(r=>`<div class="rec-item"><div class="rec-date">${r.date}</div><div class="rec-body">${r.content}</div>${r.homework?`<div class="hw-line"><span>📌 功課：</span>${r.homework}</div>`:''}<div class="rating-tag">${'★'.repeat(parseInt(r.rating)||3)} ${RATING_LABEL[r.rating]||''}</div></div>`).join('');
   } else {
-    tabContent = `
-      <div class="rec-item">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div><div style="font-size:.72rem;color:var(--muted)">樂器</div><div style="font-size:.92rem;font-weight:600;margin-top:3px">${s.instrument}</div></div>
-          <div><div style="font-size:.72rem;color:var(--muted)">程度</div><div style="font-size:.92rem;font-weight:600;margin-top:3px">${s.level}</div></div>
-          <div><div style="font-size:.72rem;color:var(--muted)">上課時間</div><div style="font-size:.92rem;font-weight:600;margin-top:3px">${s.time||'未設定'}</div></div>
-          <div><div style="font-size:.72rem;color:var(--muted)">堂數</div><div style="font-size:.92rem;font-weight:600;margin-top:3px">${recs.length} 堂</div></div>
-        </div>
-        ${s.note ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:.83rem;color:var(--muted);line-height:1.7"><b style="color:var(--ink)">備註</b><br>${s.note}</div>` : ''}
-      </div>
-      <button class="danger-btn" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
+    tabContent=`<div class="rec-item"><div style="display:grid;grid-template-columns:1fr 1fr;gap:13px 8px"><div><div style="font-size:.66rem;color:var(--muted);letter-spacing:.05em">樂器</div><div style="font-size:.88rem;font-family:'Noto Serif TC',serif;margin-top:3px">${s.instrument}</div></div><div><div style="font-size:.66rem;color:var(--muted);letter-spacing:.05em">程度</div><div style="font-size:.88rem;font-family:'Noto Serif TC',serif;margin-top:3px">${s.level}</div></div><div><div style="font-size:.66rem;color:var(--muted);letter-spacing:.05em">上課時間</div><div style="font-size:.88rem;font-family:'Noto Serif TC',serif;margin-top:3px">${s.time||'未設定'}</div></div><div><div style="font-size:.66rem;color:var(--muted);letter-spacing:.05em">累計堂數</div><div style="font-size:.88rem;font-family:'Noto Serif TC',serif;margin-top:3px">${recs.length} 堂</div></div></div>${sch?`<div style="margin-top:13px;padding-top:11px;border-top:1px dashed var(--border2);font-size:.76rem"><span style="color:var(--muted)">學校：</span><span style="color:var(--gold)">${sch.name}</span></div>`:''}${s.note?`<div style="margin-top:9px;padding-top:9px;border-top:1px dashed var(--border2);font-size:.78rem;color:var(--muted);line-height:1.7"><b style="color:var(--ink)">備註</b><br>${s.note}</div>`:''}</div><button class="danger-btn" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
   }
-
-  document.getElementById('detailContent').innerHTML = `
-    <div class="d-header">
-      <div class="d-avatar ${COLORS[s.instrument]||'c1'}">${s.name[0]}</div>
-      <div>
-        <div class="d-name">${s.name}</div>
-        <div class="d-sub">${s.instrument} · ${s.level}</div>
-      </div>
-    </div>
-    <div class="tab-row">
-      <button class="tab-btn ${tab==='records'?'active':''}" onclick="renderDetail('${sid}','records')">課堂記錄</button>
-      <button class="tab-btn ${tab==='info'?'active':''}" onclick="renderDetail('${sid}','info')">學生資料</button>
-    </div>
-    ${tabContent}`;
+  document.getElementById('detailContent').innerHTML=`<div class="d-header"><div class="d-avatar">${s.name[0]}</div><div><div class="d-name">${s.name}</div><div class="d-sub">${s.instrument} · ${s.level}</div>${sch?`<div class="d-school">◈ ${sch.name}</div>`:''}</div></div><div class="tab-row"><button class="tab-btn ${tab==='records'?'active':''}" onclick="renderDetail('${sid}','records')">課堂記錄</button><button class="tab-btn ${tab==='info'?'active':''}" onclick="renderDetail('${sid}','info')">學生資料</button></div>${tabContent}`;
 }
 
-// ── ADD STUDENT ──
-function openAddStudent() { document.getElementById('modalStudent').classList.add('open'); }
-
-async function addStudent() {
-  const name = document.getElementById('sName').value.trim();
-  if (!name) { alert('請輸入學生姓名'); return; }
-  const btn = document.getElementById('btnStudent');
-  btn.disabled = true; btn.textContent = '儲存中...';
-
-  const s = {
-    id: Date.now().toString(),
-    name,
-    instrument: document.getElementById('sInstrument').value,
-    time: document.getElementById('sTime').value.trim(),
-    level: document.getElementById('sLevel').value,
-    note: document.getElementById('sNote').value.trim(),
-    createdAt: Date.now()
-  };
-
-  // Optimistic local update
-  state.students.push(s);
-  state.records[s.id] = [];
-  saveLocal(); renderAll();
-
-  await fbSet('students', s.id, s);
-
-  closeModal('modalStudent');
-  ['sName','sTime','sNote'].forEach(id => document.getElementById(id).value = '');
-  btn.disabled = false; btn.textContent = '儲存學生';
-  showBanner('✅ 學生已新增！', false);
+function openAddSchool(){document.getElementById('modalSchool').classList.add('open');}
+async function addSchool(){
+  const name=document.getElementById('schName').value.trim();if(!name){alert('請輸入學校名稱');return;}
+  const btn=document.getElementById('btnSchool');btn.disabled=true;btn.textContent='新增中⋯';
+  const s={id:Date.now().toString(),name,createdAt:Date.now()};
+  state.schools.push(s);saveLocal();await fbSet('schools',s.id,s);
+  closeModal('modalSchool');document.getElementById('schName').value='';
+  btn.disabled=false;btn.textContent='新增學校';renderAll();showBanner('✓ 學校已新增',false);
+}
+async function deleteSchool(id){
+  if(!confirm('刪除此學校？學生資料不受影響。'))return;
+  await fbDel('schools',id);state.schools=state.schools.filter(s=>s.id!==id);saveLocal();renderAll();
 }
 
-// ── ADD RECORD ──
-function openAddRecord() {
-  const s = state.students.find(x => x.id === currentStudentId);
-  document.getElementById('recordModalTitle').textContent = s ? `${s.name} · 課堂記錄` : '新增課堂記錄';
-  document.getElementById('modalRecord').classList.add('open');
+function openAddStudent(){
+  const sel=document.getElementById('sSchool');
+  sel.innerHTML=state.schools.length===0?'<option value="">（請先在設定中新增學校）</option>':state.schools.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  document.getElementById('modalStudent').classList.add('open');
+}
+async function addStudent(){
+  const name=document.getElementById('sName').value.trim();if(!name){alert('請輸入學生姓名');return;}
+  const btn=document.getElementById('btnStudent');btn.disabled=true;btn.textContent='儲存中⋯';
+  const s={id:Date.now().toString(),name,schoolId:document.getElementById('sSchool').value,instrument:document.getElementById('sInstrument').value,time:document.getElementById('sTime').value.trim(),level:document.getElementById('sLevel').value,note:document.getElementById('sNote').value.trim(),createdAt:Date.now()};
+  state.students.push(s);state.records[s.id]=[];saveLocal();await fbSet('students',s.id,s);
+  closeModal('modalStudent');['sName','sTime','sNote'].forEach(id=>document.getElementById(id).value='');
+  btn.disabled=false;btn.textContent='儲存學生';renderAll();showBanner('✓ 學生已新增',false);
 }
 
-async function addRecord() {
-  const content = document.getElementById('rContent').value.trim();
-  if (!content) { alert('請輸入學習內容'); return; }
-  const btn = document.getElementById('btnRecord');
-  btn.disabled = true; btn.textContent = '儲存中...';
-
-  const r = {
-    id: Date.now().toString(),
-    studentId: currentStudentId,
-    date: new Date().toLocaleDateString('zh-HK'),
-    createdAt: Date.now(),
-    content,
-    rating: document.getElementById('rRating').value,
-    homework: document.getElementById('rHomework').value.trim()
-  };
-
-  if (!state.records[currentStudentId]) state.records[currentStudentId] = [];
-  state.records[currentStudentId].push(r);
-  saveLocal();
-
-  await fbSet('records', r.id, r);
-
-  closeModal('modalRecord');
-  document.getElementById('rContent').value = '';
-  document.getElementById('rHomework').value = '';
-  btn.disabled = false; btn.textContent = '儲存記錄';
-  renderDetail(currentStudentId, currentDetailTab);
-  renderDashboard();
-  showBanner('✅ 記錄已儲存！', false);
+function openAddRecord(){const s=state.students.find(x=>x.id===currentStudentId);document.getElementById('recordTitle').textContent=s?`${s.name} · 課堂記錄`:'課堂記錄';document.getElementById('modalRecord').classList.add('open');}
+async function addRecord(){
+  const content=document.getElementById('rContent').value.trim();if(!content){alert('請輸入學習內容');return;}
+  const btn=document.getElementById('btnRecord');btn.disabled=true;btn.textContent='記錄中⋯';
+  const r={id:Date.now().toString(),studentId:currentStudentId,date:new Date().toLocaleDateString('zh-HK'),createdAt:Date.now(),content,rating:document.getElementById('rRating').value,homework:document.getElementById('rHomework').value.trim()};
+  if(!state.records[currentStudentId])state.records[currentStudentId]=[];
+  state.records[currentStudentId].push(r);saveLocal();await fbSet('records',r.id,r);
+  closeModal('modalRecord');document.getElementById('rContent').value='';document.getElementById('rHomework').value='';
+  btn.disabled=false;btn.textContent='記錄入冊';renderDetail(currentStudentId,currentDetailTab);renderDashboard();showBanner('✓ 記錄已入冊',false);
 }
 
-// ── DELETE STUDENT ──
-async function deleteStudent(sid) {
-  if (!confirm('確定刪除此學生？所有課堂記錄將一併刪除，此動作不可撤銷。')) return;
-
-  const recs = state.records[sid] || [];
-  for (const r of recs) await fbDel('records', r.id);
-  await fbDel('students', sid);
-
-  state.students = state.students.filter(s => s.id !== sid);
-  delete state.records[sid];
-  saveLocal();
-
-  showPage('students', document.querySelectorAll('nav button')[1], '學生管理', true);
-  renderAll();
+async function deleteStudent(sid){
+  if(!confirm('確定刪除此學生？所有課堂記錄將一併刪除，此動作不可撤銷。'))return;
+  for(const r of (state.records[sid]||[]))await fbDel('records',r.id);
+  await fbDel('students',sid);state.students=state.students.filter(s=>s.id!==sid);delete state.records[sid];saveLocal();
+  showPage('students',document.querySelectorAll('nav button')[1],'學生名冊',true);renderAll();
 }
 
-// ── EXPORT / CLEAR ──
-function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '履音備份_' + new Date().toLocaleDateString('zh-HK').replace(/\//g,'-') + '.json';
-  a.click();
-}
-
-function confirmClear() {
-  if (confirm('清除本機快取？Firebase 上的資料不受影響，重新整理後會自動重新下載。')) {
-    localStorage.removeItem('mta_wm');
-    location.reload();
-  }
-}
-
-// ── MODAL ──
-function closeModal(id, e) {
-  if (e && e.target !== document.getElementById(id)) return;
-  document.getElementById(id).classList.remove('open');
-}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='履音備份_'+new Date().toLocaleDateString('zh-HK').replace(/\//g,'-')+'.json';a.click();}
+function confirmClear(){if(confirm('清除本機快取？Firebase 雲端資料不受影響。')){localStorage.removeItem('luyin_v1');location.reload();}}
+function closeModal(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
 </script>
 </body>
 </html>
