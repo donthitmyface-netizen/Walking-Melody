@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="履音">
 <title>履音 · 教學手記</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -101,8 +101,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .sp-seal{width:82px;height:82px;border:2px solid var(--red);display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:18px;animation:spA 2.5s ease infinite}
 .sp-seal::before{content:'';position:absolute;inset:5px;border:1px solid rgba(212,172,69,.18)}
 @keyframes spA{0%,100%{opacity:1}50%{opacity:.5}}
-.sp-char{font-family:'Noto Serif TC',serif;font-size:2.2rem;color:var(--red);font-weight:700}
-.sp-t{font-family:'Noto Serif TC',serif;font-size:.96rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
+.sp-char{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:2.5rem;color:var(--red);font-weight:400}
+.sp-t{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
 .sp-s{font-size:.65rem;color:rgba(212,172,69,.35);letter-spacing:.25em;margin-bottom:20px}
 .sp-l{width:1px;height:26px;background:linear-gradient(to bottom,var(--gold),transparent)}
 .sp-msg{font-size:.63rem;color:rgba(212,172,69,.35);margin-top:9px;letter-spacing:.1em}
@@ -123,8 +123,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--hbg);pad
 .hi{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
 .hl{display:flex;align-items:center;gap:8px}
 .h-seal{width:26px;height:26px;border:1px solid var(--red);display:flex;align-items:center;justify-content:center}
-.h-seal span{font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--red);font-weight:700}
-.h-title{font-family:'Noto Serif TC',serif;font-size:.93rem;color:var(--htxt);letter-spacing:.2em}
+.h-seal span{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.88rem;color:var(--red);font-weight:400}
+.h-title{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.97rem;color:var(--htxt);letter-spacing:.22em}
 .hr2{display:flex;align-items:center;gap:6px}
 .hbtn{background:none;border:1px solid rgba(184,146,42,.32);cursor:pointer;color:var(--gold2);font-size:.72rem;font-family:'Noto Sans TC',sans-serif;padding:4px 8px;letter-spacing:.04em}
 .sd{width:6px;height:6px;border-radius:50%;background:#444;flex-shrink:0}
@@ -149,7 +149,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .pad{padding:13px}
 
 /* SECTION TITLE */
-.st{font-family:'Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.st{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
 .st::before{content:'';width:2px;height:12px;background:linear-gradient(to bottom,var(--red),transparent);flex-shrink:0}
 .st::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--bdr),transparent)}
 .st.jade::before{background:linear-gradient(to bottom,var(--jade),transparent)}.st.gold::before{background:linear-gradient(to bottom,var(--gold),transparent)}
@@ -157,9 +157,9 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* STAT ROW */
 .srow{display:grid;gap:6px;margin-bottom:13px}
 .srow.c2{grid-template-columns:1fr 1fr}.srow.c3{grid-template-columns:1fr 1fr 1fr}.srow.c4{grid-template-columns:1fr 1fr 1fr 1fr}
-.sc{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:11px 6px;text-align:center;position:relative;overflow:hidden}
+.sc{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:10px 3px;text-align:center;position:relative;overflow:hidden}
 .sc::after{content:'';position:absolute;bottom:0;left:14%;right:14%;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
-.sc-n{font-family:'Noto Serif TC',serif;font-size:1.5rem;font-weight:700;color:var(--stxt)}
+.sc-n{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:clamp(.72rem,3.5vw,1.1rem);font-weight:400;color:var(--stxt);line-height:1.25;word-break:break-all}
 .sc-l{font-size:.53rem;color:rgba(184,146,42,.4);margin-top:2px;letter-spacing:.1em}
 
 /* CARD */
@@ -173,7 +173,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .scu-top{padding:12px 14px;display:flex;align-items:center;gap:11px}
 .av{width:38px;height:38px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:700;flex-shrink:0;background:var(--card2);color:var(--txt);position:relative}
 .av::after{content:'';position:absolute;bottom:0;right:0;width:8px;height:8px;border-top:1px solid var(--bdr2);border-left:1px solid var(--bdr2)}
-.sn{font-family:'Noto Serif TC',serif;font-size:.88rem;font-weight:700;letter-spacing:.06em;color:var(--txt)}
+.sn{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.95rem;font-weight:400;letter-spacing:.08em;color:var(--txt)}
 .sm{font-size:.64rem;color:var(--txt3);margin-top:2px;letter-spacing:.02em}
 .sbadge{font-size:.52rem;padding:1px 6px;background:var(--hbg);color:var(--gold2);display:inline-block;margin-top:3px;border:1px solid rgba(184,146,42,.2);letter-spacing:.04em}
 .pw{padding:0 14px 10px}
@@ -207,8 +207,8 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .rtag{display:inline-block;font-size:.59rem;padding:2px 6px;background:var(--hbg);color:var(--gold2);letter-spacing:.07em;margin-top:4px}
 
 /* LESSON PLAN CARD */
-.lp-card{background:var(--card);border:1px solid var(--bdr);margin-bottom:9px;overflow:hidden;box-shadow:1px 2px 5px var(--sh)}
-.lp-hd{padding:10px 12px;background:var(--sbg);display:flex;align-items:center;gap:9px;cursor:pointer}
+.lp-card{background:var(--card);border:1px solid var(--bdr);margin-bottom:9px;overflow:visible;box-shadow:1px 2px 5px var(--sh)}
+.lp-hd{padding:10px 12px;background:var(--sbg);display:flex;align-items:center;gap:9px;cursor:pointer;overflow:hidden}
 .lp-hd:active{opacity:.8}
 .lp-date{font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);min-width:68px;letter-spacing:.04em}
 .lp-stu{font-family:'Noto Serif TC',serif;font-size:.82rem;color:var(--htxt);flex:1}
@@ -217,8 +217,8 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-status.done{background:var(--jade);color:#fff}
 .lp-status.absent{background:var(--red);color:#fff}
 .lp-status.makeup{background:var(--gold);color:var(--hbg)}
-.lp-body{padding:12px 13px;display:none;border-top:1px solid var(--bdr)}
-.lp-body.open{display:block}
+.lp-body{padding:12px 13px;display:none;border-top:1px solid var(--bdr);overflow:visible}
+.lp-body.open{display:block;overflow:visible}
 .lp-sec{margin-bottom:10px}
 .lp-sec-title{font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
 .lp-sec-title::before{content:'';width:2px;height:10px;background:var(--gold);flex-shrink:0}
@@ -275,11 +275,11 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-dot.major{background:var(--gold);border-color:var(--gold)}
 .lp-card{background:var(--card);border:1px solid var(--bdr);padding:11px 13px;flex:1;box-shadow:0 1px 4px var(--sh)}
 .lp-card:active{opacity:.85}
-.lp-name{font-family:'Noto Serif TC',serif;font-size:.9rem;font-weight:700;color:var(--txt);letter-spacing:.07em}
+.lp-name{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:1rem;font-weight:400;color:var(--txt);letter-spacing:.1em}
 .lp-years{font-size:.6rem;color:var(--txt3);margin-left:7px;letter-spacing:.04em}
 .lp-school{font-size:.63rem;color:var(--jade);margin-top:3px;letter-spacing:.03em}
 .lp-desc{font-size:.71rem;color:var(--txt2);margin-top:4px;line-height:1.62}
-.lp-sect{display:inline-block;font-size:.56rem;padding:2px 7px;margin-top:4px;letter-spacing:.06em;font-family:'Noto Serif TC',serif}
+.lp-sect{display:inline-block;font-size:.58rem;padding:2px 8px;margin-top:4px;letter-spacing:.07em;font-family:'Ma Shan Zheng','Noto Serif TC',serif}
 .sect-guqin-guan{background:rgba(155,42,26,.12);color:var(--red);border:1px solid rgba(155,42,26,.25)}
 .sect-guqin-wu{background:rgba(61,107,90,.12);color:var(--jade);border:1px solid rgba(61,107,90,.25)}
 .sect-guqin-guang{background:rgba(184,146,42,.12);color:var(--gold);border:1px solid rgba(184,146,42,.25)}
@@ -295,6 +295,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .sect-pipa-wangpai{background:rgba(184,146,42,.12);color:var(--gold);border:1px solid rgba(184,146,42,.25)}
 .sect-pipa-cm{background:rgba(42,90,155,.12);color:#4a6ab0;border:1px solid rgba(42,90,155,.25)}
 .sect-pipa-wx{background:rgba(90,42,155,.12);color:#7a5ab8;border:1px solid rgba(90,42,155,.25)}
+.sect-hk{background:rgba(61,107,155,.12);color:#3d6b9b;border:1px solid rgba(61,107,155,.25)}
 .lp-yt{display:inline-flex;align-items:center;gap:5px;margin-top:7px;color:rgba(155,42,26,.7);font-size:.63rem;text-decoration:none;border:1px solid rgba(155,42,26,.2);padding:3px 8px}
 .lineage-inst-tab{display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
 .lineage-inst-tab::-webkit-scrollbar{display:none}
@@ -310,7 +311,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* CHIPS & SEARCH */
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:11px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
+.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'Ma Shan Zheng','Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
 .chip.active{background:var(--hbg);color:var(--gold2);border-color:var(--gold)}
 .isrch{display:flex;align-items:center;gap:7px;border:1px solid var(--bdr2);background:var(--card);padding:7px 10px;margin-bottom:11px}
 .isrch input{flex:1;border:none;background:none;font-size:.81rem;color:var(--txt);font-family:'Noto Sans TC',sans-serif;outline:none}
@@ -319,10 +320,10 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* MONTH NAV */
 .mnav{display:flex;align-items:center;margin-bottom:11px}
 .mnav-btn{background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:4px 11px;cursor:pointer;font-size:.78rem;font-family:'Noto Serif TC',serif;flex-shrink:0}
-.mnav-lbl{font-family:'Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
+.mnav-lbl{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
 
 /* CALENDAR */
-.cal-wrap{margin-bottom:12px}
+.cal-wrap{margin-bottom:12px;overflow:visible}
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px}
 .cal-dow-cell{text-align:center;font-size:.58rem;color:var(--txt3);padding:4px 0;font-family:'Noto Serif TC',serif}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr)}
@@ -338,7 +339,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .cal-ev.absent{background:var(--red);color:#fff}
 .cal-ev.makeup{background:var(--gold);color:var(--hbg)}
 .cal-ev.plan{background:rgba(184,146,42,.3);color:var(--hbg)}
-.day-detail{background:var(--card);border:1px solid var(--bdr);padding:12px;margin-top:9px;box-shadow:2px 2px 6px var(--sh)}
+.day-detail{background:var(--card);border:1px solid var(--bdr);padding:12px;margin-top:9px;box-shadow:2px 2px 6px var(--sh);overflow:visible}
 .day-detail-title{font-family:'Noto Serif TC',serif;font-size:.86rem;color:var(--gold2);margin-bottom:10px}
 
 /* SETTINGS / THEME PICKER */
@@ -389,6 +390,15 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 
 /* GCAL BTN */
 .gcal-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid rgba(66,133,244,.35);color:#4285F4;padding:3px 8px;font-size:.61rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+
+/* BACK BUTTON */
+.back-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--txt3);font-size:.75rem;cursor:pointer;font-family:'Ma Shan Zheng','Noto Serif TC',serif;padding:6px 0 2px;letter-spacing:.1em}
+.back-btn svg{width:14px;height:14px;flex-shrink:0}
+.back-btn:active{opacity:.6}
+/* UNDO BANNER */
+#undoBanner{position:fixed;bottom:72px;left:10px;right:10px;z-index:250;background:var(--sbg);border:1px solid var(--gold);color:var(--gold2);font-size:.74rem;padding:10px 13px;display:none;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 18px rgba(0,0,0,.45);font-family:'Noto Serif TC',serif;animation:moUp .25s ease}
+#undoBanner.show{display:flex}
+.undo-act-btn{background:var(--gold);color:var(--hbg);border:none;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'Noto Serif TC',serif;letter-spacing:.06em;flex-shrink:0;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -469,8 +479,12 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 </div>
 </div>
 
+<!-- UNDO BANNER -->
+<div id="undoBanner"><span id="undoMsg">已刪除</span><button class="undo-act-btn" onclick="doUndo()">↩ 復原</button></div>
+
 <!-- ④ DETAIL -->
 <div class="page" id="page-detail">
+  <div style="padding:8px 13px 2px;background:var(--bg)"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>返回</button></div>
   <div class="dh" id="detailHd"></div>
   <div class="tabs" id="detailTabs"></div>
   <div class="pad" id="detailBody"></div>
@@ -944,6 +958,13 @@ function showPage(id,btn,title,showAdd){
   if(id==='lineage')renderLineage();
 }
 function showDetail(sid){
+  // Save current page for back button
+  _prevPageState={
+    id:CP||'students',
+    btn:document.querySelector('nav button.active'),
+    title:document.getElementById('pgTitle').textContent,
+    showAdd:(CP==='students'||CP==='dashboard')
+  };
   CSD=sid;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-detail').classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -1571,16 +1592,76 @@ async function addPayment(){
   btn.disabled=false;btn.textContent='記錄收款';renderAll();showBan('✓ 收款已記錄',false);
 }
 
+// ── BACK NAVIGATION ──
+function goBack(){
+  const p=_prevPageState;
+  showPage(p.id,p.btn,p.title,p.showAdd);
+}
+
+// ── UNDO SYSTEM ──
+let _undoFn=null,_undoTimer=null;
+function showUndo(msg,fn){
+  _undoFn=fn;
+  document.getElementById('undoMsg').textContent=msg;
+  const b=document.getElementById('undoBanner');
+  b.classList.add('show');
+  if(_undoTimer)clearTimeout(_undoTimer);
+  _undoTimer=setTimeout(()=>{b.classList.remove('show');_undoFn=null;},8000);
+}
+async function doUndo(){
+  if(_undoFn){try{await _undoFn();}catch(e){console.error(e);}}_undoFn=null;
+  if(_undoTimer)clearTimeout(_undoTimer);
+  document.getElementById('undoBanner').classList.remove('show');
+  showBan('✓ 已成功復原',false);renderAll();
+}
+
+// ── SAFE DELETE STUDENT (triple confirm + undo) ──
 async function deleteStudent(sid){
-  if(!confirm('確定刪除此學生？所有相關記錄、學費、課堂、教案將一併刪除。'))return;
-  for(const r of S.records.filter(r=>r.studentId===sid))await fbDel('records',r.id);
-  for(const p of S.payments.filter(p=>p.studentId===sid))await fbDel('payments',p.id);
-  for(const l of S.lessons.filter(l=>l.studentId===sid))await fbDel('lessons',l.id);
-  for(const lp of S.lessonPlans.filter(lp=>lp.studentId===sid))await fbDel('lessonPlans',lp.id);
+  const s=S.students.find(x=>x.id===sid);
+  if(!s)return;
+  if(!confirm('⚠️ 刪除學生
+
+確定要刪除「'+s.name+'」？
+
+此操作將刪除：
+· 所有課堂記錄
+· 所有教案計劃
+· 所有學費記錄
+· 所有課堂安排'))return;
+  if(!confirm('🔴 最後確認
+
+再次確認：要永久刪除「'+s.name+'」的所有資料？
+
+刪除後可在8秒內按「復原」恢復。'))return;
+  // Snapshot for undo
+  const snap={
+    student:{...s},
+    records:S.records.filter(r=>r.studentId===sid).map(x=>({...x})),
+    payments:S.payments.filter(p=>p.studentId===sid).map(x=>({...x})),
+    lessons:S.lessons.filter(l=>l.studentId===sid).map(x=>({...x})),
+    lessonPlans:S.lessonPlans.filter(lp=>lp.studentId===sid).map(x=>({...x})),
+  };
+  // Delete from Firebase
+  for(const r of snap.records)await fbDel('records',r.id);
+  for(const p of snap.payments)await fbDel('payments',p.id);
+  for(const l of snap.lessons)await fbDel('lessons',l.id);
+  for(const lp of snap.lessonPlans)await fbDel('lessonPlans',lp.id);
   await fbDel('students',sid);
+  // Update local state
   ['records','payments','lessons','lessonPlans'].forEach(k=>S[k]=S[k].filter(x=>x.studentId!==sid));
-  S.students=S.students.filter(s=>s.id!==sid);
-  saveL();showPage('students',document.querySelectorAll('nav button')[2],'學生名冊',true);renderAll();
+  S.students=S.students.filter(x=>x.id!==sid);
+  saveL();
+  showPage('students',document.querySelectorAll('nav button')[2],'學生名冊',true);
+  renderAll();
+  // Offer undo
+  showUndo('已刪除「'+s.name+'」',async()=>{
+    const u=uid();
+    await fbSet('students',snap.student.id,{...snap.student,uid:u});
+    for(const r of snap.records)await fbSet('records',r.id,{...r,uid:u});
+    for(const p of snap.payments)await fbSet('payments',p.id,{...p,uid:u});
+    for(const l of snap.lessons)await fbSet('lessons',l.id,{...l,uid:u});
+    for(const lp of snap.lessonPlans)await fbSet('lessonPlans',lp.id,{...lp,uid:u});
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -1642,9 +1723,48 @@ const LINEAGE={
       {name:'章紅艷',years:'1971–',sect:'浦東派傳承',sectCls:'sect-pipa-pu',school:'中央音樂學院教授',desc:'林石城嫡傳弟子，浦東派傳人。中央音樂學院教授，演奏技藝精湛，兼顧傳統技法與現代詮釋，是當代最重要的琵琶演奏家及教育家之一。',dot:'major',yt:'https://www.youtube.com/results?search_query=章红艳+琵琶'},
       {name:'方錦龍',years:'1963–',sect:'跨界推廣·多樂器演奏家',sectCls:'sect-pipa-wangpai',school:'廣東民族樂團首席琵琶',desc:'廣東民族樂團首席琵琶演奏家，同時精通多種彈撥樂器。以跨界演奏和現場互動著稱，是近年來最積極推廣中樂的藝術家之一，在YouTube擁有龐大受眾。',dot:'major',yt:'https://www.youtube.com/results?search_query=方锦龙+琵琶'},
     ]},
+  ]},
+  dizi:{label:'笛子',icon:'🎐',eras:[
+    {era:'南北二派奠基宗師（1900–1960）',persons:[
+      {name:'馮子存',years:'1904–1987',sect:'北派梆笛·北方鼓吹代表',sectCls:'sect-guqin-chuan',school:'中國音樂學院教授',desc:'北派梆笛奠基人，演奏活潑熱烈，擅長吐音、剁音、花舌等北方特色技法。代表曲《喜相逢》《五梆子》《黃鶯亮翅》，是最早將北方民間笛藝帶入現代音樂廳的演奏家。',dot:'founder',yt:'https://www.youtube.com/results?search_query=冯子存+笛子+喜相逢'},
+      {name:'陸春齡',years:'1921–2018',sect:'南派曲笛·「中國笛王」',sectCls:'sect-guqin-wu',school:'上海音樂學院教授（1976年起）',desc:'南派笛王，國家一級演員及非物質文化遺產代表性傳承人。演奏細膩婉轉，氣韻悠長，是江南絲竹風格的最高代表。1976年任教於上海音樂學院，俞遜發為其嫡傳。獲中國音樂金鐘獎終身成就獎。',dot:'founder',yt:'https://www.youtube.com/results?search_query=陆春龄+笛子+鹧鸪飞'},
+      {name:'趙松庭',years:'1923–2001',sect:'浙江南派·婺劇笛風',sectCls:'sect-guqin-wu',school:'浙江歌舞劇院',desc:'浙江笛派代表人，演奏融合南派氣息與浙江婺劇特色，發明顫音技法，代表曲《早晨》《三五七》《婺江風光》。著有《笛子演奏技巧十講》，對後代笛藝教學影響深遠。',dot:'major',yt:'https://www.youtube.com/results?search_query=赵松庭+笛子+三五七'},
+    ]},
+    {era:'第二代名家與當代院長（1946–）',persons:[
+      {name:'俞遜發',years:'1946–2006',sect:'南派陸春齡傳承·「中國魔笛」',sectCls:'sect-guqin-wu',school:'上海民族樂團首席笛師',desc:'陸春齡嫡傳，被法國樂壇稱為「中國魔笛」。大幅拓展笛子音色，發明口笛、朱笛等新型樂器，及氣沖音、包吹等多種新技法。代表曲《秋湖月夜》《匯流》，出訪逾四十國。',dot:'founder',yt:'https://www.youtube.com/results?search_query=俞逊发+笛子+秋湖月夜'},
+      {name:'張維良',years:'1957–',sect:'南北融合·學院代表',sectCls:'sect-guqin-wu',school:'中央音樂學院教授・民樂系主任（前）',desc:'中央音樂學院教授，曾任民樂系主任，師承曾永清。融匯南北技法，兼顧傳統與現代創作，長期在國際舞台演出，為當代最具影響力的笛子演奏家及教育家之一，培育無數學院傳人。',dot:'major',yt:'https://www.youtube.com/results?search_query=张维良+笛子'},
+      {name:'唐俊喬',years:'1977–',sect:'南派當代代表演奏家',sectCls:'sect-guqin-wu',school:'上海音樂學院教授・碩士導師',desc:'上海音樂學院教授，師承陸春齡傳人系脈。以突破性技法及現代詮釋著稱，多次在重要國際音樂節演出，積極委託新曲創作，是當代最重要的中青代笛子演奏家及教育家。',dot:'major',yt:'https://www.youtube.com/results?search_query=唐俊乔+笛子'},
+    ]},
+  ]},
+  suona:{label:'嗩吶',icon:'📯',eras:[
+    {era:'民間鼓吹傳統至學院化（1900–1960）',persons:[
+      {name:'任同祥',years:'1927–',sect:'山東鼓吹·現代嗩吶獨奏開創者',sectCls:'sect-guqin-guan',school:'中央廣播民族樂團',desc:'六歲隨伯父學藝，嗩吶、笛、笙兼通。1953年登臺演奏《百鳥朝鳳》，獲第四屆世界青年聯歡節銀質獎，奠定嗩吶現代獨奏表演形式。演奏「乾淨利落，音色華美」，啟發劉雯雯學習嗩吶。',dot:'founder',yt:'https://www.youtube.com/results?search_query=任同祥+嗩吶+百鸟朝凤'},
+    ]},
+    {era:'學院派代表宗師與當代名家（1960–）',persons:[
+      {name:'劉英',years:'1960–',sect:'「嗩吶皇后」·學院現代化旗手',sectCls:'sect-guqin-guan',school:'上海音樂學院教授・博士生導師',desc:'被譽為「嗩吶皇后」，是中國嗩吶學院派最重要的代表人物。上海音樂學院教授、博士生導師。技藝精湛，創作並首演大量現代嗩吶作品，劉雯雯為其最著名學生。',dot:'founder',yt:'https://www.youtube.com/results?search_query=刘英+嗩吶'},
+      {name:'郭雅志',years:'1963–',sect:'香港嗩吶代表・跨界名家',sectCls:'sect-guqin-guang',school:'香港中樂團前首席嗩吶',desc:'在香港中樂團擔任首席嗩吶多年，是香港嗩吶演奏的代表人物。積極推廣嗩吶於香港及海外，曾多次在香港演藝學院及國際音樂節演出，並參與跨界音樂合作，對香港中樂教育貢獻卓著。',dot:'major',yt:'https://www.youtube.com/results?search_query=郭雅志+嗩吶'},
+      {name:'石磊',years:'1975–',sect:'中央民族樂團首席',sectCls:'sect-guqin-guan',school:'中央民族樂團首席嗩吶',desc:'中央民族樂團首席嗩吶，師從劉英。演奏技藝精湛，對現代音樂語言的駕馭見長，長期推動嗩吶的跨界融合與現代作品創作。',dot:'major',yt:'https://www.youtube.com/results?search_query=石磊+嗩吶'},
+      {name:'劉雯雯',years:'1990–',sect:'中國首位嗩吶博士・90後旗手',sectCls:'sect-guqin-guan',school:'上海音樂學院講師・國家級非遺傳承人',desc:'中國第一位嗩吶演奏博士（2023年），上海音樂學院講師，父為山東魯西南小銅嗩吶第七代傳人，師從劉英。2015年起隨譚盾版《百鳥朝鳳》全球巡演，2024年巴黎演出驚豔法國觀眾，是當今最受矚目的嗩吶年輕演奏家。',dot:'major',yt:'https://www.youtube.com/results?search_query=刘雯雯+嗩吶+百鸟朝凤'},
+    ]},
+  ]},
+  hongkong:{label:'香港',icon:'🏮',eras:[
+    {era:'香港中樂教育奠基人物',persons:[
+      {name:'閻惠昌',years:'1955–',sect:'香港中樂指揮・藝術總監',sectCls:'sect-guqin-wu',school:'香港中樂團藝術總監兼終身指揮（2002–）',desc:'2002年出任香港中樂團藝術總監，任期內大幅提升樂團國際地位，多次帶領樂團登上卡內基音樂廳等國際舞台。積極推動本地中樂創作，委約大量香港及國際作曲家創作新曲。',dot:'founder',yt:'https://www.youtube.com/results?search_query=閻惠昌+香港中樂團'},
+      {name:'余其偉',years:'1948–',sect:'廣東音樂・高胡宗師',sectCls:'sect-guqin-guang',school:'星海音樂學院教授・香港演藝學院客席',desc:'廣東音樂和高胡演奏泰斗，星海音樂學院教授，與香港演藝學院及本地樂壇有長期合作。是傳承廣東音樂傳統最重要的在世演奏家，著有廣東音樂演奏教材。',dot:'major',yt:'https://www.youtube.com/results?search_query=余其偉+高胡+广东音乐'},
+    ]},
+    {era:'香港演藝學院中樂系代表師資',persons:[
+      {name:'盧偉良',years:'1968–',sect:'古箏・香港演藝學院主任',sectCls:'sect-guzheng-he',school:'香港演藝學院音樂學院中國音樂系主任',desc:'香港演藝學院音樂學院中國音樂系主任，古箏演奏及教學專家。在香港推動高等中樂教育多年，為本地培育大批中樂教育人才，亦積極參與社區中樂推廣工作。',dot:'major',yt:'https://www.youtube.com/results?search_query=卢伟良+古箏+香港'},
+      {name:'翁榮輝',years:'1967–',sect:'二胡・香港中樂團前首席',sectCls:'sect-guqin-wu',school:'香港中樂團首席二胡・香港演藝學院講師',desc:'香港中樂團首席二胡演奏家，同時在香港演藝學院任教。演奏技藝精湛，風格溫潤細膩，多次舉辦獨奏音樂會，是香港二胡演奏的重要代表人物。',dot:'major',yt:'https://www.youtube.com/results?search_query=翁榮輝+二胡+香港'},
+    ]},
+    {era:'香港年青一輩著名演奏家',persons:[
+      {name:'林昭亮（香港）',years:'1988–',sect:'笛子・香港青年代表',sectCls:'sect-guqin-wu',school:'香港中樂團笛子演奏員・本地笛子推廣',desc:'香港中樂團笛子演奏員，積極在本地學校及社區推廣笛子藝術。曾多次舉辦本地及內地演出，是香港年青一輩笛子演奏的代表。（注：香港有多位同名音樂家，請自行核實最新資料）',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂團+笛子+青年演奏家'},
+      {name:'葉沛楠',years:'1992–',sect:'琵琶・香港青年一代',sectCls:'sect-pipa-pu',school:'香港演藝學院畢業・本地演奏家',desc:'香港演藝學院琵琶畢業生，積極在港澳及內地從事演出及教學工作，是香港年輕一代琵琶演奏家中的代表人物。（此為示例，建議補充最新本地名家資料）',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+琵琶+青年演奏家'},
+      {name:'查詢本地師資',years:'',sect:'香港演藝學院・香港演藝發展局',sectCls:'sect-guqin-zhe',school:'香港演藝學院 ・ 康文署・香港演藝發展局',desc:'建議透過香港演藝學院官網、香港演藝發展局藝術家名冊，或各中樂團樂師名單，查閱最新的香港本地中樂老師及演奏家資訊，資料最為準確。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂+青年演奏家+2024'},
+    ]},
   ]}
 };
 
+let _prevPageState={id:'students',btn:null,title:'學生名冊',showAdd:true};
 let currentLineageInst='guqin';
 function renderLineage(){
   const tab=document.getElementById('lineageTab');
