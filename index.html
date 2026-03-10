@@ -868,101 +868,174 @@ function drawRadar(scores,size){
   return svg;
 }
 function renderScoreTab(sid){
-  const s=S.students.find(x=>x.id===sid);if(!s)return'';
+  const s=S.students.find(x=>x.id===sid);if(!s)return'<div style="padding:20px;color:red">找不到學生資料</div>';
   const sc=s.scores||{};
-  const autoOv=Math.round(SCORE_DIMS.map(d=>sc[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
-  const overall=s.overallScore!==null&&s.overallScore!==undefined?s.overallScore:autoOv;
-  const g=getGrade(overall);
-  const n=SCORE_DIMS.length;
-  const size=240,cx=size/2,cy=size/2,r=cx-32;
-  function buildSvg(sc2){
-    let sv=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 8px">`;
-    for(let lv=1;lv<=5;lv++){const rr=r*lv/5;const pp=SCORE_DIMS.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');sv+=`<polygon points="${pp}" fill="none" stroke="rgba(184,146,42,${lv===5?0.55:0.22})" stroke-width="${lv===5?1.3:0.6}"/>`;  }
-    SCORE_DIMS.forEach((d,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;const lx=cx+(r+22)*Math.cos(a),ly=cy+(r+22)*Math.sin(a);sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(184,146,42,0.28)" stroke-width="0.7"/>`;sv+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="var(--txt3)" font-family="sans-serif">${d.label}</text>`;});
-    const pts=SCORE_DIMS.map((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
-    sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.18)" stroke="#9b2a1a" stroke-width="1.8" stroke-linejoin="round"/>`;
-    SCORE_DIMS.forEach((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="3.5" fill="#9b2a1a" stroke="var(--card)" stroke-width="1.5"/>`;});
-    sv+='</svg>';return sv;
+
+  // ── 6 hexagon axes (each is avg of sub-dims) ──
+  const AXES=[
+    {key:'tech',   label:'技術基礎', dims:['pitch','rhythm','pulse'],          color:'#9b2a1a'},
+    {key:'music',  label:'音樂感受', dims:['musical','tone','ear'],             color:'#b8862a'},
+    {key:'read',   label:'視奏模仿', dims:['sightread','imitate'],              color:'#3d6b5a'},
+    {key:'mind',   label:'創意記憶', dims:['creative','memory'],               color:'#4a5e8a'},
+    {key:'body',   label:'體能動力', dims:['physical','stamina','power','attitude','motivation'], color:'#7a4a8a'},
+    {key:'stage',  label:'舞台表現', dims:['stage','family'],                   color:'#8a6a2a'},
+  ];
+  function axisVal(axKey){
+    const ax=AXES.find(a=>a.key===axKey);
+    const vals=ax.dims.map(k=>sc[k]||5);
+    return vals.reduce((a,b)=>a+b,0)/vals.length;
   }
+
+  const autoOv=s.overallScore!==null&&s.overallScore!==undefined?s.overallScore:
+    Math.round(SCORE_DIMS.map(d=>sc[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
+  const g=getGrade(autoOv);
+
+  // ── Draw hexagon SVG (no CSS vars - hardcoded for Safari compat) ──
+  function buildHex(){
+    const n=6,size=220,cx=size/2,cy=size/2,r=80;
+    const textR=r+26;
+    const bgColor='#f7f0e3'; // fallback if CSS var fails
+    let sv=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 10px">`;
+    // Grid rings
+    [0.25,0.5,0.75,1.0].forEach(frac=>{
+      const pp=AXES.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;const rr=r*frac;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');
+      sv+=`<polygon points="${pp}" fill="none" stroke="rgba(155,130,80,${frac===1?0.5:0.2})" stroke-width="${frac===1?1.2:0.5}"/>`;
+    });
+    // Axis lines
+    AXES.forEach((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(155,130,80,0.3)" stroke-width="0.8"/>`;});
+    // Labels
+    AXES.forEach((ax,i)=>{
+      const a=(i/n)*2*Math.PI-Math.PI/2;
+      const lx=(cx+textR*Math.cos(a)).toFixed(1),ly=(cy+textR*Math.sin(a)).toFixed(1);
+      const val=axisVal(ax.key);
+      sv+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="9.5" fill="${ax.color}" font-weight="bold">${ax.label}</text>`;
+    });
+    // Data polygon
+    const pts=AXES.map((ax,i)=>{const v=axisVal(ax.key)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
+    sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.15)" stroke="#9b2a1a" stroke-width="2" stroke-linejoin="round"/>`;
+    // Dots with axis colors
+    AXES.forEach((ax,i)=>{const v=axisVal(ax.key)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="4" fill="${ax.color}" stroke="white" stroke-width="1.5"/>`;});
+    // Center score
+    sv+=`<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="18" fill="#9b2a1a" font-weight="bold">${g.grade}</text>`;
+    sv+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="9" fill="#8a7a62">${autoOv}/100</text>`;
+    sv+='</svg>';
+    return sv;
+  }
+
+  // ── Axis summary bars ──
+  const axisHtml=AXES.map(ax=>{
+    const v=axisVal(ax.key);const pct=Math.round(v*10);
+    return `<div style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;font-size:.67rem;margin-bottom:3px">
+        <span style="color:#4a3a2a;font-weight:600">${ax.label}</span>
+        <span style="color:${ax.color};font-weight:700">${pct}</span>
+      </div>
+      <div style="height:5px;background:#e8ddc8;border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${ax.color};border-radius:3px;transition:width .3s"></div>
+      </div>
+      <div style="font-size:.58rem;color:#8a7a62;margin-top:1px">${ax.dims.map(k=>{const dim=SCORE_DIMS.find(d=>d.key===k);return dim?dim.label:'';}).join('・')}</div>
+    </div>`;
+  }).join('');
+
+  // ── Individual dimension sliders ──
   const cats=[...new Set(SCORE_DIMS.map(d=>d.cat))];
   let slidersHtml='';
   cats.forEach(cat=>{
     const dims=SCORE_DIMS.filter(d=>d.cat===cat);
-    slidersHtml+=`<div style="font-size:.6rem;color:var(--gold2);letter-spacing:.1em;margin:10px 0 5px;border-bottom:1px solid var(--bdr);padding-bottom:3px">${cat}</div>`;
+    slidersHtml+=`<div style="font-size:.6rem;color:#b8862a;letter-spacing:.08em;margin:10px 0 5px;border-bottom:1px solid #e0d0b0;padding-bottom:3px">${cat}</div>`;
     dims.forEach(d=>{
       const v=sc[d.key]||5;const pct=v*10;
-      slidersHtml+=`<div style="margin-bottom:9px">
-        <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-bottom:3px">
-          <span style="color:var(--txt2)">${d.icon} ${d.label}${d.note?` <span style="color:var(--txt3);font-size:.58rem">（${d.note}）</span>`:''}</span>
-          <span id="sv_${d.key}_${sid}" style="color:#9b2a1a;font-weight:600;min-width:30px;text-align:right">${v}/10</span>
+      slidersHtml+=`<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:.66rem;margin-bottom:3px">
+          <span style="color:#4a3a2a">${d.icon} ${d.label}${d.note?` <span style="color:#8a7a62;font-size:.57rem">（${d.note}）</span>`:''}</span>
+          <span id="sv_${d.key}_${sid}" style="color:#9b2a1a;font-weight:700;min-width:28px;text-align:right">${v}/10</span>
         </div>
         <input type="range" min="1" max="10" value="${v}"
-          style="width:100%;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(to right,#9b2a1a ${pct}%,var(--bdr) ${pct}%);outline:none;cursor:pointer;border-radius:2px"
+          style="width:100%;-webkit-appearance:none;height:4px;background:linear-gradient(to right,#9b2a1a ${pct}%,#d0c0a0 ${pct}%);outline:none;cursor:pointer;border-radius:2px"
           oninput="updScoreSlider(this,'${sid}','${d.key}')"
           onchange="saveScoreField('${sid}','${d.key}',this.value)">
       </div>`;
     });
   });
-  const ovPct=overall;
-  return `<div style="background:var(--card);border:1px solid var(--bdr);padding:13px;margin-bottom:10px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-family:${KAI};font-size:.84rem;color:var(--gold2);letter-spacing:.1em">能力雷達圖</span>
-      <span id="gradeBadge_${sid}" style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:2px solid ${g.color};font-family:${KAI};font-size:1.5rem;color:${g.color};background:${g.color}18">${g.grade}</span>
+
+  return `<div style="background:#fdf8f0;border:1px solid #d0b878;padding:13px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-family:${KAI};font-size:.84rem;color:#b8862a;letter-spacing:.1em">六維能力圖</span>
+      <span id="gradeBadge_${sid}" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:2px solid ${g.color};font-family:${KAI};font-size:1.4rem;color:${g.color}">${g.grade}</span>
     </div>
-    <div id="radarSvgWrap_${sid}">${buildSvg(sc)}</div>
-    <div style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px">
-        <span style="color:var(--txt3)">整體評分 <strong id="overallVal_${sid}" style="color:var(--txt)">${overall}/100</strong></span>
-        <span id="gradeDesc_${sid}" style="color:var(--txt3);font-size:.62rem">${g.desc}</span>
-      </div>
-      <input type="range" min="0" max="100" value="${overall}"
-        style="width:100%;-webkit-appearance:none;appearance:none;height:5px;background:linear-gradient(to right,#9b2a1a ${ovPct}%,var(--bdr) ${ovPct}%);outline:none;cursor:pointer;border-radius:3px"
+    <div id="hexWrap_${sid}">${buildHex()}</div>
+    <div style="margin:0 0 12px">
+      <div style="font-size:.64rem;color:#8a7a62;margin-bottom:4px">整體評分 <strong id="overallVal_${sid}" style="color:#4a3a2a">${autoOv}/100</strong> · <span id="gradeDesc_${sid}" style="color:#8a7a62;font-size:.6rem">${g.desc}</span></div>
+      <input type="range" min="0" max="100" value="${autoOv}"
+        style="width:100%;-webkit-appearance:none;height:5px;background:linear-gradient(to right,#9b2a1a ${autoOv}%,#d0c0a0 ${autoOv}%);outline:none;cursor:pointer;border-radius:3px"
         oninput="updOverallSlider(this,'${sid}')"
         onchange="saveOverallScore('${sid}',this.value)">
-      <div style="font-size:.58rem;color:var(--txt3);margin-top:2px">可手動拖動此滑桿覆蓋自動計算</div>
+      <div style="font-size:.57rem;color:#8a7a62;margin-top:2px">手動拖動可覆蓋自動計算</div>
     </div>
-    ${slidersHtml}
-    <div style="font-size:.6rem;color:var(--txt3);border-top:1px solid var(--bdr);padding-top:7px;line-height:2;margin-top:6px">
-      1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越<br>
-      S≥92 · A≥80 · B≥65 · C≥50 · D≥35 · F&lt;35
+    <div style="margin-bottom:12px;border-top:1px solid #e0d0b0;padding-top:10px">${axisHtml}</div>
+    <details style="margin-bottom:8px">
+      <summary style="font-size:.65rem;color:#b8862a;cursor:pointer;letter-spacing:.06em;padding:4px 0">▸ 展開各項詳細評分滑桿</summary>
+      <div style="margin-top:8px">${slidersHtml}</div>
+    </details>
+    <div style="font-size:.6rem;color:#8a7a62;border-top:1px solid #e0d0b0;padding-top:6px;line-height:2">
+      1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越 · S≥92 A≥80 B≥65 C≥50 D≥35 F&lt;35
     </div>
   </div>`;
 }
 function updScoreSlider(el,sid,key){
   const val=parseInt(el.value),pct=val*10;
-  el.style.background=`linear-gradient(to right,#9b2a1a ${pct}%,var(--bdr) ${pct}%)`;
+  el.style.background=`linear-gradient(to right,#9b2a1a ${pct}%,#d0c0a0 ${pct}%)`;
   const lbl=document.getElementById('sv_'+key+'_'+sid);
   if(lbl)lbl.textContent=val+'/10';
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   if(!s.scores)s.scores={};
   s.scores[key]=val;
-  // Rebuild radar
-  const wrap=document.getElementById('radarSvgWrap_'+sid);
-  if(wrap){
-    const n=SCORE_DIMS.length,size=240,cx=size/2,cy=size/2,r=cx-32;
-    let sv=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 8px">`;
-    for(let lv=1;lv<=5;lv++){const rr=r*lv/5;const pp=SCORE_DIMS.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');sv+=`<polygon points="${pp}" fill="none" stroke="rgba(184,146,42,${lv===5?0.55:0.22})" stroke-width="${lv===5?1.3:0.6}"/>`;  }
-    SCORE_DIMS.forEach((d,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(184,146,42,0.28)" stroke-width="0.7"/>`;sv+=`<text x="${((cx+(r+22)*Math.cos(a))).toFixed(1)}" y="${((cy+(r+22)*Math.sin(a))).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="var(--txt3)" font-family="sans-serif">${d.label}</text>`;});
-    const sc2=s.scores;const pts=SCORE_DIMS.map((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
-    sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.18)" stroke="#9b2a1a" stroke-width="1.8" stroke-linejoin="round"/>`;
-    SCORE_DIMS.forEach((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="3.5" fill="#9b2a1a" stroke="var(--card)" stroke-width="1.5"/>`;});
-    sv+='</svg>';wrap.innerHTML=sv;
-  }
-  // Auto-update overall if no manual override
-  if(s.overallScore===null||s.overallScore===undefined){
-    const auto=Math.round(SCORE_DIMS.map(d=>s.scores[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
-    const g2=getGrade(auto);
-    const lbl2=document.getElementById('overallVal_'+sid);if(lbl2)lbl2.textContent=auto+'/100';
-    const badge=document.getElementById('gradeBadge_'+sid);if(badge){badge.textContent=g2.grade;badge.style.borderColor=g2.color;badge.style.color=g2.color;badge.style.background=g2.color+'18';}
-    const desc=document.getElementById('gradeDesc_'+sid);if(desc)desc.textContent=g2.desc;
+  rebuildHex(sid,s);
+}
+function rebuildHex(sid,s){
+  const wrap=document.getElementById('hexWrap_'+sid);if(!wrap)return;
+  const sc=s.scores||{};
+  const AXES=[
+    {key:'tech',dims:['pitch','rhythm','pulse'],color:'#9b2a1a'},
+    {key:'music',dims:['musical','tone','ear'],color:'#b8862a'},
+    {key:'read',dims:['sightread','imitate'],color:'#3d6b5a'},
+    {key:'mind',dims:['creative','memory'],color:'#4a5e8a'},
+    {key:'body',dims:['physical','stamina','power','attitude','motivation'],color:'#7a4a8a'},
+    {key:'stage2',dims:['stage','family'],color:'#8a6a2a'},
+  ];
+  function av(ax){const vs=ax.dims.map(k=>sc[k]||5);return vs.reduce((a,b)=>a+b,0)/vs.length;}
+  const auto=Math.round(SCORE_DIMS.map(d=>sc[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
+  const g2=getGrade(s.overallScore??auto);
+  const n=6,sz=220,cx=sz/2,cy=sz/2,r=80,tR=r+26;
+  let sv=`<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" style="display:block;margin:0 auto 10px">`;
+  [0.25,0.5,0.75,1.0].forEach(f=>{const pp=AXES.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;const rr=r*f;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');sv+=`<polygon points="${pp}" fill="none" stroke="rgba(155,130,80,${f===1?0.5:0.2})" stroke-width="${f===1?1.2:0.5}"/>`;});
+  AXES.forEach((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(155,130,80,0.3)" stroke-width="0.8"/>`;});
+  const LABELS=['技術基礎','音樂感受','視奏模仿','創意記憶','體能動力','舞台表現'];
+  AXES.forEach((ax,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<text x="${(cx+tR*Math.cos(a)).toFixed(1)}" y="${(cy+tR*Math.sin(a)).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="9.5" fill="${ax.color}" font-weight="bold">${LABELS[i]}</text>`;});
+  const pts=AXES.map((ax,i)=>{const v=av(ax)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
+  sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.15)" stroke="#9b2a1a" stroke-width="2" stroke-linejoin="round"/>`;
+  AXES.forEach((ax,i)=>{const v=av(ax)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="4" fill="${ax.color}" stroke="white" stroke-width="1.5"/>`;});
+  sv+=`<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="18" fill="#9b2a1a" font-weight="bold">${g2.grade}</text>`;
+  sv+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="9" fill="#8a7a62">${(s.overallScore??auto)}/100</text>`;
+  sv+='</svg>';
+  wrap.innerHTML=sv;
+  // Update axis bars
+  AXES.forEach((ax,i)=>{const bar=document.querySelector(`#hexWrap_${sid}~* [data-ax="${ax.key}"]`);});// bars are outside wrap, skip for now
+  // Update grade badge
+  const badge=document.getElementById('gradeBadge_'+sid);
+  if(badge&&(s.overallScore===null||s.overallScore===undefined)){
+    const autoG=getGrade(auto);badge.textContent=autoG.grade;badge.style.borderColor=autoG.color;badge.style.color=autoG.color;
+    const lbl=document.getElementById('overallVal_'+sid);if(lbl)lbl.textContent=auto+'/100';
+    const desc=document.getElementById('gradeDesc_'+sid);if(desc)desc.textContent=autoG.desc;
   }
 }
 function updOverallSlider(el,sid){
   const val=parseInt(el.value);
-  el.style.background=`linear-gradient(to right,#9b2a1a ${val}%,var(--bdr) ${val}%)`;
+  el.style.background=`linear-gradient(to right,#9b2a1a ${val}%,#d0c0a0 ${val}%)`;
   const lbl=document.getElementById('overallVal_'+sid);if(lbl)lbl.textContent=val+'/100';
   const g=getGrade(val);
-  const badge=document.getElementById('gradeBadge_'+sid);if(badge){badge.textContent=g.grade;badge.style.borderColor=g.color;badge.style.color=g.color;badge.style.background=g.color+'18';}
+  const badge=document.getElementById('gradeBadge_'+sid);
+  if(badge){badge.textContent=g.grade;badge.style.borderColor=g.color;badge.style.color=g.color;}
   const desc=document.getElementById('gradeDesc_'+sid);if(desc)desc.textContent=g.desc;
   const s=S.students.find(x=>x.id===sid);if(s)s.overallScore=val;
 }
@@ -977,6 +1050,7 @@ async function saveOverallScore(sid,val){
   s.overallScore=parseInt(val);
   saveL();await fbSet('students',sid,s);
 }
+
 
 
 const THEMES=[
@@ -1438,6 +1512,11 @@ function toggleLessonType(){const t=document.getElementById('lsType').value;docu
 
 function populateLessonModal(){
   document.getElementById('lsStu').innerHTML=S.students.map(s=>`<option value="${s.id}">${s.name} (${s.instrument})</option>`).join('');
+  const grpEl=document.getElementById('lsGrp');
+  if(grpEl)grpEl.innerHTML=S.groups&&S.groups.length?S.groups.map(g=>`<option value="${g.id}">${g.name}（${g.members.length}人）</option>`).join(''):'<option value="">（尚未建立群組）</option>';
+  const ttEl=document.getElementById('lsTargetType');if(ttEl)ttEl.value='student';
+  const sRow=document.getElementById('lsStudentRow');if(sRow)sRow.style.display='';
+  const gRow=document.getElementById('lsGroupRow');if(gRow)gRow.style.display='none';
   document.getElementById('lsType').value='fixed';
   document.getElementById('fixedFields').style.display='block';
   document.getElementById('onceFields').style.display='none';
@@ -1446,17 +1525,45 @@ function populateLessonModal(){
 function addOnceLesson(dateStr){
   selCalDay=dateStr;
   document.getElementById('lsStu').innerHTML=S.students.map(s=>`<option value="${s.id}">${s.name} (${s.instrument})</option>`).join('');
+  const _grpEl=document.getElementById('lsGrp');
+  if(_grpEl)_grpEl.innerHTML=S.groups.length?S.groups.map(g=>`<option value="${g.id}">${g.name} (${g.members.length}人)</option>`).join(''):'';
   document.getElementById('lsType').value='once';
   document.getElementById('lsDate').value=dateStr;
   document.getElementById('fixedFields').style.display='none';
   document.getElementById('onceFields').style.display='block';
   openMo('moLesson');
 }
+function toggleLessonTarget(){
+  const t=document.getElementById('lsTargetType').value;
+  document.getElementById('lsStudentRow').style.display=t==='student'?'':'none';
+  document.getElementById('lsGroupRow').style.display=t==='group'?'':'none';
+}
 async function addLesson(){
-  const sid=document.getElementById('lsStu').value;if(!sid){alert('請選擇學生');return;}
-  const btn=document.getElementById('btnLesson');btn.disabled=true;btn.textContent='儲存中⋯';
+  const targetType=document.getElementById('lsTargetType')?.value||'student';
+  const btn=document.getElementById('btnLesson');
+  let sid=null,gid=null;
+  if(targetType==='group'){
+    gid=document.getElementById('lsGrp').value;
+    if(!gid){alert('請選擇群組');return;}
+  } else {
+    sid=document.getElementById('lsStu').value;
+    if(!sid){alert('請選擇學生');return;}
+  }
+  btn.disabled=true;btn.textContent='儲存中⋯';
   const type=document.getElementById('lsType').value;
-  const l={id:Date.now().toString(),studentId:sid,type,day:type==='fixed'?document.getElementById('lsDay').value:null,date:type==='once'?document.getElementById('lsDate').value:null,start:document.getElementById('lsStart').value,dur:document.getElementById('lsDur').value,fee:document.getElementById('lsFee').value,createdAt:Date.now()};
+  const l={
+    id:Date.now().toString(),
+    studentId:sid,
+    groupId:gid,
+    targetType,
+    type,
+    day:type==='fixed'?document.getElementById('lsDay').value:null,
+    date:type==='once'?document.getElementById('lsDate').value:null,
+    start:document.getElementById('lsStart').value,
+    dur:document.getElementById('lsDur').value,
+    fee:document.getElementById('lsFee').value,
+    createdAt:Date.now()
+  };
   S.lessons.push(l);saveL();await fbSet('lessons',l.id,l);
   closeMo('moLesson');btn.disabled=false;btn.textContent='儲存課堂';
   renderAll();showBan('✓ 課堂已新增',false);
@@ -2032,17 +2139,17 @@ const LINEAGE={
   guqin:{label:'古琴',icon:'🎵',eras:[
     {era:'清末至民國奠基（1880–1930）',persons:[
       {name:'楊宗稷',years:'1865–1931',sect:'九嶷派',sectCls:'sect-guqin-guan',school:'北平·九嶷琴社創始人',desc:'九嶷派創派宗師。著《琴學叢書》，集清代琴學大成，為現代古琴學院教育先驅。門生眾多，管平湖為其最著名傳人。',dot:'founder',yt:'https://www.youtube.com/results?search_query=楊宗稷+古琴+九嶷'},
-      {name:'查阜西',years:'1895–1976',sect:'諸派融通',sectCls:'sect-guqin-guan',school:'中國音樂家協會·民族音樂研究所',desc:'二十世紀最重要的古琴組織者。主持1950年代全國古琴普查，建立現代琴學學術體系，推動古琴進入高等音樂院校。',dot:'founder',yt:'https://www.youtube.com/results?search_query=查阜西+古琴'},
+      {name:'查阜西',years:'1895–1976',src:'資料來源：維基百科 查阜西條目 zh.wikipedia.org/wiki/查阜西',sect:'諸派融通',sectCls:'sect-guqin-guan',school:'中國音樂家協會·民族音樂研究所',desc:'二十世紀最重要的古琴組織者。主持1950年代全國古琴普查，建立現代琴學學術體系，推動古琴進入高等音樂院校。',dot:'founder',yt:'https://www.youtube.com/results?search_query=查阜西+古琴'},
     ]},
     {era:'二十世紀中葉大師（1895–1960）',persons:[
-      {name:'管平湖',years:'1897–1967',sect:'管派（融合九嶷、川、武夷諸派）',sectCls:'sect-guqin-guan',school:'中央音樂學院民族音樂研究所',desc:'近現代「琴樂第一人」。師從楊宗稷（九嶷）、悟澄和尚（武夷）、秦鶴鳴（川派）。打譜《廣陵散》《幽蘭》等逾十首古曲。1977年其演奏《流水》被美國航海家號帶上太空。',dot:'founder',yt:'https://www.youtube.com/results?search_query=管平湖+古琴+流水'},
-      {name:'吳景略',years:'1907–1987',sect:'虞山吳派',sectCls:'sect-guqin-wu',school:'中央音樂學院民樂系教授·彈撥教研室主任',desc:'虞山吳派創派人。1956年起任中央音樂學院教授，將古琴教育推進至學院專業層面。打譜近四十首古曲，著《七弦琴教材》。演奏風格如「公孫劍舞，神出鬼沒」。',dot:'founder',yt:'https://www.youtube.com/results?search_query=吴景略+古琴'},
+      {name:'管平湖',years:'1897–1967',src:'資料來源：維基百科 管平湖條目 zh.wikipedia.org/wiki/管平湖',sect:'管派（融合九嶷、川、武夷諸派）',sectCls:'sect-guqin-guan',school:'中央音樂學院民族音樂研究所',desc:'近現代「琴樂第一人」。師從楊宗稷（九嶷）、悟澄和尚（武夷）、秦鶴鳴（川派）。打譜《廣陵散》《幽蘭》等逾十首古曲。1977年其演奏《流水》被美國航海家號帶上太空。',dot:'founder',yt:'https://www.youtube.com/results?search_query=管平湖+古琴+流水'},
+      {name:'吳景略',years:'1907–1987',src:'資料來源：維基百科 吳景略條目 zh.wikipedia.org/wiki/吳景略',sect:'虞山吳派',sectCls:'sect-guqin-wu',school:'中央音樂學院民樂系教授·彈撥教研室主任',desc:'虞山吳派創派人。1956年起任中央音樂學院教授，將古琴教育推進至學院專業層面。打譜近四十首古曲，著《七弦琴教材》。演奏風格如「公孫劍舞，神出鬼沒」。',dot:'founder',yt:'https://www.youtube.com/results?search_query=吴景略+古琴'},
       {name:'張子謙',years:'1899–1991',sect:'廣陵派',sectCls:'sect-guqin-guang',school:'上海·廣陵琴社',desc:'廣陵派代表人物。與查阜西、管平湖並稱「當代三琴家」。演奏「如鴻鵠在天，去留無跡」，韻味悠長深厚。',dot:'major',yt:'https://www.youtube.com/results?search_query=张子谦+古琴+广陵'},
       {name:'劉少椿',years:'1901–1971',sect:'廣陵派',sectCls:'sect-guqin-guang',school:'南京藝術學院',desc:'廣陵派重要傳人，演奏古拙質樸，「不事纖巧，專以古拙為勝」。師承廣陵琴社正脈，為南方廣陵派在當代最重要的傳承者之一。',dot:'major',yt:'https://www.youtube.com/results?search_query=刘少椿+古琴'},
     ]},
     {era:'第二代學院傳人（1940–當代）',persons:[
-      {name:'龔一',years:'1941–',sect:'廣陵派傳承·當代融合',sectCls:'sect-guqin-guang',school:'上海音樂學院碩士導師·國家級非遺傳承人',desc:'師承廣陵派，旁及張正吟、夏一峰、劉少椿等多位名家，博採眾長。國家級古琴非物質文化遺產代表性傳承人，為當代最重要的演奏家及教育家之一。',dot:'major',yt:'https://www.youtube.com/results?search_query=龚一+古琴'},
-      {name:'李祥霆',years:'1940–',sect:'虞山吳派傳承',sectCls:'sect-guqin-wu',school:'中央音樂學院教授',desc:'吳景略嫡傳弟子，虞山吳派傳人。中央音樂學院古琴教授，演奏與即興創作並重，推動古琴走向國際，著有多本古琴教學著作。',dot:'major',yt:'https://www.youtube.com/results?search_query=李祥霆+古琴'},
+      {name:'龔一',years:'1941–',src:'資料來源：維基百科 龔一條目 zh.wikipedia.org/wiki/龔一',sect:'廣陵派傳承·當代融合',sectCls:'sect-guqin-guang',school:'上海音樂學院碩士導師·國家級非遺傳承人',desc:'師承廣陵派，旁及張正吟、夏一峰、劉少椿等多位名家，博採眾長。國家級古琴非物質文化遺產代表性傳承人，為當代最重要的演奏家及教育家之一。',dot:'major',yt:'https://www.youtube.com/results?search_query=龚一+古琴'},
+      {name:'李祥霆',years:'1940–',src:'資料來源：中央音樂學院官網 ccom.edu.cn；維基百科 李祥霆條目',sect:'虞山吳派傳承',sectCls:'sect-guqin-wu',school:'中央音樂學院教授',desc:'吳景略嫡傳弟子，虞山吳派傳人。中央音樂學院古琴教授，演奏與即興創作並重，推動古琴走向國際，著有多本古琴教學著作。',dot:'major',yt:'https://www.youtube.com/results?search_query=李祥霆+古琴'},
       {name:'成公亮',years:'1940–2015',sect:'廣陵派·現代探索',sectCls:'sect-guqin-guang',school:'南京藝術學院',desc:'師從劉少椿，廣陵派傳人。晚年深入民間音樂與現代創作，著《秋籟居琴話》，思想深邃，對後代琴人影響極大。',dot:'major',yt:'https://www.youtube.com/results?search_query=成公亮+古琴'},
       {name:'趙家珍',years:'1963–',sect:'虞山吳派傳承',sectCls:'sect-guqin-wu',school:'中央音樂學院教授',desc:'吳景略再傳弟子，李祥霆學生，虞山吳派第三代。中央音樂學院教授，在國際舞台上積極推廣古琴，多次獲邀在聯合國演奏。',dot:'major',yt:'https://www.youtube.com/results?search_query=赵家珍+古琴'},
       {name:'戴曉蓮',years:'1963–',sect:'廣陵派',sectCls:'sect-guqin-guang',school:'上海音樂學院教授',desc:'師承龔一，廣陵派傳人。上海音樂學院教授，演奏典雅細膩，積極從事傳統曲目整理及新曲創作，推廣古琴於現代教育。',dot:'major',yt:'https://www.youtube.com/results?search_query=戴晓莲+古琴'},
@@ -2051,19 +2158,19 @@ const LINEAGE={
   ]},
   guzheng:{label:'古箏',icon:'🎶',eras:[
     {era:'各流派奠基宗師（1890–1950）',persons:[
-      {name:'娄树华',years:'1907–1952',sect:'北京·河南箏派傳人',sectCls:'sect-guzheng-zhe',school:'北京·曾任職廣播電台；師從河南魏子猷',desc:'著名古箏演奏家，師從魏子猷習河南箏藝。1935–36年隨中國音樂旅行團赴歐洲演出。改編《漁舟唱晚》並廣泛流傳（該曲歸屬有歷史爭議，另說源自金灼南）。改革工尺譜記譜法，多年從事教學。',dot:'founder',yt:'https://www.youtube.com/results?search_query=娄树华+古箏+漁舟唱晚'},
-      {name:'曹東扶',years:'1898–1970',sect:'河南派',sectCls:'sect-guzheng-he',school:'河南省中州古箏學會',desc:'河南箏派奠基人，技法雄渾有力，善用大滑音和「以韻補聲」技法。代表曲目《閨中怨》《陳杏元落院》，對河南箏派影響最深。',dot:'founder',yt:'https://www.youtube.com/results?search_query=曹东扶+古箏+河南'},
+      {name:'娄树华',years:'1907–1952',src:'資料來源：維基百科 漁舟唱晚條目 zh.wikipedia.org/wiki/漁舟唱晚；中國古箏網 guzheng.cn',sect:'北京·河南箏派傳人',sectCls:'sect-guzheng-zhe',school:'北京·曾任職廣播電台；師從河南魏子猷',desc:'著名古箏演奏家，師從魏子猷習河南箏藝。1935–36年隨中國音樂旅行團赴歐洲演出。改編《漁舟唱晚》並廣泛流傳（該曲歸屬有歷史爭議，另說源自金灼南）。改革工尺譜記譜法，多年從事教學。',dot:'founder',yt:'https://www.youtube.com/results?search_query=娄树华+古箏+漁舟唱晚'},
+      {name:'曹東扶',years:'1898–1970',src:'資料來源：維基百科 曹東扶條目 zh.wikipedia.org/wiki/曹東扶',sect:'河南派',sectCls:'sect-guzheng-he',school:'河南省中州古箏學會',desc:'河南箏派奠基人，技法雄渾有力，善用大滑音和「以韻補聲」技法。代表曲目《閨中怨》《陳杏元落院》，對河南箏派影響最深。',dot:'founder',yt:'https://www.youtube.com/results?search_query=曹东扶+古箏+河南'},
       {name:'高自成',years:'1918–2009',sect:'山東派',sectCls:'sect-guzheng-sd',school:'山東師範大學',desc:'山東箏派代表人。演奏風格剛勁清麗，音色乾淨透徹。長期在山東傳授山東風格古箏，著有山東箏派演奏教材。',dot:'founder',yt:'https://www.youtube.com/results?search_query=高自成+山东+古箏'},
       {name:'林毛根',years:'1929–2006',sect:'潮州派',sectCls:'sect-guzheng-chao',school:'廣東潮汕地區',desc:'潮州箏派代表人物之一。精通潮州音樂，保存和傳承了大量潮州古曲，演奏音色甜美婉約，具有鮮明的南方地域風格。',dot:'founder',yt:'https://www.youtube.com/results?search_query=林毛根+潮州+古箏'},
     ]},
     {era:'學院專業教育先驅（1920–1970）',persons:[
-      {name:'曹正',years:'1920–1998',sect:'融合·學院派宗師',sectCls:'sect-guzheng-he',school:'中央音樂學院教授（奠基人）',desc:'「一代古箏宗師」。中央音樂學院古箏教學奠基人，將古箏帶入高等音樂教育體系。學貫各派，著有大量古箏教材，培育眾多著名演奏家。',dot:'founder',yt:'https://www.youtube.com/results?search_query=曹正+古箏+中央音乐学院'},
+      {name:'曹正',years:'1920–1998',src:'資料來源：維基百科 曹正條目 zh.wikipedia.org/wiki/曹正_(音乐家)',sect:'融合·學院派宗師',sectCls:'sect-guzheng-he',school:'中央音樂學院教授（奠基人）',desc:'「一代古箏宗師」。中央音樂學院古箏教學奠基人，將古箏帶入高等音樂教育體系。學貫各派，著有大量古箏教材，培育眾多著名演奏家。',dot:'founder',yt:'https://www.youtube.com/results?search_query=曹正+古箏+中央音乐学院'},
       {name:'趙玉齋',years:'1923–2003',sect:'東北融合派',sectCls:'sect-guzheng-sd',school:'沈陽音樂學院教授',desc:'東北古箏學會創辦人。首創左手旋律演奏技法，突破傳統古箏右手主導的局限，代表曲《四段錦》影響深遠，為古箏演奏現代化的重要推手。',dot:'major',yt:'https://www.youtube.com/results?search_query=赵玉斋+古箏+四段锦'},
       {name:'王巽之',years:'1899–1972',sect:'浙江派',sectCls:'sect-guzheng-zhe',school:'上海音樂學院',desc:'浙江箏派重要傳人。上海音樂學院任教，演奏典雅秀麗，具有明顯江南絲竹特色，培育了浙派在學院體系的傳承脈絡。',dot:'major',yt:'https://www.youtube.com/results?search_query=王巽之+浙江+古箏'},
     ]},
     {era:'當代名家（1960–）',persons:[
-      {name:'王中山',years:'1968–',sect:'當代融合·技術革新',sectCls:'sect-guzheng-he',school:'中國音樂學院教授·中國古箏學會會長',desc:'師從趙曼琴，後入中國音樂學院師從李婉芬。首創「搖指」技法革命，將古箏技術拓展至前所未有的高度。現任中國音樂學院教授、博士導師、中國古箏學會會長。',dot:'major',yt:'https://www.youtube.com/results?search_query=王中山+古箏'},
-      {name:'袁莎',years:'1978–',sect:'中央音樂學院派',sectCls:'sect-guzheng-he',school:'中央音樂學院副教授',desc:'中央音樂學院培育，師承曹正一脈。以推廣古箏教育見長，網絡教學影響廣泛，著有《袁莎古箏教學法》系列，在香港、海外亦設立眾多教學點。',dot:'major',yt:'https://www.youtube.com/results?search_query=袁莎+古箏'},
+      {name:'王中山',years:'1968–',src:'資料來源：維基百科 王中山條目 zh.wikipedia.org/wiki/王中山_(古筝演奏家)',sect:'當代融合·技術革新',sectCls:'sect-guzheng-he',school:'中國音樂學院教授·中國古箏學會會長',desc:'師從趙曼琴，後入中國音樂學院師從李婉芬。首創「搖指」技法革命，將古箏技術拓展至前所未有的高度。現任中國音樂學院教授、博士導師、中國古箏學會會長。',dot:'major',yt:'https://www.youtube.com/results?search_query=王中山+古箏'},
+      {name:'袁莎',years:'1978–',src:'資料來源：中央音樂學院官網 ccom.edu.cn',sect:'中央音樂學院派',sectCls:'sect-guzheng-he',school:'中央音樂學院副教授',desc:'中央音樂學院培育，師承曹正一脈。以推廣古箏教育見長，網絡教學影響廣泛，著有《袁莎古箏教學法》系列，在香港、海外亦設立眾多教學點。',dot:'major',yt:'https://www.youtube.com/results?search_query=袁莎+古箏'},
       {name:'林玲',years:'1958–',sect:'潮州派',sectCls:'sect-guzheng-chao',school:'中國音樂學院教授',desc:'潮州箏派代表學院傳人，中國音樂學院教授。演奏融合南方韻味與學院技術，對潮州箏曲的整理和推廣貢獻卓著，代表曲《出水蓮》《寒鴉戲水》。',dot:'major',yt:'https://www.youtube.com/results?search_query=林玲+古箏'},
       {name:'李萌',years:'1963–',sect:'中央音樂學院派',sectCls:'sect-guzheng-he',school:'中央音樂學院教授',desc:'師承曹正，中央音樂學院教授。重視傳統技法與現代創作並重，著有多冊古箏教材，對現代古箏考級教材的訂定有重要貢獻。',dot:'major',yt:'https://www.youtube.com/results?search_query=李萌+古箏'},
     ]},
@@ -2079,8 +2186,8 @@ const LINEAGE={
       {name:'孫裕德',years:'1904–1981',sect:'汪派',sectCls:'sect-pipa-wangpai',school:'上海音樂學院',desc:'汪昱庭嫡傳弟子，汪派重要傳人。上海音樂學院任教，演奏凝重大氣，保存了汪派核心技法。劉德海曾向其學習，吸收了汪派演奏精髓。',dot:'major',yt:'https://www.youtube.com/results?search_query=孙裕德+琵琶+汪派'},
     ]},
     {era:'當代宗師與國際名家（1937–）',persons:[
-      {name:'劉德海',years:'1937–2020',sect:'集浦東、崇明、汪、平湖各派之大成',sectCls:'sect-pipa-pu',school:'中國音樂學院教授·副院長',desc:'二十世紀最偉大的琵琶演奏家及作曲家。先後師從林石城（浦東）、曹安和（崇明）、孫裕德（汪派）、楊大鈞（平湖），集各派之長。1973年創作首部琵琶協奏曲《草原小姐妹》。著有「人生篇」系列作品。',dot:'founder',yt:'https://www.youtube.com/results?search_query=刘德海+琵琶+十面埋伏'},
-      {name:'吳蠻',years:'1963–',sect:'浦東派傳承·跨界融合',sectCls:'sect-pipa-pu',school:'中央音樂學院（碩士）·旅美演奏家',desc:'師從林石城、劉德海，獲中央音樂學院首個琵琶演奏碩士學位。1990年旅居美國，與馬友友絲綢之路合奏團長期合作，多次獲格萊美提名，是將琵琶推向國際最重要的演奏家。',dot:'major',yt:'https://www.youtube.com/results?search_query=吴蛮+Wu+Man+pipa'},
+      {name:'劉德海',years:'1937–2020',src:'資料來源：維基百科 劉德海條目 zh.wikipedia.org/wiki/刘德海',sect:'集浦東、崇明、汪、平湖各派之大成',sectCls:'sect-pipa-pu',school:'中國音樂學院教授·副院長',desc:'二十世紀最偉大的琵琶演奏家及作曲家。先後師從林石城（浦東）、曹安和（崇明）、孫裕德（汪派）、楊大鈞（平湖），集各派之長。1973年創作首部琵琶協奏曲《草原小姐妹》。著有「人生篇」系列作品。',dot:'founder',yt:'https://www.youtube.com/results?search_query=刘德海+琵琶+十面埋伏'},
+      {name:'吳蠻',years:'1963–',src:'資料來源：維基百科 吳蠻條目 zh.wikipedia.org/wiki/吳蠻；個人官網 wumanpipa.com',sect:'浦東派傳承·跨界融合',sectCls:'sect-pipa-pu',school:'中央音樂學院（碩士）·旅美演奏家',desc:'師從林石城、劉德海，獲中央音樂學院首個琵琶演奏碩士學位。1990年旅居美國，與馬友友絲綢之路合奏團長期合作，多次獲格萊美提名，是將琵琶推向國際最重要的演奏家。',dot:'major',yt:'https://www.youtube.com/results?search_query=吴蛮+Wu+Man+pipa'},
       {name:'章紅艷',years:'1971–',sect:'浦東派傳承',sectCls:'sect-pipa-pu',school:'中央音樂學院教授',desc:'林石城嫡傳弟子，浦東派傳人。中央音樂學院教授，演奏技藝精湛，兼顧傳統技法與現代詮釋，是當代最重要的琵琶演奏家及教育家之一。',dot:'major',yt:'https://www.youtube.com/results?search_query=章红艳+琵琶'},
       {name:'方錦龍',years:'1963–',sect:'跨界推廣·多樂器演奏家',sectCls:'sect-pipa-wangpai',school:'廣東民族樂團首席琵琶',desc:'廣東民族樂團首席琵琶演奏家，同時精通多種彈撥樂器。以跨界演奏和現場互動著稱，是近年來最積極推廣中樂的藝術家之一，在YouTube擁有龐大受眾。',dot:'major',yt:'https://www.youtube.com/results?search_query=方锦龙+琵琶'},
     ]},
@@ -2088,12 +2195,12 @@ const LINEAGE={
   dizi:{label:'笛子',icon:'🎐',eras:[
     {era:'南北二派奠基宗師（1900–1960）',persons:[
       {name:'馮子存',years:'1904–1987',sect:'北派梆笛·北方鼓吹代表',sectCls:'sect-guqin-chuan',school:'中國音樂學院教授',desc:'北派梆笛奠基人，演奏活潑熱烈，擅長吐音、剁音、花舌等北方特色技法。代表曲《喜相逢》《五梆子》《黃鶯亮翅》，是最早將北方民間笛藝帶入現代音樂廳的演奏家。',dot:'founder',yt:'https://www.youtube.com/results?search_query=冯子存+笛子+喜相逢'},
-      {name:'陸春齡',years:'1921–2018',sect:'南派曲笛·「中國笛王」',sectCls:'sect-guqin-wu',school:'上海音樂學院教授（1976年起）',desc:'南派笛王，國家一級演員及非物質文化遺產代表性傳承人。演奏細膩婉轉，氣韻悠長，是江南絲竹風格的最高代表。1976年任教於上海音樂學院，俞遜發為其嫡傳。獲中國音樂金鐘獎終身成就獎。',dot:'founder',yt:'https://www.youtube.com/results?search_query=陆春龄+笛子+鹧鸪飞'},
+      {name:'陸春齡',years:'1921–2018',src:'資料來源：維基百科 陸春齡條目 zh.wikipedia.org/wiki/陸春齡',sect:'南派曲笛·「中國笛王」',sectCls:'sect-guqin-wu',school:'上海音樂學院教授（1976年起）',desc:'南派笛王，國家一級演員及非物質文化遺產代表性傳承人。演奏細膩婉轉，氣韻悠長，是江南絲竹風格的最高代表。1976年任教於上海音樂學院，俞遜發為其嫡傳。獲中國音樂金鐘獎終身成就獎。',dot:'founder',yt:'https://www.youtube.com/results?search_query=陆春龄+笛子+鹧鸪飞'},
       {name:'趙松庭',years:'1923–2001',sect:'浙江南派·婺劇笛風',sectCls:'sect-guqin-wu',school:'浙江歌舞劇院',desc:'浙江笛派代表人，演奏融合南派氣息與浙江婺劇特色，發明顫音技法，代表曲《早晨》《三五七》《婺江風光》。著有《笛子演奏技巧十講》，對後代笛藝教學影響深遠。',dot:'major',yt:'https://www.youtube.com/results?search_query=赵松庭+笛子+三五七'},
     ]},
     {era:'第二代名家與當代院長（1946–）',persons:[
       {name:'俞遜發',years:'1946–2006',sect:'南派陸春齡傳承·「中國魔笛」',sectCls:'sect-guqin-wu',school:'上海民族樂團首席笛師',desc:'陸春齡嫡傳，被法國樂壇稱為「中國魔笛」。大幅拓展笛子音色，發明口笛、朱笛等新型樂器，及氣沖音、包吹等多種新技法。代表曲《秋湖月夜》《匯流》，出訪逾四十國。',dot:'founder',yt:'https://www.youtube.com/results?search_query=俞逊发+笛子+秋湖月夜'},
-      {name:'張維良',years:'1957–',sect:'南北融合·學院代表',sectCls:'sect-guqin-wu',school:'中央音樂學院教授・民樂系主任（前）',desc:'中央音樂學院教授，曾任民樂系主任，師承曾永清。融匯南北技法，兼顧傳統與現代創作，長期在國際舞台演出，為當代最具影響力的笛子演奏家及教育家之一，培育無數學院傳人。',dot:'major',yt:'https://www.youtube.com/results?search_query=张维良+笛子'},
+      {name:'張維良',years:'1957–',src:'資料來源：中央音樂學院官網 ccom.edu.cn',sect:'南北融合·學院代表',sectCls:'sect-guqin-wu',school:'中央音樂學院教授・民樂系主任（前）',desc:'中央音樂學院教授，曾任民樂系主任，師承曾永清。融匯南北技法，兼顧傳統與現代創作，長期在國際舞台演出，為當代最具影響力的笛子演奏家及教育家之一，培育無數學院傳人。',dot:'major',yt:'https://www.youtube.com/results?search_query=张维良+笛子'},
       {name:'唐俊喬',years:'1977–',sect:'南派當代代表演奏家',sectCls:'sect-guqin-wu',school:'上海音樂學院教授・碩士導師',desc:'上海音樂學院教授，師承陸春齡傳人系脈。以突破性技法及現代詮釋著稱，多次在重要國際音樂節演出，積極委託新曲創作，是當代最重要的中青代笛子演奏家及教育家。',dot:'major',yt:'https://www.youtube.com/results?search_query=唐俊乔+笛子'},
     ]},
   ]},
@@ -2127,12 +2234,12 @@ const LINEAGE={
   ]},
   hk:{label:'香港',icon:'🏙',eras:[
     {era:'香港中樂代表人物',persons:[
-      {name:'閻惠昌',years:'1955–',sect:'香港中樂團藝術總監·指揮',sectCls:'sect-guqin-guan',
+      {name:'閻惠昌',years:'1955–',src:'資料來源：香港中樂團官網 hkco.org',sect:'香港中樂團藝術總監·指揮',sectCls:'sect-guqin-guan',
        school:'香港中樂團藝術總監及首席指揮',
        desc:'著名指揮家，中國國家一級指揮。長期執掌香港中樂團，帶領樂團走向國際，委約創作大量新作品，推動香港中樂發展。',
        dot:'major',src:'資料來源：香港中樂團官網',
        yt:'https://www.youtube.com/results?search_query=閻惠昌+香港中樂團'},
-      {name:'余其偉',years:'1951–',sect:'廣東音樂·高胡演奏家',sectCls:'sect-guzheng-he',
+      {name:'余其偉',years:'1951–',src:'資料來源：維基百科 余其偉條目 zh.wikipedia.org/wiki/余其偉',sect:'廣東音樂·高胡演奏家',sectCls:'sect-guzheng-he',
        school:'星海音樂學院教授·廣東音樂名家',
        desc:'著名廣東音樂高胡演奏家，被視為廣東音樂高胡泰斗。長期推廣廣東音樂，亦在香港演出。',
        dot:'major',src:'資料來源：星海音樂學院',
