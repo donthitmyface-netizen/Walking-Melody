@@ -7,7 +7,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="履音">
 <title>履音 · 教學手記</title>
-<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* 標楷體 system font - works on iOS, macOS, Windows, Android */
+:lang(zh-TW), :lang(zh-HK) {
+  --kai: 'DFKai-SB', 'BiauKai', '標楷體', 'KaiTi', 'STKaiti', 'Noto Serif TC', serif;
+}
+:lang(zh-CN) {
+  --kai: 'KaiTi', 'STKaiti', 'DFKai-SB', 'Noto Serif TC', serif;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -34,7 +43,7 @@ window.addEventListener('DOMContentLoaded',()=>window._init());
   --sbg:#2a1e0e;--stxt:#d4ac45;
   --sh:rgba(28,20,8,.12);
   --fs:1;
-  --calligraphic-font:'ZCOOL XiaoWei','Noto Serif TC',serif;
+  --calligraphic-font:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;
 }
 /* ── LIGHT ── */
 [data-theme="light"]{
@@ -95,7 +104,7 @@ window.addEventListener('DOMContentLoaded',()=>window._init());
 }
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+body{font-family:'Noto Sans TC','DFKai-SB',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
 
 /* FONT SIZE SCALING */
 body.fs-large{font-size:105%}
@@ -103,7 +112,7 @@ body.fs-xlarge{font-size:114%}
 body.fs-small{font-size:94%}
 /* Font size picker */
 .fsize-grid{display:flex;gap:7px;margin:7px 0 12px}
-.fsize-opt{flex:1;border:2px solid var(--bdr);padding:10px 5px;cursor:pointer;text-align:center;background:var(--card);font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;color:var(--txt3);transition:border-color .15s}
+.fsize-opt{flex:1;border:2px solid var(--bdr);padding:10px 5px;cursor:pointer;text-align:center;background:var(--card);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--txt3);transition:border-color .15s}
 .fsize-opt.active{border-color:var(--red);color:var(--red)}
 .fsize-opt .fs-preview{font-size:1.3em;display:block;margin-bottom:2px;line-height:1.2}
 .fsize-opt .fs-label{font-size:.6rem;letter-spacing:.06em}
@@ -115,8 +124,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .sp-seal{width:82px;height:82px;border:2px solid var(--red);display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:18px;animation:spA 2.5s ease infinite}
 .sp-seal::before{content:'';position:absolute;inset:5px;border:1px solid rgba(212,172,69,.18)}
 @keyframes spA{0%,100%{opacity:1}50%{opacity:.5}}
-.sp-char{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:2.5rem;color:var(--red);font-weight:400}
-.sp-t{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
+.sp-char{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:2.5rem;color:var(--red);font-weight:400}
+.sp-t{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
 .sp-s{font-size:.65rem;color:rgba(212,172,69,.35);letter-spacing:.25em;margin-bottom:20px}
 .sp-l{width:1px;height:26px;background:linear-gradient(to bottom,var(--gold),transparent)}
 .sp-msg{font-size:.63rem;color:rgba(212,172,69,.35);margin-top:9px;letter-spacing:.1em}
@@ -124,7 +133,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 /* LOGIN */
 #loginScreen{display:none;position:fixed;inset:0;z-index:500;background:var(--hbg);flex-direction:column;align-items:center;justify-content:center}
 #loginScreen.show{display:flex}
-.g-btn{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--bdr);padding:12px 22px;cursor:pointer;font-family:'Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.g-btn{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--bdr);padding:12px 22px;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;box-shadow:0 2px 12px rgba(0,0,0,.28)}
 .g-btn svg{width:17px;height:17px;flex-shrink:0}
 .login-note{font-size:.61rem;color:rgba(212,172,69,.3);margin-top:15px;letter-spacing:.1em;text-align:center;line-height:2.3}
 
@@ -137,8 +146,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--hbg);pad
 .hi{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
 .hl{display:flex;align-items:center;gap:8px}
 .h-seal{width:26px;height:26px;border:1px solid var(--red);display:flex;align-items:center;justify-content:center}
-.h-seal span{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.88rem;color:var(--red);font-weight:400}
-.h-title{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.97rem;color:var(--htxt);letter-spacing:.22em}
+.h-seal span{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.88rem;color:var(--red);font-weight:400}
+.h-title{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.97rem;color:var(--htxt);letter-spacing:.22em}
 .hr2{display:flex;align-items:center;gap:6px}
 .hbtn{background:none;border:1px solid rgba(184,146,42,.32);cursor:pointer;color:var(--gold2);font-size:.72rem;font-family:'Noto Sans TC',sans-serif;padding:4px 8px;letter-spacing:.04em}
 .sd{width:6px;height:6px;border-radius:50%;background:#444;flex-shrink:0}
@@ -163,7 +172,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .pad{padding:13px}
 
 /* SECTION TITLE */
-.st{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.st{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
 .st::before{content:'';width:2px;height:12px;background:linear-gradient(to bottom,var(--red),transparent);flex-shrink:0}
 .st::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--bdr),transparent)}
 .st.jade::before{background:linear-gradient(to bottom,var(--jade),transparent)}.st.gold::before{background:linear-gradient(to bottom,var(--gold),transparent)}
@@ -173,7 +182,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .srow.c2{grid-template-columns:1fr 1fr}.srow.c3{grid-template-columns:1fr 1fr 1fr}.srow.c4{grid-template-columns:1fr 1fr 1fr 1fr}
 .sc{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:10px 3px;text-align:center;position:relative;overflow:hidden;min-height:52px}
 .sc::after{content:'';position:absolute;bottom:0;left:14%;right:14%;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
-.sc-n{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:clamp(.68rem,3.2vw,1rem);font-weight:400;color:var(--stxt);line-height:1.2;word-break:break-all;overflow-wrap:break-word}
+.sc-n{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:clamp(.68rem,3.2vw,1rem);font-weight:400;color:var(--stxt);line-height:1.2;word-break:break-all;overflow-wrap:break-word}
 .sc-l{font-size:.53rem;color:rgba(184,146,42,.4);margin-top:2px;letter-spacing:.1em}
 
 /* CARD */
@@ -185,9 +194,9 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .scu{background:var(--card);border:1px solid var(--bdr);overflow:hidden;cursor:pointer;margin-bottom:8px;box-shadow:0 2px 8px var(--sh);transition:box-shadow .2s,transform .15s}
 .scu:active{opacity:.85;transform:scale(.99)}
 .scu-top{padding:12px 14px;display:flex;align-items:center;gap:11px}
-.av{width:38px;height:38px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:700;flex-shrink:0;background:var(--card2);color:var(--txt);position:relative}
+.av{width:38px;height:38px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.95rem;font-weight:700;flex-shrink:0;background:var(--card2);color:var(--txt);position:relative}
 .av::after{content:'';position:absolute;bottom:0;right:0;width:8px;height:8px;border-top:1px solid var(--bdr2);border-left:1px solid var(--bdr2)}
-.sn{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.95rem;font-weight:400;letter-spacing:.08em;color:var(--txt)}
+.sn{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.95rem;font-weight:400;letter-spacing:.08em;color:var(--txt)}
 .sm{font-size:.64rem;color:var(--txt3);margin-top:2px;letter-spacing:.02em}
 .sbadge{font-size:.52rem;padding:1px 6px;background:var(--hbg);color:var(--gold2);display:inline-block;margin-top:3px;border:1px solid rgba(184,146,42,.2);letter-spacing:.04em}
 .pw{padding:0 14px 10px}
@@ -198,15 +207,15 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* DETAIL */
 .dh{background:var(--sbg);border-bottom:1px solid rgba(184,146,42,.14);padding:13px;display:flex;align-items:center;gap:11px;position:relative}
 .dh::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
-.dav{width:46px;height:46px;border:1px solid rgba(184,146,42,.28);background:var(--hbg);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:1.2rem;color:var(--gold2);flex-shrink:0}
-.dn{font-family:'Noto Serif TC',serif;font-size:1rem;color:var(--gold2);letter-spacing:.1em}
+.dav{width:46px;height:46px;border:1px solid rgba(184,146,42,.28);background:var(--hbg);display:flex;align-items:center;justify-content:center;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:1.2rem;color:var(--gold2);flex-shrink:0}
+.dn{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:1rem;color:var(--gold2);letter-spacing:.1em}
 .ds{font-size:.65rem;color:rgba(184,146,42,.48);margin-top:3px}
 .dsch{font-size:.59rem;color:var(--red);margin-top:2px;letter-spacing:.06em}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none;background:var(--card)}
 .tabs::-webkit-scrollbar{display:none}
-.tb{border:none;background:none;padding:8px 13px;font-size:.69rem;cursor:pointer;font-family:'Noto Serif TC',serif;color:var(--txt3);letter-spacing:.07em;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
+.tb{border:none;background:none;padding:8px 13px;font-size:.69rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--txt3);letter-spacing:.07em;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
 .tb.active{color:var(--red);border-bottom-color:var(--red)}
 
 /* RECORD ITEM */
@@ -224,8 +233,8 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-card{background:var(--card);border:1px solid var(--bdr);margin-bottom:9px;overflow:visible;box-shadow:1px 2px 5px var(--sh)}
 .lp-hd{padding:10px 12px;background:var(--sbg);display:flex;align-items:center;gap:9px;cursor:pointer;overflow:hidden}
 .lp-hd:active{opacity:.8}
-.lp-date{font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);min-width:68px;letter-spacing:.04em}
-.lp-stu{font-family:'Noto Serif TC',serif;font-size:.82rem;color:var(--htxt);flex:1}
+.lp-date{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);min-width:68px;letter-spacing:.04em}
+.lp-stu{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.82rem;color:var(--htxt);flex:1}
 .lp-status{font-size:.56rem;padding:2px 6px;border-radius:1px;flex-shrink:0}
 .lp-status.plan{background:rgba(184,146,42,.22);color:var(--gold2)}
 .lp-status.done{background:var(--jade);color:#fff}
@@ -254,7 +263,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* FINANCE */
 .fin-total{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:12px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .fin-table{width:100%;border-collapse:collapse;font-size:.73rem;margin-bottom:10px}
-.fin-table th{background:var(--sbg);color:var(--gold2);padding:6px 7px;text-align:left;font-family:'Noto Serif TC',serif;font-weight:400;font-size:.68rem}
+.fin-table th{background:var(--sbg);color:var(--gold2);padding:6px 7px;text-align:left;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-weight:400;font-size:.68rem}
 .fin-table td{padding:7px;border-bottom:1px solid var(--bdr);background:var(--card)}
 .fin-income{color:var(--jade);font-weight:600}
 
@@ -262,7 +271,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .xcard{background:var(--card);border:1px solid var(--bdr);margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px var(--sh)}
 .xhd{padding:13px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--card);transition:background .15s}
 .xhd:active{background:var(--card2)}
-.xtitle{font-family:'Noto Serif TC',serif;font-size:.86rem;color:var(--txt);flex:1;letter-spacing:.07em;font-weight:600}
+.xtitle{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;color:var(--txt);flex:1;letter-spacing:.07em;font-weight:600}
 .xbody{padding:13px 14px;display:none;border-top:1px solid var(--bdr);background:var(--card2)}
 .xbody.open{display:block}
 .xrow{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--bdr)}
@@ -272,13 +281,13 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .exam-url{display:inline-flex;align-items:center;gap:5px;margin-top:8px;color:var(--red);font-size:.7rem;text-decoration:none;border:1px solid rgba(155,42,26,.28);padding:5px 10px}
 .ref-item{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(184,146,42,.12)}
 .ref-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.ref-item b{color:var(--red);font-size:.8rem;display:block;margin-bottom:3px;font-family:'Noto Serif TC',serif;letter-spacing:.04em}
+.ref-item b{color:var(--red);font-size:.8rem;display:block;margin-bottom:3px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.04em}
 .ref-item span{font-size:.75rem;line-height:1.72;color:var(--txt2)}
 
 /* LINEAGE TIMELINE */
 .lineage-wrap{position:relative}
 .lineage-era{margin-bottom:20px}
-.lineage-era-title{font-family:'Noto Serif TC',serif;font-size:.68rem;letter-spacing:.22em;color:var(--txt3);padding:5px 0;margin-bottom:10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px}
+.lineage-era-title{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.68rem;letter-spacing:.22em;color:var(--txt3);padding:5px 0;margin-bottom:10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px}
 .lineage-era-title::before{content:'';width:14px;height:1px;background:var(--gold)}
 .lineage-person{display:flex;gap:0;margin-bottom:8px;position:relative}
 .lineage-person::before{content:'';position:absolute;left:18px;top:36px;bottom:-8px;width:1px;background:linear-gradient(to bottom,var(--bdr2),transparent);z-index:0}
@@ -289,11 +298,11 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-dot.major{background:var(--gold);border-color:var(--gold)}
 .lp-card{background:var(--card);border:1px solid var(--bdr);padding:11px 13px;flex:1;box-shadow:0 1px 4px var(--sh)}
 .lp-card:active{opacity:.85}
-.lp-name{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:1rem;font-weight:400;color:var(--txt);letter-spacing:.1em}
+.lp-name{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:1rem;font-weight:400;color:var(--txt);letter-spacing:.1em}
 .lp-years{font-size:.6rem;color:var(--txt3);margin-left:7px;letter-spacing:.04em}
 .lp-school{font-size:.63rem;color:var(--jade);margin-top:3px;letter-spacing:.03em}
 .lp-desc{font-size:.71rem;color:var(--txt2);margin-top:4px;line-height:1.62}
-.lp-sect{display:inline-block;font-size:.58rem;padding:2px 8px;margin-top:4px;letter-spacing:.07em;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif}
+.lp-sect{display:inline-block;font-size:.58rem;padding:2px 8px;margin-top:4px;letter-spacing:.07em;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif}
 .sect-guqin-guan{background:rgba(155,42,26,.12);color:var(--red);border:1px solid rgba(155,42,26,.25)}
 .sect-guqin-wu{background:rgba(61,107,90,.12);color:var(--jade);border:1px solid rgba(61,107,90,.25)}
 .sect-guqin-guang{background:rgba(184,146,42,.12);color:var(--gold);border:1px solid rgba(184,146,42,.25)}
@@ -313,7 +322,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-yt{display:inline-flex;align-items:center;gap:5px;margin-top:7px;color:rgba(155,42,26,.7);font-size:.63rem;text-decoration:none;border:1px solid rgba(155,42,26,.2);padding:3px 8px}
 .lineage-inst-tab{display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
 .lineage-inst-tab::-webkit-scrollbar{display:none}
-.lit-btn{border:none;background:none;padding:9px 16px;font-family:'Noto Serif TC',serif;font-size:.78rem;color:var(--txt3);cursor:pointer;letter-spacing:.1em;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;flex-shrink:0;transition:color .15s}
+.lit-btn{border:none;background:none;padding:9px 16px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.78rem;color:var(--txt3);cursor:pointer;letter-spacing:.1em;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;flex-shrink:0;transition:color .15s}
 .lit-btn.active{color:var(--red);border-bottom-color:var(--red)}
 
 
@@ -325,7 +334,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* CHIPS & SEARCH */
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:11px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
+.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
 .chip.active{background:var(--hbg);color:var(--gold2);border-color:var(--gold)}
 .isrch{display:flex;align-items:center;gap:7px;border:1px solid var(--bdr2);background:var(--card);padding:7px 10px;margin-bottom:11px}
 .isrch input{flex:1;border:none;background:none;font-size:.81rem;color:var(--txt);font-family:'Noto Sans TC',sans-serif;outline:none}
@@ -333,20 +342,20 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 
 /* MONTH NAV */
 .mnav{display:flex;align-items:center;margin-bottom:11px}
-.mnav-btn{background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:4px 11px;cursor:pointer;font-size:.78rem;font-family:'Noto Serif TC',serif;flex-shrink:0}
-.mnav-lbl{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
+.mnav-btn{background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:4px 11px;cursor:pointer;font-size:.78rem;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;flex-shrink:0}
+.mnav-lbl{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
 
 /* CALENDAR */
 .cal-wrap{margin-bottom:12px;overflow:visible}
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px}
-.cal-dow-cell{text-align:center;font-size:.58rem;color:var(--txt3);padding:4px 0;font-family:'Noto Serif TC',serif}
+.cal-dow-cell{text-align:center;font-size:.58rem;color:var(--txt3);padding:4px 0;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr)}
 .cal-cell{background:var(--bg);padding:3px;min-height:44px;cursor:pointer;position:relative}
 .cal-cell:hover{background:var(--bg3)}
 .cal-cell.today{outline:1px solid var(--red);outline-offset:-1px}
 .cal-cell.selected{background:var(--bg3)}
 .cal-cell.other-m{opacity:.3}
-.cal-num{font-size:.68rem;font-family:'Noto Serif TC',serif;color:var(--txt);line-height:1.5}
+.cal-num{font-size:.68rem;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--txt);line-height:1.5}
 .cal-cell.today .cal-num{color:var(--red);font-weight:700}
 .cal-ev{font-size:.48rem;padding:1px 2px;margin-top:1px;line-height:1.4;border-radius:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cal-ev.lesson{background:var(--jade);color:#fff}
@@ -354,21 +363,21 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .cal-ev.makeup{background:var(--gold);color:var(--hbg)}
 .cal-ev.plan{background:rgba(184,146,42,.3);color:var(--hbg)}
 .day-detail{background:var(--card);border:1px solid var(--bdr);padding:12px;margin-top:9px;box-shadow:2px 2px 6px var(--sh);overflow:visible}
-.day-detail-title{font-family:'Noto Serif TC',serif;font-size:.86rem;color:var(--gold2);margin-bottom:10px}
+.day-detail-title{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;color:var(--gold2);margin-bottom:10px}
 
 /* SETTINGS / THEME PICKER */
 .stb{background:var(--card);border:1px solid var(--bdr);padding:11px 12px;margin-bottom:6px}
-.stl{font-family:'Noto Serif TC',serif;font-size:.81rem;margin-bottom:2px;color:var(--txt)}
+.stl{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.81rem;margin-bottom:2px;color:var(--txt)}
 .sts{font-size:.66rem;color:var(--txt3)}
 .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}
 .th-opt{border:2px solid var(--bdr);padding:12px 8px;cursor:pointer;text-align:center;background:var(--card)}
 .th-opt.active{border-color:var(--red)}
 .th-preview{height:26px;border-radius:2px;margin-bottom:6px;border:1px solid var(--bdr2)}
-.th-label{font-size:.68rem;color:var(--txt3);font-family:'Noto Serif TC',serif}
+.th-label{font-size:.68rem;color:var(--txt3);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif}
 .dbtn{width:100%;background:none;border:1px solid rgba(155,42,26,.35);color:var(--red);padding:9px;font-size:.77rem;cursor:pointer;margin-top:5px;letter-spacing:.04em}
 .up{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .up img{width:40px;height:40px;border-radius:50%;border:1px solid rgba(184,146,42,.26);object-fit:cover}
-.up-n{font-family:'Noto Serif TC',serif;font-size:.86rem;color:var(--gold2)}
+.up-n{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;color:var(--gold2)}
 .up-e{font-size:.62rem;color:rgba(184,146,42,.4);margin-top:1px}
 .sob{background:none;border:1px solid rgba(155,42,26,.32);color:var(--red);padding:5px 9px;font-size:.67rem;cursor:pointer;white-space:nowrap}
 
@@ -378,12 +387,12 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .mo{background:var(--mbg);width:100%;padding:14px 14px calc(14px + env(safe-area-inset-bottom));animation:moUp .28s cubic-bezier(.32,1.15,.54,1);max-height:90vh;overflow-y:auto;border-top:2px solid rgba(184,146,42,.22);box-shadow:0 -4px 24px rgba(0,0,0,.4)}
 @keyframes moUp{from{transform:translateY(100%)}to{transform:none}}
 .mg{width:28px;height:3px;background:var(--bdr2);margin:0 auto 12px;border-radius:2px}
-.mt{font-family:'Noto Serif TC',serif;font-size:.94rem;margin-bottom:11px;letter-spacing:.1em;color:var(--txt);display:flex;align-items:center;gap:7px}
+.mt{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.94rem;margin-bottom:11px;letter-spacing:.1em;color:var(--txt);display:flex;align-items:center;gap:7px}
 .mt::before{content:'';width:3px;height:13px;background:var(--red);flex-shrink:0}
 .il{display:block;font-size:.66rem;color:var(--txt3);margin-bottom:3px;margin-top:7px;letter-spacing:.04em}
 .ii,.is,.ita{width:100%;border:1px solid var(--bdr2);background:var(--card);padding:8px 10px;font-size:.82rem;color:var(--txt);margin-bottom:1px;font-family:'Noto Sans TC',sans-serif;outline:none;-webkit-appearance:auto;appearance:auto}
 .ita{height:86px;resize:none;line-height:1.66}
-.mb{width:100%;background:var(--hbg);color:var(--gold2);border:1px solid rgba(184,146,42,.22);padding:12px;font-size:.84rem;font-weight:600;cursor:pointer;margin-top:8px;font-family:'Noto Serif TC',serif;letter-spacing:.12em}
+.mb{width:100%;background:var(--hbg);color:var(--gold2);border:1px solid rgba(184,146,42,.22);padding:12px;font-size:.84rem;font-weight:600;cursor:pointer;margin-top:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.12em}
 .mb:active{opacity:.8}.mb:disabled{opacity:.35;cursor:not-allowed}
 .mb.sec{background:transparent;color:var(--txt3);border-color:var(--bdr);margin-top:4px}
 .mb.danger{border-color:rgba(155,42,26,.38);color:var(--red);background:transparent;margin-top:5px}
@@ -399,20 +408,46 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 
 /* EMPTY */
 .empty{text-align:center;padding:34px 16px;color:var(--txt3)}
-.empty .ec{font-family:'Noto Serif TC',serif;font-size:2.3rem;color:var(--bdr);margin-bottom:7px}
+.empty .ec{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:2.3rem;color:var(--bdr);margin-bottom:7px}
 .empty p{font-size:.76rem;line-height:1.85}
 
 /* GCAL BTN */
 .gcal-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid rgba(66,133,244,.35);color:#4285F4;padding:3px 8px;font-size:.61rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
 
 /* BACK BUTTON */
-.back-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--txt3);font-size:.75rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;padding:6px 0 2px;letter-spacing:.1em}
+.back-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--txt3);font-size:.75rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;padding:6px 0 2px;letter-spacing:.1em}
 .back-btn svg{width:14px;height:14px;flex-shrink:0}
 .back-btn:active{opacity:.6}
 /* UNDO BANNER */
-#undoBanner{position:fixed;bottom:72px;left:10px;right:10px;z-index:250;background:var(--sbg);border:1px solid var(--gold);color:var(--gold2);font-size:.74rem;padding:10px 13px;display:none;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 18px rgba(0,0,0,.45);font-family:'Noto Serif TC',serif;animation:moUp .25s ease}
+#undoBanner{position:fixed;bottom:72px;left:10px;right:10px;z-index:250;background:var(--sbg);border:1px solid var(--gold);color:var(--gold2);font-size:.74rem;padding:10px 13px;display:none;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 18px rgba(0,0,0,.45);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;animation:moUp .25s ease}
 #undoBanner.show{display:flex}
-.undo-act-btn{background:var(--gold);color:var(--hbg);border:none;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'Noto Serif TC',serif;letter-spacing:.06em;flex-shrink:0;white-space:nowrap}
+.undo-act-btn{background:var(--gold);color:var(--hbg);border:none;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.06em;flex-shrink:0;white-space:nowrap}
+
+/* ── RADAR / SCORE SYSTEM ── */
+.radar-wrap{background:var(--card);border:1px solid var(--bdr);padding:14px;margin-bottom:12px;box-shadow:0 2px 8px var(--sh)}
+.radar-title{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.82rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.radar-svg{display:block;margin:0 auto 10px}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.score-item{background:var(--card2);border:1px solid var(--bdr);padding:7px 9px}
+.score-label{font-size:.61rem;color:var(--txt3);letter-spacing:.05em;margin-bottom:4px}
+.score-slider{width:100%;-webkit-appearance:none;appearance:none;height:3px;background:var(--bdr);outline:none;border-radius:2px;cursor:pointer}
+.score-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid var(--card);box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer}
+.score-val{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi',serif;font-size:.75rem;color:var(--txt);float:right;margin-bottom:2px}
+.grade-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:2px solid var(--gold);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi',serif;font-size:1.5rem;color:var(--gold2);background:var(--sbg);flex-shrink:0}
+.grade-badge.grade-S{border-color:#e8c840;color:#e8c840;background:rgba(232,200,64,.1)}
+.grade-badge.grade-A{border-color:var(--jade);color:var(--jade);background:rgba(61,107,90,.1)}
+.grade-badge.grade-B{border-color:#4a80c0;color:#4a80c0;background:rgba(74,128,192,.1)}
+.grade-badge.grade-C{border-color:var(--txt3);color:var(--txt3);background:var(--card2)}
+.grade-badge.grade-D{border-color:rgba(155,42,26,.5);color:var(--red);background:rgba(155,42,26,.08)}
+.grade-badge.grade-F{border-color:var(--red);color:var(--red);background:rgba(155,42,26,.12)}
+.grade-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--sbg);border:1px solid rgba(184,146,42,.18);margin-bottom:8px}
+.grade-info{flex:1}
+.grade-name{font-family:'DFKai-SB','BiauKai','標楷體','KaiTi',serif;font-size:.86rem;color:var(--txt);letter-spacing:.06em}
+.grade-sub{font-size:.62rem;color:var(--txt3);margin-top:2px;line-height:1.5}
+.overall-score{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:12px;background:var(--sbg);border:1px solid rgba(184,146,42,.2)}
+.overall-lbl{font-size:.68rem;color:var(--txt3);letter-spacing:.08em;flex:1}
+.overall-slider{width:100%;-webkit-appearance:none;appearance:none;height:5px;background:linear-gradient(to right,var(--red),var(--gold));outline:none;border-radius:3px;cursor:pointer;margin:6px 0}
+.overall-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold2);border:3px solid var(--card);box-shadow:0 2px 6px rgba(0,0,0,.4);cursor:pointer}
 </style>
 </head>
 <body>
@@ -531,7 +566,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 <!-- ⑦b LINEAGE (傳承譜系) -->
 <div class="page" id="page-lineage">
 <div class="pad">
-  <div style="font-family:'Noto Serif TC',serif;font-size:.72rem;color:var(--txt3);letter-spacing:.12em;margin-bottom:12px;line-height:1.9;border-left:2px solid var(--gold);padding-left:10px">名師傳承譜系 · 按樂器分類<br><span style="font-size:.62rem;opacity:.7">資料來源：各名家維基百科頁面、中央音樂學院官網、華音網</span></div>
+  <div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.72rem;color:var(--txt3);letter-spacing:.12em;margin-bottom:12px;line-height:1.9;border-left:2px solid var(--gold);padding-left:10px">名師傳承譜系 · 按樂器分類<br><span style="font-size:.62rem;opacity:.7">資料來源：各名家維基百科頁面、中央音樂學院官網、華音網</span></div>
   <div class="lineage-inst-tab" id="lineageTab"></div>
   <div id="lineageContent"></div>
 </div>
@@ -550,8 +585,8 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
     <div class="stl">繁體 ／ 簡體切換</div>
     <div class="sts">切換後頁面所有文字將顯示為繁體或簡體中文</div>
     <div style="display:flex;gap:8px;margin-top:8px">
-      <button id="btnTrad" onclick="setCharSet('trad')" style="flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;letter-spacing:.08em">繁體</button>
-      <button id="btnSimp" onclick="setCharSet('simp')" style="flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;letter-spacing:.08em">简体</button>
+      <button id="btnTrad" onclick="setCharSet('trad')" style="flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.08em">繁體</button>
+      <button id="btnSimp" onclick="setCharSet('simp')" style="flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.08em">简体</button>
     </div>
   </div>
   <div class="st">學校管理</div>
@@ -713,6 +748,147 @@ const DZ=['日','一','二','三','四','五','六'];
 const RLBL=['','需特別輔導','需加強','一般','良好','非常出色'];
 const CN_INST=['二胡','琵琶','古琴','古箏','笛子／簫','揚琴','中阮／大阮','中胡','板胡','三弦','嗩吶','中國敲擊'];
 const TRAITS=['節拍感強','節拍感待改','手指靈活','手指力度不足','音感良好','音感待培','視奏良好','視奏待改','樂理基礎強','樂理需加強','專注力高','需多督促','練習勤快','需督促練習','表演慾強','舞台緊張','善於背譜','記憶力佳','創意豐富','注重細節'];
+// ── SCORING SYSTEM ──
+const SCORE_DIMS=[
+  {key:'pitch',    label:'音準',   icon:'🎯'},
+  {key:'rhythm',   label:'節奏',   icon:'🥁'},
+  {key:'pulse',    label:'拍子',   icon:'⏱'},
+  {key:'musical',  label:'音樂感', icon:'🎵'},
+  {key:'tone',     label:'音色變化',icon:'🎨'},
+  {key:'creative', label:'創意',   icon:'💡'},
+  {key:'attitude', label:'態度',   icon:'⭐'},
+  {key:'power',    label:'力量',   icon:'💪'},
+  {key:'physical', label:'身體機能',icon:'🤸'},
+  {key:'stamina',  label:'持久力', icon:'🔥'},
+  {key:'stage',    label:'演技',   icon:'🎭'},
+];
+const GRADE_THRESHOLDS=[
+  {grade:'S',min:92,color:'#e8c840',desc:'卓越·宗師之資'},
+  {grade:'A',min:80,color:'#3d6b5a',desc:'優秀·可獨當一面'},
+  {grade:'B',min:65,color:'#4a80c0',desc:'良好·穩步進步中'},
+  {grade:'C',min:50,color:'#8a7a62',desc:'一般·需持續練習'},
+  {grade:'D',min:35,color:'#9b2a1a',desc:'待改進·需加強基礎'},
+  {grade:'F',min:0, color:'#9b2a1a',desc:'需重新檢視學習方法'},
+];
+function getGrade(overall){return GRADE_THRESHOLDS.find(g=>overall>=g.min)||GRADE_THRESHOLDS[5];}
+function getScores(s){return s.scores||{};}
+function calcOverall(s){
+  const sc=getScores(s);
+  const manual=s.overallScore;
+  if(manual!==undefined&&manual!==null)return manual;
+  const vals=SCORE_DIMS.map(d=>sc[d.key]||5);
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10);
+}
+function drawRadar(scores,size){
+  const n=SCORE_DIMS.length;
+  const cx=size/2,cy=size/2,r=(size/2)-28;
+  const levels=5;
+  let svg=`<svg class="radar-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+  // Grid circles
+  for(let lv=1;lv<=levels;lv++){
+    const rr=r*lv/levels;
+    const pts=SCORE_DIMS.map((_,i)=>{
+      const a=(i/n)*2*Math.PI-Math.PI/2;
+      return `${cx+rr*Math.cos(a)},${cy+rr*Math.sin(a)}`;
+    }).join(' ');
+    svg+=`<polygon points="${pts}" fill="none" stroke="var(--bdr)" stroke-width="${lv===levels?1.5:0.7}" opacity="${lv===levels?0.6:0.35}"/>`;
+  }
+  // Axis lines + labels
+  SCORE_DIMS.forEach((d,i)=>{
+    const a=(i/n)*2*Math.PI-Math.PI/2;
+    const x2=cx+r*Math.cos(a),y2=cy+r*Math.sin(a);
+    const lx=cx+(r+18)*Math.cos(a),ly=cy+(r+18)*Math.sin(a);
+    svg+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="var(--bdr2)" stroke-width="0.8" opacity="0.5"/>`;
+    svg+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="8.5" fill="var(--txt3)" font-family="'DFKai-SB','BiauKai','標楷體',serif">${d.label}</text>`;
+  });
+  // Data polygon
+  const pts=SCORE_DIMS.map((d,i)=>{
+    const v=(scores[d.key]||5)/10;
+    const a=(i/n)*2*Math.PI-Math.PI/2;
+    return `${cx+r*v*Math.cos(a)},${cy+r*v*Math.sin(a)}`;
+  }).join(' ');
+  svg+=`<polygon points="${pts}" fill="rgba(155,42,26,0.18)" stroke="var(--red)" stroke-width="1.5"/>`;
+  // Data dots
+  SCORE_DIMS.forEach((d,i)=>{
+    const v=(scores[d.key]||5)/10;
+    const a=(i/n)*2*Math.PI-Math.PI/2;
+    const px=cx+r*v*Math.cos(a),py=cy+r*v*Math.sin(a);
+    svg+=`<circle cx="${px}" cy="${py}" r="3" fill="var(--red)" stroke="var(--card)" stroke-width="1.5"/>`;
+  });
+  svg+='</svg>';
+  return svg;
+}
+function renderScoreTab(sid){
+  const s=S.students.find(x=>x.id===sid);if(!s)return'';
+  const sc=getScores(s);
+  const overall=calcOverall(s);
+  const g=getGrade(overall);
+  const radarHtml=drawRadar(sc,230);
+  const dimsHtml=SCORE_DIMS.map(d=>`
+    <div class="score-item">
+      <div class="score-label"><span style="margin-right:3px">${d.icon}</span>${d.label} <span class="score-val" id="sv_${d.key}_${sid}">${sc[d.key]||5}/10</span></div>
+      <input type="range" class="score-slider" min="1" max="10" value="${sc[d.key]||5}"
+        oninput="updScore('${sid}','${d.key}',this.value)"
+        onchange="saveScore('${sid}','${d.key}',this.value)">
+    </div>`).join('');
+  const overallHtml=`
+    <div class="overall-score">
+      <div class="grade-badge grade-${g.grade}">${g.grade}</div>
+      <div style="flex:1">
+        <div class="overall-lbl">整體評分 <strong style="color:var(--txt);font-size:.82rem">${overall}/100</strong>　<span style="font-size:.6rem;color:var(--txt3)">${g.desc}</span></div>
+        <input type="range" class="overall-slider" min="0" max="100" value="${s.overallScore??overall}"
+          oninput="updOverall('${sid}',this.value)"
+          onchange="saveOverall('${sid}',this.value)">
+      </div>
+    </div>`;
+  return`<div class="radar-wrap">
+    <div class="radar-title">能力雷達圖 <span style="font-size:.62rem;color:var(--txt3);letter-spacing:.04em">拖動滑桿調整各項評分</span></div>
+    ${radarHtml}
+    ${overallHtml}
+    <div class="score-grid">${dimsHtml}</div>
+    <div style="font-size:.64rem;color:var(--txt3);line-height:1.8;border-top:1px solid var(--bdr);padding-top:8px;letter-spacing:.04em">
+      評分說明：1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越<br>
+      整體評級由各項平均分計算，老師亦可手動拖動整體滑桿覆蓋自動計算。
+    </div>
+  </div>`;
+}
+function updScore(sid,key,val){
+  document.getElementById('sv_'+key+'_'+sid).textContent=val+'/10';
+  // Live update radar
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  if(!s.scores)s.scores={};
+  s.scores[key]=parseInt(val);
+  const radarEl=document.querySelector('.radar-svg');
+  if(radarEl)radarEl.outerHTML=drawRadar(s.scores,230);
+}
+async function saveScore(sid,key,val){
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  if(!s.scores)s.scores={};
+  s.scores[key]=parseInt(val);
+  const overall=calcOverall(s);
+  const g=getGrade(overall);
+  const badge=document.querySelector('.grade-badge');
+  if(badge){badge.className='grade-badge grade-'+g.grade;badge.textContent=g.grade;}
+  const lbl=document.querySelector('.overall-lbl strong');
+  if(lbl)lbl.textContent=overall+'/100';
+  document.querySelector('.overall-slider').value=s.overallScore??overall;
+  saveL();await fbSet('students',sid,s);
+}
+function updOverall(sid,val){
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  s.overallScore=parseInt(val);
+  const g=getGrade(parseInt(val));
+  const badge=document.querySelector('.grade-badge');
+  if(badge){badge.className='grade-badge grade-'+g.grade;badge.textContent=g.grade;}
+  const lbl=document.querySelector('.overall-lbl strong');
+  if(lbl)lbl.textContent=val+'/100';
+  const gdesc=document.querySelector('.overall-lbl span');
+  if(gdesc)gdesc.textContent=g.desc;
+}
+async function saveOverall(sid,val){
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  s.overallScore=parseInt(val);saveL();await fbSet('students',sid,s);
+}
 
 const THEMES=[
   {id:'dark',label:'深色水墨',preview:'linear-gradient(135deg,#1c1408 50%,#9b2a1a 100%)'},
@@ -924,7 +1100,7 @@ function showApp(u){
   const av=document.getElementById('uAv');
   if(u.photoURL){av.src=u.photoURL;av.style.display='block';}
   document.getElementById('userPanel').innerHTML=`<div class="up">${u.photoURL?`<img src="${u.photoURL}" alt="">`:
-    `<div style="width:40px;height:40px;background:var(--sbg);border:1px solid rgba(184,146,42,.22);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;color:var(--gold2);font-size:1.1rem">${(u.displayName||'?')[0]}</div>`}
+    `<div style="width:40px;height:40px;background:var(--sbg);border:1px solid rgba(184,146,42,.22);display:flex;align-items:center;justify-content:center;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--gold2);font-size:1.1rem">${(u.displayName||'?')[0]}</div>`}
     <div style="flex:1"><div class="up-n">${u.displayName||'老師'}</div><div class="up-e">${u.email}</div></div>
     <button class="sob" onclick="doSignOut()">登出</button></div>`;
   loadL();startSync(u.uid);
@@ -1049,15 +1225,15 @@ function renderDash(){
       const s=S.students.find(x=>x.id===l.studentId);if(!s)return'';
       const sch=S.schools.find(x=>x.id===s.schoolId);
       return`<div class="card${CN_INST.includes(s.instrument)?' jade':''}" onclick="showDetail('${s.id}')" style="cursor:pointer;display:flex;align-items:center;gap:10px">
-        <div style="font-family:'Noto Serif TC',serif;color:var(--gold);min-width:40px;font-size:.8rem">${l.start}</div>
-        <div style="flex:1"><div style="font-family:'Noto Serif TC',serif;font-size:.86rem;font-weight:600;color:var(--txt)">${s.name}</div>
+        <div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--gold);min-width:40px;font-size:.8rem">${l.start}</div>
+        <div style="flex:1"><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;font-weight:600;color:var(--txt)">${s.name}</div>
         <div style="font-size:.64rem;color:var(--txt3)">${s.instrument} · ${l.dur}分 · $${l.fee||'–'}${sch?' · '+sch.name:''}</div></div>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>`;
     }).join('');
   const recent=[...S.records].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,4);
   document.getElementById('dashRecent').innerHTML=!recent.length
     ?'<div class="empty"><div class="ec">靜</div><p>尚未有課堂記錄</p></div>'
-    :recent.map(r=>{const s=S.students.find(x=>x.id===r.studentId);return`<div class="ri ${r.attend||'present'}" style="cursor:pointer" onclick="showDetail('${r.studentId}')"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Noto Serif TC',serif;font-size:.84rem;font-weight:600;color:var(--txt)">${s?s.name:'–'}</span><span class="rd">${r.date}</span></div><div style="font-size:.77rem;color:var(--txt3);margin-top:2px">${(r.content||'').slice(0,55)}${(r.content||'').length>55?'⋯':''}</div></div>`;}).join('');
+    :recent.map(r=>{const s=S.students.find(x=>x.id===r.studentId);return`<div class="ri ${r.attend||'present'}" style="cursor:pointer" onclick="showDetail('${r.studentId}')"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;font-weight:600;color:var(--txt)">${s?s.name:'–'}</span><span class="rd">${r.date}</span></div><div style="font-size:.77rem;color:var(--txt3);margin-top:2px">${(r.content||'').slice(0,55)}${(r.content||'').length>55?'⋯':''}</div></div>`;}).join('');
 }
 </script>
 <script>
@@ -1122,14 +1298,14 @@ function renderDayDetail(){
       const sch=S.schools.find(x=>x.id===s.schoolId);
       html+=`<div style="background:var(--card);border:1px solid var(--bdr);padding:10px;margin-bottom:7px;border-left:3px solid ${plan?( plan.attend==='absent'?'var(--red)':plan.attend==='makeup'?'var(--gold)':'var(--jade)'):'var(--bdr2)'}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <span style="font-family:'Noto Serif TC',serif;color:var(--gold);font-size:.8rem">${l.start}</span>
-          <span style="font-family:'Noto Serif TC',serif;font-size:.86rem;font-weight:600;color:var(--txt);flex:1">${s.name}</span>
+          <span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--gold);font-size:.8rem">${l.start}</span>
+          <span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;font-weight:600;color:var(--txt);flex:1">${s.name}</span>
           ${plan?`<span class="att-pill ${plan.attend||'present'}">${{present:'出席',absent:'請假',makeup:'補堂'}[plan.attend||'present']}</span>`:'<span style="font-size:.58rem;padding:2px 6px;background:rgba(184,146,42,.2);color:var(--gold2)">待上課</span>'}
         </div>
         <div style="font-size:.65rem;color:var(--txt3);margin-bottom:7px">${s.instrument} · ${l.dur}分${sch?' · '+sch.name:''}</div>
         ${plan&&plan.goal?`<div style="font-size:.74rem;color:var(--txt2);margin-bottom:4px"><span style="color:var(--gold)">目標：</span>${plan.goal.slice(0,50)}${plan.goal.length>50?'⋯':''}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button onclick="openLessonPlan('${l.studentId}','${selCalDay}','${l.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:5px 10px;font-size:.67rem;cursor:pointer;font-family:'Noto Serif TC',serif">${plan?'查看教案記錄':'✏️ 寫教案 ／ 記錄'}</button>
+          <button onclick="openLessonPlan('${l.studentId}','${selCalDay}','${l.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:5px 10px;font-size:.67rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">${plan?'查看教案記錄':'✏️ 寫教案 ／ 記錄'}</button>
           <button class="gcal-btn" onclick="addToGCal('${l.id}')">+GCal</button>
           ${l.type==='fixed'?`<button onclick="markStatus('${l.id}','${selCalDay}','absent')" style="background:none;border:1px solid rgba(155,42,26,.3);color:var(--red);padding:5px 9px;font-size:.63rem;cursor:pointer">標記請假</button>
           <button onclick="markStatus('${l.id}','${selCalDay}','makeup')" style="background:none;border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:5px 9px;font-size:.63rem;cursor:pointer">標記補堂</button>`
@@ -1149,7 +1325,7 @@ function renderWeekSlots(){
     if(!slots.length)return;
     html+=`<div style="background:var(--card);border:1px solid var(--bdr);margin-bottom:6px;overflow:hidden">
       <div style="background:var(--sbg);padding:8px 12px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2)">${wd.l}</span>
+        <span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.8rem;color:var(--gold2)">${wd.l}</span>
         <span style="font-size:.62rem;color:rgba(184,146,42,.4)">${slots.length} 堂</span>
       </div>`;
     slots.forEach(l=>{
@@ -1158,8 +1334,8 @@ function renderWeekSlots(){
       const endH=parseInt(l.start.split(':')[0])+Math.floor((parseInt(l.start.split(':')[1])+parseInt(l.dur))/60);
       const end=String(endH).padStart(2,'0')+':'+String(endM).padStart(2,'0');
       html+=`<div style="padding:9px 12px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:9px;cursor:pointer" onclick="showDetail('${s.id}')">
-        <div style="font-family:'Noto Serif TC',serif;font-size:.78rem;color:var(--gold);min-width:90px">${l.start}–${end}</div>
-        <div style="flex:1"><div style="font-family:'Noto Serif TC',serif;font-size:.85rem;font-weight:600;color:var(--txt)">${s.name}</div>
+        <div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.78rem;color:var(--gold);min-width:90px">${l.start}–${end}</div>
+        <div style="flex:1"><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.85rem;font-weight:600;color:var(--txt)">${s.name}</div>
         <div style="font-size:.63rem;color:var(--txt3)">${s.instrument} · ${l.dur}分 · $${l.fee||'–'}</div></div>
         <button onclick="event.stopPropagation();delLesson('${l.id}')" style="background:none;border:none;color:var(--red);font-size:.67rem;cursor:pointer">刪</button>
       </div>`;
@@ -1296,6 +1472,7 @@ function renderStudents(){
         <div style="flex:1"><div class="sn">${s.name}</div>
           <div class="sm">${s.instrument} · ${s.level}${lesson?' · 週'+DZ[parseInt(lesson.day)]+' '+lesson.start:''}</div>
           ${sch?`<div class="sbadge">${sch.name}</div>`:''}
+          ${(()=>{const ov=s.overallScore??null;if(ov!==null){const g=getGrade(ov);return`<div class="sbadge" style="background:none;border-color:${g.color};color:${g.color}">${g.grade} ${ov}分</div>`;}return'';})()}
         </div>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
       </div>
@@ -1317,7 +1494,7 @@ function renderDetail(sid,tab){
   const lesson=S.lessons.find(l=>l.studentId===sid&&l.type==='fixed');
   const payments=S.payments.filter(p=>p.studentId===sid);
   document.getElementById('detailHd').innerHTML=`<div class="dav">${s.name[0]}</div><div><div class="dn">${s.name}</div><div class="ds">${s.instrument} · ${s.level}</div>${sch?`<div class="dsch">◈ ${sch.name}</div>`:''}</div>`;
-  document.getElementById('detailTabs').innerHTML=['records','plans','profile','fees'].map(t=>`<button class="tb${tab===t?' active':''}" onclick="renderDetail('${sid}','${t}')">${{records:'課堂記錄',plans:'教案計劃',profile:'學生資料',fees:'學費出席'}[t]}</button>`).join('');
+  document.getElementById('detailTabs').innerHTML=['records','plans','profile','fees','scores'].map(t=>`<button class="tb${tab===t?' active':''}" onclick="renderDetail('${sid}','${t}')">${{records:'課堂記錄',plans:'教案計劃',profile:'學生資料',fees:'學費出席',scores:'⬡ 能力評分'}[t]}</button>`).join('');
   let body='';
   if(tab==='records'){
     body=recs.length===0?'<div class="empty"><div class="ec">靜</div><p>尚未有課堂記錄</p></div>'
@@ -1350,7 +1527,7 @@ function renderDetail(sid,tab){
           ${p.record?`<div class="lp-sec"><div class="lp-sec-title">實際上課記錄</div><div class="lp-text">${p.record}</div></div>`:''}
           ${p.piece?`<div style="font-size:.75rem;color:var(--gold);margin-top:5px">♩ ${p.piece}</div>`:''}
           ${p.hw?`<div style="font-size:.75rem;margin-top:5px"><span style="color:var(--red)">📌</span> ${p.hw}</div>`:''}
-          <button onclick="openLessonPlan('${sid}','${p.date}','')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:5px 10px;font-size:.66rem;cursor:pointer;margin-top:8px;font-family:'Noto Serif TC',serif">編輯此教案</button>
+          <button onclick="openLessonPlan('${sid}','${p.date}','')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:5px 10px;font-size:.66rem;cursor:pointer;margin-top:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">編輯此教案</button>
         </div>
       </div>`;
     }).join('');
@@ -1360,12 +1537,12 @@ function renderDetail(sid,tab){
     const age=s.dob?Math.floor((Date.now()-new Date(s.dob))/(365.25*24*3600*1000)):null;
     const pieces=[...new Set(recs.filter(r=>r.piece).map(r=>r.piece))].slice(0,8);
     body=`<div class="card gold" style="margin-bottom:12px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 7px">
-        <div><div style="font-size:.6rem;color:var(--txt3)">樂器</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.instrument}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">程度</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.level}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">出生日期</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.dob||'–'}${age?` (${age}歲)`:''}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">聯絡</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.phone||'–'}</div></div>
-        ${s.nameEn?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">英文姓名</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.nameEn}</div></div>`:''}
-        ${lesson?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">課堂安排</div><div style="font-family:'Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">週${DZ[parseInt(lesson.day)]} ${lesson.start} · ${lesson.dur}分 · $${lesson.fee||'–'}/堂</div></div>`:''}
+        <div><div style="font-size:.6rem;color:var(--txt3)">樂器</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.instrument}</div></div>
+        <div><div style="font-size:.6rem;color:var(--txt3)">程度</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.level}</div></div>
+        <div><div style="font-size:.6rem;color:var(--txt3)">出生日期</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.dob||'–'}${age?` (${age}歲)`:''}</div></div>
+        <div><div style="font-size:.6rem;color:var(--txt3)">聯絡</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.phone||'–'}</div></div>
+        ${s.nameEn?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">英文姓名</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.nameEn}</div></div>`:''}
+        ${lesson?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">課堂安排</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">週${DZ[parseInt(lesson.day)]} ${lesson.start} · ${lesson.dur}分 · $${lesson.fee||'–'}/堂</div></div>`:''}
       </div></div>
       <div class="st jade">學生特徵</div>
       <div class="tag-grid">${TRAITS.map(t=>`<div class="tg${traits.includes(t)?' on':''}" onclick="toggleTrait('${sid}','${t}')">${t}</div>`).join('')}</div>
@@ -1374,10 +1551,12 @@ function renderDetail(sid,tab){
       <div class="st jade" style="margin-top:9px">喜好 ／ 曲風偏好</div>
       <div class="ie" contenteditable="true" data-p="點擊記錄喜好⋯" id="pf_${sid}" oninput="saveField('${sid}','prefs',this.textContent)">${s.prefs||''}</div>
       <div class="st jade" style="margin-top:9px">學習曲目</div>
-      <div style="background:var(--card);border:1px solid var(--bdr);padding:10px">${pieces.length?pieces.map((p,i)=>`<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px dashed var(--bdr);font-size:.8rem"><span style="font-family:'Noto Serif TC',serif;color:var(--red);font-size:.72rem;min-width:16px">${i+1}</span><span style="color:var(--txt)">${p}</span></div>`).join(''):'<span style="color:var(--txt3);font-size:.76rem">尚未記錄（在課堂記錄中填寫）</span>'}</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);padding:10px">${pieces.length?pieces.map((p,i)=>`<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px dashed var(--bdr);font-size:.8rem"><span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--red);font-size:.72rem;min-width:16px">${i+1}</span><span style="color:var(--txt)">${p}</span></div>`).join(''):'<span style="color:var(--txt3);font-size:.76rem">尚未記錄（在課堂記錄中填寫）</span>'}</div>
       <button class="mb" style="margin-top:11px" onclick="openEditStudent('${sid}')">✏️ 編輯學生資料</button>
       <button class="mb danger" style="margin-top:6px" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
 
+  } else if(tab==='scores'){
+    document.getElementById('detailBody').innerHTML=renderScoreTab(sid);
   } else if(tab==='fees'){
     const present=recs.filter(r=>r.attend==='present'||!r.attend).length;
     const absent=recs.filter(r=>r.attend==='absent').length;
@@ -1396,12 +1575,12 @@ function renderDetail(sid,tab){
       <div style="display:flex;gap:9px;margin-bottom:7px"><div style="display:flex;align-items:center;gap:4px;font-size:.63rem;color:var(--txt3)"><div style="width:9px;height:9px;border-radius:1px;background:var(--jade)"></div>出席</div><div style="display:flex;align-items:center;gap:4px;font-size:.63rem;color:var(--txt3)"><div style="width:9px;height:9px;border-radius:1px;background:var(--red)"></div>請假</div><div style="display:flex;align-items:center;gap:4px;font-size:.63rem;color:var(--txt3)"><div style="width:9px;height:9px;border-radius:1px;background:var(--gold)"></div>補堂</div></div>
       <div class="att-hm">${dots.join('')}</div>
       <div class="st jade">學費進度</div>
-      <div class="fee-m"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:.7rem;color:var(--gold2);font-family:'Noto Serif TC',serif">已收</span><span style="font-size:.82rem;color:var(--gold2);font-family:'Noto Serif TC',serif;font-weight:600">HK$${totalPaid.toLocaleString()}</span></div>
+      <div class="fee-m"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:.7rem;color:var(--gold2);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">已收</span><span style="font-size:.82rem;color:var(--gold2);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-weight:600">HK$${totalPaid.toLocaleString()}</span></div>
         <div class="fee-tr"><div class="fee-fi" style="width:${pct}%"></div></div>
         <div style="display:flex;justify-content:space-between;font-size:.61rem;color:rgba(184,146,42,.4)"><span>應收 HK$${expected.toLocaleString()}</span><span>${pct}%</span></div>
       </div>
       <div class="st jade">收款明細</div>
-      ${payments.length?[...payments].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(p=>`<div class="ri present" style="display:flex;align-items:center;gap:9px"><div style="flex:1"><div style="font-family:'Noto Serif TC',serif;font-size:.86rem;color:var(--jade)">HK$ ${parseFloat(p.amount).toLocaleString()}</div><div style="font-size:.68rem;color:var(--txt3);margin-top:1px">${p.method}${p.period?' · '+p.period:''}</div></div><div class="rd">${p.date}</div></div>`).join(''):'<div class="empty"><div class="ec">帳</div><p>尚未有收款記錄</p></div>'}
+      ${payments.length?[...payments].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(p=>`<div class="ri present" style="display:flex;align-items:center;gap:9px"><div style="flex:1"><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;color:var(--jade)">HK$ ${parseFloat(p.amount).toLocaleString()}</div><div style="font-size:.68rem;color:var(--txt3);margin-top:1px">${p.method}${p.period?' · '+p.period:''}</div></div><div class="rd">${p.date}</div></div>`).join(''):'<div class="empty"><div class="ec">帳</div><p>尚未有收款記錄</p></div>'}
       <button class="mb" onclick="openPayForStu('${sid}')" style="margin-top:9px">＋ 新增收款記錄</button>`;
   }
   document.getElementById('detailBody').innerHTML=body;
@@ -1427,9 +1606,9 @@ function renderFin(){
   const yPay=S.payments.filter(p=>new Date(p.date).getFullYear()===y);
   const yTotal=yPay.reduce((a,p)=>a+parseFloat(p.amount||0),0);
   let html=`<div class="fin-total">
-    <div><div style="font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2)">本月總收入</div>
+    <div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.8rem;color:var(--gold2)">本月總收入</div>
     <div style="font-size:.62rem;color:rgba(184,146,42,.4)">${y}年全年：HK$${yTotal.toLocaleString()}</div></div>
-    <div style="font-family:'Noto Serif TC',serif;font-size:1.3rem;font-weight:700;color:var(--gold2)">HK$ ${total.toLocaleString()}</div>
+    <div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:1.3rem;font-weight:700;color:var(--gold2)">HK$ ${total.toLocaleString()}</div>
   </div>
   <div class="srow c3" style="margin-bottom:12px">
     <div class="sc" style="padding:9px 5px"><div class="sc-n" style="font-size:1.1rem">${mPay.length}</div><div class="sc-l">收款筆數</div></div>
@@ -1446,7 +1625,7 @@ function renderFin(){
   for(let i=5;i>=0;i--){
     const d=new Date(y,m-i,1);
     const mv=S.payments.filter(p=>{const pd=new Date(p.date);return pd.getMonth()===d.getMonth()&&pd.getFullYear()===d.getFullYear();}).reduce((a,p)=>a+parseFloat(p.amount||0),0);
-    html+=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="font-size:.62rem;color:var(--txt3);min-width:28px;text-align:right;font-family:'Noto Serif TC',serif">${d.getMonth()+1}月</div><div style="flex:1;height:13px;background:var(--bdr);overflow:hidden"><div style="height:100%;width:${Math.min(100,mv/10000*100)}%;background:linear-gradient(to right,var(--jade),var(--gold2))"></div></div><div style="font-size:.65rem;color:var(--gold);min-width:52px;font-family:'Noto Serif TC',serif">$${mv.toLocaleString()}</div></div>`;
+    html+=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="font-size:.62rem;color:var(--txt3);min-width:28px;text-align:right;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">${d.getMonth()+1}月</div><div style="flex:1;height:13px;background:var(--bdr);overflow:hidden"><div style="height:100%;width:${Math.min(100,mv/10000*100)}%;background:linear-gradient(to right,var(--jade),var(--gold2))"></div></div><div style="font-size:.65rem;color:var(--gold);min-width:52px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">$${mv.toLocaleString()}</div></div>`;
   }
   document.getElementById('finContent').innerHTML=html;
 }
@@ -1485,9 +1664,9 @@ function renderRef(){
     if(r.yt&&r.yt.length){
       bodyHtml=r.yt.map(inst=>`
         <div style="margin-bottom:11px">
-          <div style="font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--bdr)">${inst.inst}</div>
+          <div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--bdr)">${inst.inst}</div>
           <div style="display:flex;flex-wrap:wrap;gap:5px">
-            ${inst.pieces.map(p=>`<a href="${p.url}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:5px 9px;font-size:.72rem;text-decoration:none;font-family:'Noto Serif TC',serif">
+            ${inst.pieces.map(p=>`<a href="${p.url}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:5px 9px;font-size:.72rem;text-decoration:none;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--red)"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
               ${p.name}</a>`).join('')}
           </div>
@@ -1720,8 +1899,8 @@ function applyCharSet(){
   _curCharSet=mode;
   // Switch lang attribute for browser/OS-level rendering
   document.documentElement.setAttribute('lang', mode==='simp'?'zh-CN':'zh-TW');
-  // Switch calligraphic font: Ma Shan Zheng (SC) vs ZCOOL XiaoWei (TC)
-  const calliFont = mode==='simp' ? "'Ma Shan Zheng','Noto Serif TC',serif" : "'ZCOOL XiaoWei','Noto Serif TC',serif";
+  // 標楷體 for all modes
+  const calliFont = "'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif";
   // Apply to all elements using calligraphic font via CSS variable
   document.documentElement.style.setProperty('--calligraphic-font', calliFont);
   // Update button states
@@ -1765,7 +1944,7 @@ const LINEAGE={
   ]},
   guzheng:{label:'古箏',icon:'🎶',eras:[
     {era:'各流派奠基宗師（1890–1950）',persons:[
-      {name:'娄树华',years:'1907–1952',sect:'融合派·宗師',sectCls:'sect-guzheng-zhe',school:'上海·中央廣播電台',desc:'「一代古箏宗師」。以《漁舟唱晚》享譽全國，該曲成為二十世紀最著名的古箏曲目之一，對現代古箏演奏風格影響深遠。',dot:'founder',yt:'https://www.youtube.com/results?search_query=娄树华+古箏+漁舟唱晚'},
+      {name:'娄树华',years:'1907–1952',sect:'北京·河南箏派傳人',sectCls:'sect-guzheng-zhe',school:'北京·曾任職廣播電台；師從河南魏子猷',desc:'著名古箏演奏家，師從魏子猷習河南箏藝。1935–36年隨中國音樂旅行團赴歐洲演出。改編《漁舟唱晚》並廣泛流傳（該曲歸屬有歷史爭議，另說源自金灼南）。改革工尺譜記譜法，多年從事教學。',dot:'founder',yt:'https://www.youtube.com/results?search_query=娄树华+古箏+漁舟唱晚'},
       {name:'曹東扶',years:'1898–1970',sect:'河南派',sectCls:'sect-guzheng-he',school:'河南省中州古箏學會',desc:'河南箏派奠基人，技法雄渾有力，善用大滑音和「以韻補聲」技法。代表曲目《閨中怨》《陳杏元落院》，對河南箏派影響最深。',dot:'founder',yt:'https://www.youtube.com/results?search_query=曹东扶+古箏+河南'},
       {name:'高自成',years:'1918–2009',sect:'山東派',sectCls:'sect-guzheng-sd',school:'山東師範大學',desc:'山東箏派代表人。演奏風格剛勁清麗，音色乾淨透徹。長期在山東傳授山東風格古箏，著有山東箏派演奏教材。',dot:'founder',yt:'https://www.youtube.com/results?search_query=高自成+山东+古箏'},
       {name:'林毛根',years:'1929–2006',sect:'潮州派',sectCls:'sect-guzheng-chao',school:'廣東潮汕地區',desc:'潮州箏派代表人物之一。精通潮州音樂，保存和傳承了大量潮州古曲，演奏音色甜美婉約，具有鮮明的南方地域風格。',dot:'founder',yt:'https://www.youtube.com/results?search_query=林毛根+潮州+古箏'},
@@ -1832,8 +2011,8 @@ const LINEAGE={
       {name:'翁榮輝',years:'1967–',sect:'二胡・香港中樂團前首席',sectCls:'sect-guqin-wu',school:'香港中樂團首席二胡・香港演藝學院講師',desc:'香港中樂團首席二胡演奏家，同時在香港演藝學院任教。演奏技藝精湛，風格溫潤細膩，多次舉辦獨奏音樂會，是香港二胡演奏的重要代表人物。',dot:'major',yt:'https://www.youtube.com/results?search_query=翁榮輝+二胡+香港'},
     ]},
     {era:'香港年青一輩著名演奏家',persons:[
-      {name:'林昭亮（香港）',years:'1988–',sect:'笛子・香港青年代表',sectCls:'sect-guqin-wu',school:'香港中樂團笛子演奏員・本地笛子推廣',desc:'香港中樂團笛子演奏員，積極在本地學校及社區推廣笛子藝術。曾多次舉辦本地及內地演出，是香港年青一輩笛子演奏的代表。（注：香港有多位同名音樂家，請自行核實最新資料）',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂團+笛子+青年演奏家'},
-      {name:'葉沛楠',years:'1992–',sect:'琵琶・香港青年一代',sectCls:'sect-pipa-pu',school:'香港演藝學院畢業・本地演奏家',desc:'香港演藝學院琵琶畢業生，積極在港澳及內地從事演出及教學工作，是香港年輕一代琵琶演奏家中的代表人物。（此為示例，建議補充最新本地名家資料）',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+琵琶+青年演奏家'},
+      {name:'香港笛子演奏員',years:'',sect:'香港中樂團・本地推廣',sectCls:'sect-guqin-wu',school:'香港中樂團',desc:'香港中樂團設有笛子演奏員職位，積極推廣笛子藝術。建議透過香港中樂團官網查閱現任笛子演奏員名單，資料最為準確。本欄資料由老師自行更新。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂團+笛子+青年演奏家'},
+      {name:'香港琵琶青年演奏家',years:'',sect:'香港演藝學院畢業生',sectCls:'sect-pipa-pu',school:'香港演藝學院中國音樂系',desc:'此欄位建議老師自行填入所認識的本地琵琶年青演奏家，香港演藝學院中國音樂系每年均有琵琶畢業生活躍於本地演奏及教學界。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+琵琶+青年演奏家'},
       {name:'查詢本地師資',years:'',sect:'香港演藝學院・香港演藝發展局',sectCls:'sect-guqin-zhe',school:'香港演藝學院 ・ 康文署・香港演藝發展局',desc:'建議透過香港演藝學院官網、香港演藝發展局藝術家名冊，或各中樂團樂師名單，查閱最新的香港本地中樂老師及演奏家資訊，資料最為準確。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂+青年演奏家+2024'},
     ]},
   ]}
@@ -1897,7 +2076,7 @@ function renderGroupList(){
       </div>
       <div class="xbody">
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
-          <button onclick="openGroupPlan('${g.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:6px 11px;font-size:.68rem;cursor:pointer;font-family:'Noto Serif TC',serif">✏️ 新增 ／ 查看教案</button>
+          <button onclick="openGroupPlan('${g.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:6px 11px;font-size:.68rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">✏️ 新增 ／ 查看教案</button>
           <button onclick="editGroup('${g.id}')" style="background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:6px 11px;font-size:.68rem;cursor:pointer">編輯群組</button>
           <button onclick="delGroup('${g.id}')" style="background:none;border:none;color:var(--red);font-size:.68rem;cursor:pointer;padding:6px">刪除</button>
         </div>
@@ -1988,7 +2167,7 @@ function openGroupPlanEdit(gid,planId){
 }
 function renderGpIndivNotes(members,existing={}){
   document.getElementById('gpIndivNotes').innerHTML=members.length
-    ?members.map(sid=>{const s=S.students.find(x=>x.id===sid);if(!s)return'';return`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="font-family:'Noto Serif TC',serif;font-size:.77rem;color:var(--txt);min-width:52px">${s.name}</div><input type="text" id="gpin_${sid}" class="ii" style="margin-bottom:0;flex:1;padding:5px 8px;font-size:.74rem" placeholder="個別備注（如需要）" value="${(existing[sid]||'').replace(/"/g,'&quot;')}"></div>`;}).join('')
+    ?members.map(sid=>{const s=S.students.find(x=>x.id===sid);if(!s)return'';return`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.77rem;color:var(--txt);min-width:52px">${s.name}</div><input type="text" id="gpin_${sid}" class="ii" style="margin-bottom:0;flex:1;padding:5px 8px;font-size:.74rem" placeholder="個別備注（如需要）" value="${(existing[sid]||'').replace(/"/g,'&quot;')}"></div>`;}).join('')
     :'<div style="font-size:.73rem;color:var(--txt3)">此群組暫無成員</div>';
 }
 async function saveGroupPlan(){
