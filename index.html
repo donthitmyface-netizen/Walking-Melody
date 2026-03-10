@@ -1645,20 +1645,8 @@ async function doUndo(){
 async function deleteStudent(sid){
   const s=S.students.find(x=>x.id===sid);
   if(!s)return;
-  if(!confirm('⚠️ 刪除學生
-
-確定要刪除「'+s.name+'」？
-
-此操作將刪除：
-· 所有課堂記錄
-· 所有教案計劃
-· 所有學費記錄
-· 所有課堂安排'))return;
-  if(!confirm('🔴 最後確認
-
-再次確認：要永久刪除「'+s.name+'」的所有資料？
-
-刪除後可在8秒內按「復原」恢復。'))return;
+  if(!confirm('⚠️ 刪除學生\n\n確定要刪除「'+s.name+'」？\n\n此操作將刪除：\n・所有課堂記錄\n・所有教案計劃\n・所有學費記錄\n・所有課堂安排'))return;
+  if(!confirm('🔴 最後確認\n\n再次確認：要永久刪除「'+s.name+'」的所有資料？\n\n刪除後可在8秒內按「復原」恢復。'))return;
   // Snapshot for undo
   const snap={
     student:{...s},
