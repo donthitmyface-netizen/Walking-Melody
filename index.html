@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="履音">
 <title>履音 · 教學手記</title>
-<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -33,6 +33,8 @@ window.addEventListener('DOMContentLoaded',()=>window._init());
   --mbg:#f7f0e3;--ovl:rgba(8,4,1,.78);
   --sbg:#2a1e0e;--stxt:#d4ac45;
   --sh:rgba(28,20,8,.12);
+  --fs:1;
+  --calligraphic-font:'ZCOOL XiaoWei','Noto Serif TC',serif;
 }
 /* ── LIGHT ── */
 [data-theme="light"]{
@@ -94,6 +96,18 @@ window.addEventListener('DOMContentLoaded',()=>window._init());
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+
+/* FONT SIZE SCALING */
+body.fs-large{font-size:105%}
+body.fs-xlarge{font-size:114%}
+body.fs-small{font-size:94%}
+/* Font size picker */
+.fsize-grid{display:flex;gap:7px;margin:7px 0 12px}
+.fsize-opt{flex:1;border:2px solid var(--bdr);padding:10px 5px;cursor:pointer;text-align:center;background:var(--card);font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;color:var(--txt3);transition:border-color .15s}
+.fsize-opt.active{border-color:var(--red);color:var(--red)}
+.fsize-opt .fs-preview{font-size:1.3em;display:block;margin-bottom:2px;line-height:1.2}
+.fsize-opt .fs-label{font-size:.6rem;letter-spacing:.06em}
+
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");background-size:300px 300px}
 
 /* SPLASH */
@@ -101,8 +115,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .sp-seal{width:82px;height:82px;border:2px solid var(--red);display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:18px;animation:spA 2.5s ease infinite}
 .sp-seal::before{content:'';position:absolute;inset:5px;border:1px solid rgba(212,172,69,.18)}
 @keyframes spA{0%,100%{opacity:1}50%{opacity:.5}}
-.sp-char{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:2.5rem;color:var(--red);font-weight:400}
-.sp-t{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
+.sp-char{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:2.5rem;color:var(--red);font-weight:400}
+.sp-t{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:1.05rem;color:var(--gold2);letter-spacing:.5em;margin-bottom:4px}
 .sp-s{font-size:.65rem;color:rgba(212,172,69,.35);letter-spacing:.25em;margin-bottom:20px}
 .sp-l{width:1px;height:26px;background:linear-gradient(to bottom,var(--gold),transparent)}
 .sp-msg{font-size:.63rem;color:rgba(212,172,69,.35);margin-top:9px;letter-spacing:.1em}
@@ -123,8 +137,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--hbg);pad
 .hi{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
 .hl{display:flex;align-items:center;gap:8px}
 .h-seal{width:26px;height:26px;border:1px solid var(--red);display:flex;align-items:center;justify-content:center}
-.h-seal span{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.88rem;color:var(--red);font-weight:400}
-.h-title{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.97rem;color:var(--htxt);letter-spacing:.22em}
+.h-seal span{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.88rem;color:var(--red);font-weight:400}
+.h-title{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.97rem;color:var(--htxt);letter-spacing:.22em}
 .hr2{display:flex;align-items:center;gap:6px}
 .hbtn{background:none;border:1px solid rgba(184,146,42,.32);cursor:pointer;color:var(--gold2);font-size:.72rem;font-family:'Noto Sans TC',sans-serif;padding:4px 8px;letter-spacing:.04em}
 .sd{width:6px;height:6px;border-radius:50%;background:#444;flex-shrink:0}
@@ -149,7 +163,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .pad{padding:13px}
 
 /* SECTION TITLE */
-.st{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.st{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.75rem;letter-spacing:.22em;color:var(--txt3);margin-bottom:9px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
 .st::before{content:'';width:2px;height:12px;background:linear-gradient(to bottom,var(--red),transparent);flex-shrink:0}
 .st::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--bdr),transparent)}
 .st.jade::before{background:linear-gradient(to bottom,var(--jade),transparent)}.st.gold::before{background:linear-gradient(to bottom,var(--gold),transparent)}
@@ -157,9 +171,9 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* STAT ROW */
 .srow{display:grid;gap:6px;margin-bottom:13px}
 .srow.c2{grid-template-columns:1fr 1fr}.srow.c3{grid-template-columns:1fr 1fr 1fr}.srow.c4{grid-template-columns:1fr 1fr 1fr 1fr}
-.sc{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:10px 3px;text-align:center;position:relative;overflow:hidden}
+.sc{background:var(--sbg);border:1px solid rgba(184,146,42,.14);padding:10px 3px;text-align:center;position:relative;overflow:hidden;min-height:52px}
 .sc::after{content:'';position:absolute;bottom:0;left:14%;right:14%;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
-.sc-n{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:clamp(.72rem,3.5vw,1.1rem);font-weight:400;color:var(--stxt);line-height:1.25;word-break:break-all}
+.sc-n{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:clamp(.68rem,3.2vw,1rem);font-weight:400;color:var(--stxt);line-height:1.2;word-break:break-all;overflow-wrap:break-word}
 .sc-l{font-size:.53rem;color:rgba(184,146,42,.4);margin-top:2px;letter-spacing:.1em}
 
 /* CARD */
@@ -173,7 +187,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .scu-top{padding:12px 14px;display:flex;align-items:center;gap:11px}
 .av{width:38px;height:38px;border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:700;flex-shrink:0;background:var(--card2);color:var(--txt);position:relative}
 .av::after{content:'';position:absolute;bottom:0;right:0;width:8px;height:8px;border-top:1px solid var(--bdr2);border-left:1px solid var(--bdr2)}
-.sn{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.95rem;font-weight:400;letter-spacing:.08em;color:var(--txt)}
+.sn{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.95rem;font-weight:400;letter-spacing:.08em;color:var(--txt)}
 .sm{font-size:.64rem;color:var(--txt3);margin-top:2px;letter-spacing:.02em}
 .sbadge{font-size:.52rem;padding:1px 6px;background:var(--hbg);color:var(--gold2);display:inline-block;margin-top:3px;border:1px solid rgba(184,146,42,.2);letter-spacing:.04em}
 .pw{padding:0 14px 10px}
@@ -275,11 +289,11 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .lp-dot.major{background:var(--gold);border-color:var(--gold)}
 .lp-card{background:var(--card);border:1px solid var(--bdr);padding:11px 13px;flex:1;box-shadow:0 1px 4px var(--sh)}
 .lp-card:active{opacity:.85}
-.lp-name{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:1rem;font-weight:400;color:var(--txt);letter-spacing:.1em}
+.lp-name{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:1rem;font-weight:400;color:var(--txt);letter-spacing:.1em}
 .lp-years{font-size:.6rem;color:var(--txt3);margin-left:7px;letter-spacing:.04em}
 .lp-school{font-size:.63rem;color:var(--jade);margin-top:3px;letter-spacing:.03em}
 .lp-desc{font-size:.71rem;color:var(--txt2);margin-top:4px;line-height:1.62}
-.lp-sect{display:inline-block;font-size:.58rem;padding:2px 8px;margin-top:4px;letter-spacing:.07em;font-family:'Ma Shan Zheng','Noto Serif TC',serif}
+.lp-sect{display:inline-block;font-size:.58rem;padding:2px 8px;margin-top:4px;letter-spacing:.07em;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif}
 .sect-guqin-guan{background:rgba(155,42,26,.12);color:var(--red);border:1px solid rgba(155,42,26,.25)}
 .sect-guqin-wu{background:rgba(61,107,90,.12);color:var(--jade);border:1px solid rgba(61,107,90,.25)}
 .sect-guqin-guang{background:rgba(184,146,42,.12);color:var(--gold);border:1px solid rgba(184,146,42,.25)}
@@ -311,7 +325,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* CHIPS & SEARCH */
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:11px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'Ma Shan Zheng','Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
+.chip{border:1px solid var(--bdr2);background:var(--card);padding:4px 10px;font-size:.68rem;cursor:pointer;white-space:nowrap;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;color:var(--txt3);flex-shrink:0}
 .chip.active{background:var(--hbg);color:var(--gold2);border-color:var(--gold)}
 .isrch{display:flex;align-items:center;gap:7px;border:1px solid var(--bdr2);background:var(--card);padding:7px 10px;margin-bottom:11px}
 .isrch input{flex:1;border:none;background:none;font-size:.81rem;color:var(--txt);font-family:'Noto Sans TC',sans-serif;outline:none}
@@ -320,7 +334,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 /* MONTH NAV */
 .mnav{display:flex;align-items:center;margin-bottom:11px}
 .mnav-btn{background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:4px 11px;cursor:pointer;font-size:.78rem;font-family:'Noto Serif TC',serif;flex-shrink:0}
-.mnav-lbl{font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
+.mnav-lbl{font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;font-size:.87rem;color:var(--txt);letter-spacing:.1em;flex:1;text-align:center}
 
 /* CALENDAR */
 .cal-wrap{margin-bottom:12px;overflow:visible}
@@ -392,7 +406,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 .gcal-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid rgba(66,133,244,.35);color:#4285F4;padding:3px 8px;font-size:.61rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
 
 /* BACK BUTTON */
-.back-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--txt3);font-size:.75rem;cursor:pointer;font-family:'Ma Shan Zheng','Noto Serif TC',serif;padding:6px 0 2px;letter-spacing:.1em}
+.back-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--txt3);font-size:.75rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;padding:6px 0 2px;letter-spacing:.1em}
 .back-btn svg{width:14px;height:14px;flex-shrink:0}
 .back-btn:active{opacity:.6}
 /* UNDO BANNER */
@@ -529,6 +543,17 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
   <div id="userPanel"></div>
   <div class="st">介面主題</div>
   <div class="theme-grid" id="themePicker"></div>
+  <div class="st" style="margin-top:14px">字體大小</div>
+  <div class="fsize-grid" id="fsizePicker"></div>
+  <div class="st" style="margin-top:10px">文字顯示</div>
+  <div class="stb" style="margin-bottom:10px">
+    <div class="stl">繁體 ／ 簡體切換</div>
+    <div class="sts">切換後頁面所有文字將顯示為繁體或簡體中文</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="btnTrad" onclick="setCharSet('trad')" style="flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;letter-spacing:.08em">繁體</button>
+      <button id="btnSimp" onclick="setCharSet('simp')" style="flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:'ZCOOL XiaoWei','Noto Serif TC',serif;letter-spacing:.08em">简体</button>
+    </div>
+  </div>
   <div class="st">學校管理</div>
   <div id="schMgmt"></div>
   <button class="mb" style="margin-top:4px" onclick="openMo('moSchool')">＋ 新增學校</button>
@@ -850,6 +875,8 @@ let S={schools:[],students:[],lessons:[],records:[],payments:[],lessonPlans:[],g
 let CU=null,CSD=null,CDT='records',CP='dashboard',selSch='all';
 let unsubFns=[],calDate=new Date(),finDate=new Date();
 let examCat='全部',refCat='全部',selCalDay=null,currentLpId=null,currentGroupId=null;
+let _prevPageState={id:'students',btn:null,title:'學生名冊',showAdd:true};
+let _undoFn=null,_undoTimer=null;
 let _st={};// save timers
 
 function uid(){return CU?CU.uid:null}
@@ -901,7 +928,7 @@ function showApp(u){
     <div style="flex:1"><div class="up-n">${u.displayName||'老師'}</div><div class="up-e">${u.email}</div></div>
     <button class="sob" onclick="doSignOut()">登出</button></div>`;
   loadL();startSync(u.uid);
-  renderThemePicker();renderExams();renderRef();renderHelp();
+  renderThemePicker();renderFsizePicker();renderExams();renderRef();renderHelp();applyFsize();applyCharSet();
 }
 
 // ═══════════════════════════════════════════
@@ -1599,7 +1626,6 @@ function goBack(){
 }
 
 // ── UNDO SYSTEM ──
-let _undoFn=null,_undoTimer=null;
 function showUndo(msg,fn){
   _undoFn=fn;
   document.getElementById('undoMsg').textContent=msg;
@@ -1663,6 +1689,67 @@ async function deleteStudent(sid){
     for(const lp of snap.lessonPlans)await fbSet('lessonPlans',lp.id,{...lp,uid:u});
   });
 }
+
+// ═══════════════════════════════════════════
+// FONT SIZE & CHARSET
+// ═══════════════════════════════════════════
+const FSIZE_OPTS=[
+  {id:'small', label:'小', preview:'文', cls:'fs-small'},
+  {id:'normal',label:'標準',preview:'文', cls:''},
+  {id:'large', label:'大', preview:'文', cls:'fs-large'},
+  {id:'xlarge',label:'特大',preview:'文', cls:'fs-xlarge'},
+];
+function renderFsizePicker(){
+  const el=document.getElementById('fsizePicker');if(!el)return;
+  const cur=localStorage.getItem('luyin_fsize')||'normal';
+  el.innerHTML=FSIZE_OPTS.map(o=>`
+    <div class="fsize-opt${o.id===cur?' active':''}" onclick="setFsize('${o.id}')">
+      <span class="fs-preview" style="font-size:${o.id==='small'?'1em':o.id==='large'?'1.5em':o.id==='xlarge'?'1.9em':'1.2em'}">${o.preview}</span>
+      <span class="fs-label">${o.label}</span>
+    </div>`).join('');
+}
+function setFsize(id){
+  localStorage.setItem('luyin_fsize',id);
+  applyFsize();renderFsizePicker();
+}
+function applyFsize(){
+  const id=localStorage.getItem('luyin_fsize')||'normal';
+  const opt=FSIZE_OPTS.find(o=>o.id===id)||FSIZE_OPTS[1];
+  document.body.className=document.body.className.replace(/\bfs-\S+/g,'').trim();
+  if(opt.cls)document.body.classList.add(opt.cls);
+}
+
+// CHARSET TOGGLE (繁/簡)
+const TC_MAP={'學':'学','話':'话','時':'时','間':'间','師':'师','學':'学','進':'进','練':'练','實':'实','費':'费','課':'课','對':'对','問':'问','說':'说','藝':'艺','現':'现','歲':'岁','參':'参','經':'经','傳':'传','統':'统','專':'专','題':'题','總':'总','覽':'览','備':'备','應':'应','種':'种','態':'态','個':'个','來':'来','會':'会','體':'体','後':'后','數':'数','關':'关','聽':'听','書':'书','術':'术','樂':'乐','觀':'观','舊':'旧','從':'从','達':'达','項':'项','設':'设','嗩':'唢','吶':'呐','琴':'琴','箏':'筝','蘭':'兰','資':'资','訊':'讯','連':'连','認':'认','繁':'繁','簡':'简','換':'换','顯':'显','選':'选','擇':'择','調':'调','響':'响','變':'变','務':'务','歷':'历','標':'标','準':'准','碼':'码','較':'较','級':'级','識':'识','錄':'录','聲':'声','頭':'头','馬':'马','關':'关','點':'点','節':'节','識':'识','幫':'帮','長':'长','發':'发','請':'请','張':'张','國':'国','與':'与','無':'无','歡':'欢','還':'还','興':'兴','義':'义','廣':'广','隊':'队','負':'负','園':'园','愛':'爱','馬':'马','電':'电','劇':'剧','詞':'词','開':'开','閉':'闭','視':'视','頁':'页','員':'员','機':'机','器':'器','傳':'传','復':'复','換':'换','歷':'历'};
+let _curCharSet='trad';
+function setCharSet(mode){
+  _curCharSet=mode;
+  localStorage.setItem('luyin_charset',mode);
+  applyCharSet();
+}
+function applyCharSet(){
+  const mode=localStorage.getItem('luyin_charset')||'trad';
+  _curCharSet=mode;
+  // Switch lang attribute for browser/OS-level rendering
+  document.documentElement.setAttribute('lang', mode==='simp'?'zh-CN':'zh-TW');
+  // Switch calligraphic font: Ma Shan Zheng (SC) vs ZCOOL XiaoWei (TC)
+  const calliFont = mode==='simp' ? "'Ma Shan Zheng','Noto Serif TC',serif" : "'ZCOOL XiaoWei','Noto Serif TC',serif";
+  // Apply to all elements using calligraphic font via CSS variable
+  document.documentElement.style.setProperty('--calligraphic-font', calliFont);
+  // Update button states
+  const bt=document.getElementById('btnTrad');
+  const bs=document.getElementById('btnSimp');
+  if(bt&&bs){
+    if(mode==='simp'){
+      bt.style.cssText='flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
+      bs.style.cssText='flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
+    } else {
+      bt.style.cssText='flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
+      bs.style.cssText='flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
+    }
+  }
+}
+
 
 // ═══════════════════════════════════════════
 // LINEAGE DATA & RENDER
@@ -1764,7 +1851,6 @@ const LINEAGE={
   ]}
 };
 
-let _prevPageState={id:'students',btn:null,title:'學生名冊',showAdd:true};
 let currentLineageInst='guqin';
 function renderLineage(){
   const tab=document.getElementById('lineageTab');
