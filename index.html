@@ -106,10 +106,12 @@ window.addEventListener('DOMContentLoaded',()=>window._init());
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Noto Sans TC','DFKai-SB',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
 
-/* FONT SIZE SCALING */
-body.fs-large{font-size:105%}
-body.fs-xlarge{font-size:114%}
-body.fs-small{font-size:94%}
+/* FONT SIZE SCALING - applied to :root so rem values scale globally */
+:root{font-size:16px}
+html.fs-small{font-size:13px}
+html.fs-normal{font-size:16px}
+html.fs-large{font-size:19px}
+html.fs-xlarge{font-size:22px}
 /* Font size picker */
 .fsize-grid{display:flex;gap:7px;margin:7px 0 12px}
 .fsize-opt{flex:1;border:2px solid var(--bdr);padding:10px 5px;cursor:pointer;text-align:center;background:var(--card);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--txt3);transition:border-color .15s}
@@ -580,15 +582,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
   <div class="theme-grid" id="themePicker"></div>
   <div class="st" style="margin-top:14px">字體大小</div>
   <div class="fsize-grid" id="fsizePicker"></div>
-  <div class="st" style="margin-top:10px">文字顯示</div>
-  <div class="stb" style="margin-bottom:10px">
-    <div class="stl">繁體 ／ 簡體切換</div>
-    <div class="sts">切換後頁面所有文字將顯示為繁體或簡體中文</div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button id="btnTrad" onclick="setCharSet('trad')" style="flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.08em">繁體</button>
-      <button id="btnSimp" onclick="setCharSet('simp')" style="flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;letter-spacing:.08em">简体</button>
-    </div>
-  </div>
+
   <div class="st">學校管理</div>
   <div id="schMgmt"></div>
   <button class="mb" style="margin-top:4px" onclick="openMo('moSchool')">＋ 新增學校</button>
@@ -621,21 +615,70 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 
 <div class="ov" id="moStudent" onclick="closeMo('moStudent',event)"><div class="mo">
   <div class="mg"></div><div class="mt" id="moStudentTitle">新增學生</div>
+  <div style="font-size:.65rem;color:var(--txt3);margin-bottom:10px;letter-spacing:.06em;line-height:1.7">所有資料可在新增後再修改。標 * 為必填。</div>
+
+  <div class="st" style="margin:4px 0 8px">基本資料</div>
   <label class="il">學生姓名（中）*</label><input type="text" class="ii" id="sName" placeholder="例：陳小明">
   <label class="il">英文姓名</label><input type="text" class="ii" id="sNameEn" placeholder="例：Chan Siu Ming">
   <label class="il">出生日期</label><input type="date" class="ii" id="sDob">
+  <label class="il">性別</label>
+  <select class="is" id="sGender"><option value="">不填</option><option value="M">男</option><option value="F">女</option></select>
   <label class="il">所屬學校</label><select class="is" id="sSchool"></select>
-  <label class="il">學習樂器</label>
+  <label class="il">就讀年級</label>
+  <select class="is" id="sGrade">
+    <option value="">不填</option><option>幼稚園 K1</option><option>幼稚園 K2</option><option>幼稚園 K3</option>
+    <option>小一</option><option>小二</option><option>小三</option><option>小四</option><option>小五</option><option>小六</option>
+    <option>中一</option><option>中二</option><option>中三</option><option>中四</option><option>中五</option><option>中六</option>
+    <option>大學/成人</option>
+  </select>
+
+  <div class="st" style="margin:10px 0 8px">樂器與程度</div>
+  <label class="il">學習樂器 *</label>
   <select class="is" id="sInst">
     <optgroup label="── 西洋樂器 ──"><option>鋼琴</option><option>小提琴</option><option>大提琴</option><option>結他</option><option>長笛</option><option>雙簧管</option><option>單簧管</option><option>聲樂</option></optgroup>
     <optgroup label="── 中國樂器 ──"><option>二胡</option><option>琵琶</option><option>古琴</option><option>古箏</option><option>笛子／簫</option><option>揚琴</option><option>中阮／大阮</option><option>中胡</option><option>板胡</option><option>三弦</option><option>嗩吶</option><option>中國敲擊</option></optgroup>
     <optgroup label="── 其他 ──"><option>敲擊樂</option><option>其他</option></optgroup>
   </select>
-  <label class="il">程度</label><select class="is" id="sLevel"><option>初級</option><option>中級</option><option>高級</option><option>考級準備</option><option>專業進修</option></select>
-  <label class="il">家長姓名</label><input type="text" class="ii" id="sParent" placeholder="可選">
+  <label class="il">程度</label>
+  <select class="is" id="sLevel"><option>初級</option><option>中級</option><option>高級</option><option>考級準備</option><option>專業進修</option></select>
+  <label class="il">學習年數</label>
+  <select class="is" id="sYears">
+    <option value="">不填</option><option>不足1年</option><option>1年</option><option>2年</option><option>3年</option>
+    <option>4年</option><option>5年</option><option>6–8年</option><option>9–12年</option><option>12年以上</option>
+  </select>
+  <label class="il">目標考級（如適用）</label>
+  <input type="text" class="ii" id="sExamGoal" placeholder="例：ABRSM Grade 5 / 人音8級">
+  <label class="il">目前考級</label>
+  <input type="text" class="ii" id="sCurrentExam" placeholder="例：ABRSM Grade 3 已通過">
+
+  <div class="st" style="margin:10px 0 8px">聯絡資料</div>
+  <label class="il">家長 / 監護人姓名</label><input type="text" class="ii" id="sParent" placeholder="例：陳大文">
+  <label class="il">關係</label>
+  <select class="is" id="sParentRel">
+    <option value="">不填</option><option>父親</option><option>母親</option><option>祖父母</option><option>其他監護人</option><option>本人（成人學生）</option>
+  </select>
   <label class="il">聯絡電話</label><input type="tel" class="ii" id="sPhone" placeholder="例：9123 4567">
-  <label class="il">備註</label><textarea class="ita" id="sNote" placeholder="例：較活潑，需多鼓勵⋯"></textarea>
-  <button class="mb" id="btnStudent" onclick="saveStudent()">儲存學生</button>
+  <label class="il">電郵地址</label><input type="email" class="ii" id="sEmail" placeholder="例：parent@email.com">
+  <label class="il">地址（可選）</label><input type="text" class="ii" id="sAddr" placeholder="例：九龍旺角XX街XX號">
+
+  <div class="st" style="margin:10px 0 8px">學費資料</div>
+  <label class="il">每堂學費（HK$）</label><input type="number" class="ii" id="sDefaultFee" placeholder="例：400">
+  <label class="il">繳費方式</label>
+  <select class="is" id="sPayMethod">
+    <option value="">不填</option><option>現金</option><option>轉數快 FPS</option><option>銀行轉帳</option><option>支票</option><option>其他</option>
+  </select>
+
+  <div class="st" style="margin:10px 0 8px">個人背景</div>
+  <label class="il">學生性格描述</label>
+  <textarea class="ita" id="sPersonality" placeholder="例：活潑好動，專注力較短，需多鼓勵⋯"></textarea>
+  <label class="il">學習瓶頸 / 難點</label>
+  <textarea class="ita" id="sBottleneck" placeholder="例：節奏感不穩，左右手配合需加強⋯"></textarea>
+  <label class="il">學習喜好</label>
+  <textarea class="ita" id="sPrefs" placeholder="例：喜歡流行曲風格，對古典音樂較抗拒⋯"></textarea>
+  <label class="il">備課備注 / 其他資料</label>
+  <textarea class="ita" id="sNote" placeholder="例：每次上課前需要熱身，家長希望準備某考試⋯"></textarea>
+
+  <button class="mb" id="btnStudent" onclick="saveStudent()" style="margin-top:14px">儲存學生資料</button>
   <button class="mb sec" onclick="closeMo('moStudent')">取消</button>
 </div></div>
 
@@ -750,17 +793,23 @@ const CN_INST=['二胡','琵琶','古琴','古箏','笛子／簫','揚琴','中�
 const TRAITS=['節拍感強','節拍感待改','手指靈活','手指力度不足','音感良好','音感待培','視奏良好','視奏待改','樂理基礎強','樂理需加強','專注力高','需多督促','練習勤快','需督促練習','表演慾強','舞台緊張','善於背譜','記憶力佳','創意豐富','注重細節'];
 // ── SCORING SYSTEM ──
 const SCORE_DIMS=[
-  {key:'pitch',    label:'音準',   icon:'🎯'},
-  {key:'rhythm',   label:'節奏',   icon:'🥁'},
-  {key:'pulse',    label:'拍子',   icon:'⏱'},
-  {key:'musical',  label:'音樂感', icon:'🎵'},
-  {key:'tone',     label:'音色變化',icon:'🎨'},
-  {key:'creative', label:'創意',   icon:'💡'},
-  {key:'attitude', label:'態度',   icon:'⭐'},
-  {key:'power',    label:'力量',   icon:'💪'},
-  {key:'physical', label:'身體機能',icon:'🤸'},
-  {key:'stamina',  label:'持久力', icon:'🔥'},
-  {key:'stage',    label:'演技',   icon:'🎭'},
+  {key:'pitch',    label:'音準',   icon:'🎯', cat:'技術'},
+  {key:'rhythm',   label:'節奏',   icon:'🥁', cat:'技術'},
+  {key:'pulse',    label:'拍子',   icon:'⏱', cat:'技術'},
+  {key:'musical',  label:'音樂感', icon:'🎵', cat:'音樂性'},
+  {key:'tone',     label:'音色變化',icon:'🎨', cat:'音樂性'},
+  {key:'ear',      label:'聽力',   icon:'👂', cat:'音樂性'},
+  {key:'sightread',label:'視奏',   icon:'📖', cat:'音樂性'},
+  {key:'imitate',  label:'模仿力', icon:'🪞', cat:'音樂性'},
+  {key:'creative', label:'創意',   icon:'💡', cat:'音樂性'},
+  {key:'attitude', label:'態度',   icon:'⭐', cat:'個人'},
+  {key:'memory',   label:'記憶力', icon:'🧠', cat:'個人'},
+  {key:'power',    label:'力量',   icon:'💪', cat:'體能'},
+  {key:'physical', label:'身體機能',icon:'🤸', cat:'體能'},
+  {key:'stamina',  label:'持久力', icon:'🔥', cat:'體能'},
+  {key:'stage',    label:'演技',   icon:'🎭', cat:'表演'},
+  {key:'family',   label:'家庭支援',icon:'🏠', cat:'環境', note:'包括家庭財力、練習環境及家長配合度'},
+  {key:'motivation',label:'學習動力',icon:'🌟', cat:'個人'},
 ];
 const GRADE_THRESHOLDS=[
   {grade:'S',min:92,color:'#e8c840',desc:'卓越·宗師之資'},
@@ -1104,7 +1153,7 @@ function showApp(u){
     <div style="flex:1"><div class="up-n">${u.displayName||'老師'}</div><div class="up-e">${u.email}</div></div>
     <button class="sob" onclick="doSignOut()">登出</button></div>`;
   loadL();startSync(u.uid);
-  renderThemePicker();renderFsizePicker();renderExams();renderRef();renderHelp();applyFsize();applyCharSet();
+  renderThemePicker();renderFsizePicker();renderExams();renderRef();renderHelp();applyFsize();
 }
 
 // ═══════════════════════════════════════════
@@ -1533,30 +1582,52 @@ function renderDetail(sid,tab){
     }).join('');
     body+=`<button class="mb" onclick="addNewPlan('${sid}')" style="margin-top:6px">＋ 新增教案</button>`;
   } else if(tab==='profile'){
-    const traits=s.traits||[];
     const age=s.dob?Math.floor((Date.now()-new Date(s.dob))/(365.25*24*3600*1000)):null;
     const pieces=[...new Set(recs.filter(r=>r.piece).map(r=>r.piece))].slice(0,8);
-    body=`<div class="card gold" style="margin-bottom:12px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 7px">
-        <div><div style="font-size:.6rem;color:var(--txt3)">樂器</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.instrument}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">程度</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.level}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">出生日期</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.dob||'–'}${age?` (${age}歲)`:''}</div></div>
-        <div><div style="font-size:.6rem;color:var(--txt3)">聯絡</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.phone||'–'}</div></div>
-        ${s.nameEn?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">英文姓名</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">${s.nameEn}</div></div>`:''}
-        ${lesson?`<div style="grid-column:span 2"><div style="font-size:.6rem;color:var(--txt3)">課堂安排</div><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.84rem;margin-top:1px;color:var(--txt)">週${DZ[parseInt(lesson.day)]} ${lesson.start} · ${lesson.dur}分 · $${lesson.fee||'–'}/堂</div></div>`:''}
-      </div></div>
-      <div class="st jade">學生特徵</div>
-      <div class="tag-grid">${TRAITS.map(t=>`<div class="tg${traits.includes(t)?' on':''}" onclick="toggleTrait('${sid}','${t}')">${t}</div>`).join('')}</div>
-      <div class="st jade" style="margin-top:6px">瓶頸位置</div>
-      <div class="ie" contenteditable="true" data-p="點擊記錄瓶頸⋯" id="bt_${sid}" oninput="saveField('${sid}','bottleneck',this.textContent)">${s.bottleneck||''}</div>
-      <div class="st jade" style="margin-top:9px">喜好 ／ 曲風偏好</div>
-      <div class="ie" contenteditable="true" data-p="點擊記錄喜好⋯" id="pf_${sid}" oninput="saveField('${sid}','prefs',this.textContent)">${s.prefs||''}</div>
-      <div class="st jade" style="margin-top:9px">學習曲目</div>
-      <div style="background:var(--card);border:1px solid var(--bdr);padding:10px">${pieces.length?pieces.map((p,i)=>`<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px dashed var(--bdr);font-size:.8rem"><span style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;color:var(--red);font-size:.72rem;min-width:16px">${i+1}</span><span style="color:var(--txt)">${p}</span></div>`).join(''):'<span style="color:var(--txt3);font-size:.76rem">尚未記錄（在課堂記錄中填寫）</span>'}</div>
-      <button class="mb" style="margin-top:11px" onclick="openEditStudent('${sid}')">✏️ 編輯學生資料</button>
-      <button class="mb danger" style="margin-top:6px" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
-
-  } else if(tab==='scores'){
-    document.getElementById('detailBody').innerHTML=renderScoreTab(sid);
+    const row=(label,val)=>val?`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:.6rem;color:var(--txt3);width:72px;flex-shrink:0;padding-top:1px">${label}</div><div style="font-size:.76rem;color:var(--txt);flex:1;line-height:1.55">${val}</div></div>`:'';
+    body=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:.86rem;font-weight:600;color:var(--txt);font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">學生資料</div>
+      <button class="mb sec" style="padding:4px 10px;font-size:.65rem;margin:0" onclick="openEditStudent('${sid}')">✏️ 編輯資料</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">基本資料</div>
+      ${row('樂器',s.instrument)}
+      ${row('程度',s.level)}
+      ${s.yearsLearning?row('學習年數',s.yearsLearning):''}
+      ${age?row('年齡',age+'歲'):''}
+      ${s.dob?row('出生日期',s.dob):''}
+      ${s.gender?row('性別',{M:'男',F:'女'}[s.gender]||s.gender):''}
+      ${s.schoolGrade?row('就讀年級',s.schoolGrade):''}
+    </div>
+    ${(s.examGoal||s.currentExam)?`<div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">考級目標</div>
+      ${row('目前程度',s.currentExam)}
+      ${row('目標考級',s.examGoal)}
+    </div>`:''}
+    <div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">聯絡資料</div>
+      ${row('家長/監護人',s.parent+(s.parentRel?' ('+s.parentRel+')':''))}
+      ${row('電話',s.phone)}
+      ${s.email?row('電郵',s.email):''}
+      ${s.address?row('地址',s.address):''}
+    </div>
+    ${(s.defaultFee||s.payMethod)?`<div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">學費資料</div>
+      ${row('每堂學費',s.defaultFee?'HK$'+s.defaultFee:'')}
+      ${row('繳費方式',s.payMethod)}
+    </div>`:''}
+    ${(s.personality||s.bottleneck||s.prefs||s.note)?`<div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:8px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">個人背景</div>
+      ${row('性格描述',s.personality)}
+      ${row('學習瓶頸',s.bottleneck)}
+      ${row('學習喜好',s.prefs)}
+      ${row('備注',s.note)}
+    </div>`:''}
+    ${pieces.length?`<div style="background:var(--card);border:1px solid var(--bdr);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:.62rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:6px;font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif">近期曲目</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${pieces.map(p=>`<span style="font-size:.68rem;background:var(--sbg);border:1px solid var(--bdr2);padding:2px 7px;color:var(--txt)">♩ ${p}</span>`).join('')}</div>
+    </div>`:''}
+    <div style="font-size:.65rem;color:var(--jade);padding:7px 10px;background:rgba(61,107,90,.08);border:1px solid rgba(61,107,90,.2);line-height:1.8">⬡ 能力評分請前往「能力評分」分頁 · 17維度雷達圖 · F至S評級</div>`;
   } else if(tab==='fees'){
     const present=recs.filter(r=>r.attend==='present'||!r.attend).length;
     const absent=recs.filter(r=>r.attend==='absent').length;
@@ -1583,7 +1654,7 @@ function renderDetail(sid,tab){
       ${payments.length?[...payments].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(p=>`<div class="ri present" style="display:flex;align-items:center;gap:9px"><div style="flex:1"><div style="font-family:'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif;font-size:.86rem;color:var(--jade)">HK$ ${parseFloat(p.amount).toLocaleString()}</div><div style="font-size:.68rem;color:var(--txt3);margin-top:1px">${p.method}${p.period?' · '+p.period:''}</div></div><div class="rd">${p.date}</div></div>`).join(''):'<div class="empty"><div class="ec">帳</div><p>尚未有收款記錄</p></div>'}
       <button class="mb" onclick="openPayForStu('${sid}')" style="margin-top:9px">＋ 新增收款記錄</button>`;
   }
-  document.getElementById('detailBody').innerHTML=body;
+  if(tab!=='scores')document.getElementById('detailBody').innerHTML=body;
 }
 
 function addNewPlan(sid){
@@ -1736,14 +1807,16 @@ function openEditStudent(sid){
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   document.getElementById('moStudentTitle').textContent='編輯學生資料';
   document.getElementById('sSchool').innerHTML=S.schools.length?S.schools.map(sc=>`<option value="${sc.id}"${sc.id===s.schoolId?' selected':''}>${sc.name}</option>`).join(''):'<option value="">（無學校）</option>';
-  document.getElementById('sName').value=s.name||'';
-  document.getElementById('sNameEn').value=s.nameEn||'';
-  document.getElementById('sDob').value=s.dob||'';
-  document.getElementById('sInst').value=s.instrument||'二胡';
-  document.getElementById('sLevel').value=s.level||'初級';
-  document.getElementById('sParent').value=s.parent||'';
-  document.getElementById('sPhone').value=s.phone||'';
-  document.getElementById('sNote').value=s.note||'';
+  const sv=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+  sv('sName',s.name);sv('sNameEn',s.nameEn);sv('sDob',s.dob);
+  sv('sGender',s.gender);sv('sGrade',s.schoolGrade);
+  sv('sInst',s.instrument||'二胡');sv('sLevel',s.level||'初級');
+  sv('sYears',s.yearsLearning);sv('sExamGoal',s.examGoal);sv('sCurrentExam',s.currentExam);
+  sv('sParent',s.parent);sv('sParentRel',s.parentRel);
+  sv('sPhone',s.phone);sv('sEmail',s.email);sv('sAddr',s.address);
+  sv('sDefaultFee',s.defaultFee);sv('sPayMethod',s.payMethod);
+  sv('sPersonality',s.personality);sv('sBottleneck',s.bottleneck);
+  sv('sPrefs',s.prefs);sv('sNote',s.note);
   window._editStudentId=sid;
   openMo('moStudent');
 }
@@ -1752,28 +1825,48 @@ async function saveStudent(){
   const btn=document.getElementById('btnStudent');btn.disabled=true;btn.textContent='儲存中⋯';
   const sid=window._editStudentId;
   const existing=sid?S.students.find(x=>x.id===sid):null;
+  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const s={
     id:sid||Date.now().toString(),
     name,
-    nameEn:document.getElementById('sNameEn').value.trim(),
-    dob:document.getElementById('sDob').value,
-    schoolId:document.getElementById('sSchool').value,
-    instrument:document.getElementById('sInst').value,
-    level:document.getElementById('sLevel').value,
-    parent:document.getElementById('sParent').value.trim(),
-    phone:document.getElementById('sPhone').value.trim(),
-    note:document.getElementById('sNote').value.trim(),
-    traits:existing?existing.traits||[]:[],
-    bottleneck:existing?existing.bottleneck||'':'',
-    prefs:existing?existing.prefs||'':'',
+    nameEn:gv('sNameEn'),
+    dob:gv('sDob'),
+    gender:gv('sGender'),
+    schoolId:gv('sSchool'),
+    schoolGrade:gv('sGrade'),
+    instrument:gv('sInst'),
+    level:gv('sLevel'),
+    yearsLearning:gv('sYears'),
+    examGoal:gv('sExamGoal'),
+    currentExam:gv('sCurrentExam'),
+    parent:gv('sParent'),
+    parentRel:gv('sParentRel'),
+    phone:gv('sPhone'),
+    email:gv('sEmail'),
+    address:gv('sAddr'),
+    defaultFee:gv('sDefaultFee'),
+    payMethod:gv('sPayMethod'),
+    personality:gv('sPersonality'),
+    bottleneck:gv('sBottleneck')||existing?.bottleneck||'',
+    prefs:gv('sPrefs')||existing?.prefs||'',
+    note:gv('sNote'),
+    scores:existing?.scores||{},
+    overallScore:existing?.overallScore??null,
     createdAt:existing?existing.createdAt:Date.now()
   };
   const idx=S.students.findIndex(x=>x.id===s.id);
   if(idx>=0)S.students[idx]=s;else S.students.push(s);
   saveL();await fbSet('students',s.id,s);
-  closeMo('moStudent');['sName','sNameEn','sDob','sParent','sPhone','sNote'].forEach(id=>document.getElementById(id).value='');
+  closeMo('moStudent');
+  ['sName','sNameEn','sDob','sParent','sPhone','sNote','sExamGoal','sCurrentExam',
+   'sEmail','sAddr','sDefaultFee','sPersonality','sBottleneck','sPrefs'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  ['sGender','sGrade','sYears','sParentRel','sPayMethod'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
   window._editStudentId=null;
-  btn.disabled=false;btn.textContent='儲存學生';
+  btn.disabled=false;btn.textContent='儲存學生資料';
   renderAll();
   if(sid&&CP==='detail')renderDetail(sid,CDT);
   showBan(sid?'✓ 學生資料已更新':'✓ 學生已新增',false);
@@ -1861,10 +1954,10 @@ async function deleteStudent(sid){
 // FONT SIZE & CHARSET
 // ═══════════════════════════════════════════
 const FSIZE_OPTS=[
-  {id:'small', label:'小', preview:'文', cls:'fs-small'},
-  {id:'normal',label:'標準',preview:'文', cls:''},
-  {id:'large', label:'大', preview:'文', cls:'fs-large'},
-  {id:'xlarge',label:'特大',preview:'文', cls:'fs-xlarge'},
+  {id:'small', label:'小',   preview:'文'},
+  {id:'normal',label:'標準', preview:'文'},
+  {id:'large', label:'大',   preview:'文'},
+  {id:'xlarge',label:'特大', preview:'文'},
 ];
 function renderFsizePicker(){
   const el=document.getElementById('fsizePicker');if(!el)return;
@@ -1881,41 +1974,12 @@ function setFsize(id){
 }
 function applyFsize(){
   const id=localStorage.getItem('luyin_fsize')||'normal';
-  const opt=FSIZE_OPTS.find(o=>o.id===id)||FSIZE_OPTS[1];
-  document.body.className=document.body.className.replace(/\bfs-\S+/g,'').trim();
-  if(opt.cls)document.body.classList.add(opt.cls);
+  const el=document.documentElement;
+  el.classList.remove('fs-small','fs-normal','fs-large','fs-xlarge');
+  el.classList.add('fs-'+id);
 }
 
-// CHARSET TOGGLE (繁/簡)
-const TC_MAP={'學':'学','話':'话','時':'时','間':'间','師':'师','學':'学','進':'进','練':'练','實':'实','費':'费','課':'课','對':'对','問':'问','說':'说','藝':'艺','現':'现','歲':'岁','參':'参','經':'经','傳':'传','統':'统','專':'专','題':'题','總':'总','覽':'览','備':'备','應':'应','種':'种','態':'态','個':'个','來':'来','會':'会','體':'体','後':'后','數':'数','關':'关','聽':'听','書':'书','術':'术','樂':'乐','觀':'观','舊':'旧','從':'从','達':'达','項':'项','設':'设','嗩':'唢','吶':'呐','琴':'琴','箏':'筝','蘭':'兰','資':'资','訊':'讯','連':'连','認':'认','繁':'繁','簡':'简','換':'换','顯':'显','選':'选','擇':'择','調':'调','響':'响','變':'变','務':'务','歷':'历','標':'标','準':'准','碼':'码','較':'较','級':'级','識':'识','錄':'录','聲':'声','頭':'头','馬':'马','關':'关','點':'点','節':'节','識':'识','幫':'帮','長':'长','發':'发','請':'请','張':'张','國':'国','與':'与','無':'无','歡':'欢','還':'还','興':'兴','義':'义','廣':'广','隊':'队','負':'负','園':'园','愛':'爱','馬':'马','電':'电','劇':'剧','詞':'词','開':'开','閉':'闭','視':'视','頁':'页','員':'员','機':'机','器':'器','傳':'传','復':'复','換':'换','歷':'历'};
-let _curCharSet='trad';
-function setCharSet(mode){
-  _curCharSet=mode;
-  localStorage.setItem('luyin_charset',mode);
-  applyCharSet();
-}
-function applyCharSet(){
-  const mode=localStorage.getItem('luyin_charset')||'trad';
-  _curCharSet=mode;
-  // Switch lang attribute for browser/OS-level rendering
-  document.documentElement.setAttribute('lang', mode==='simp'?'zh-CN':'zh-TW');
-  // 標楷體 for all modes
-  const calliFont = "'DFKai-SB','BiauKai','標楷體','KaiTi','STKaiti','Noto Serif TC',serif";
-  // Apply to all elements using calligraphic font via CSS variable
-  document.documentElement.style.setProperty('--calligraphic-font', calliFont);
-  // Update button states
-  const bt=document.getElementById('btnTrad');
-  const bs=document.getElementById('btnSimp');
-  if(bt&&bs){
-    if(mode==='simp'){
-      bt.style.cssText='flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
-      bs.style.cssText='flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
-    } else {
-      bt.style.cssText='flex:1;background:var(--hbg);border:1px solid var(--gold);color:var(--gold2);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
-      bs.style.cssText='flex:1;background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:8px;font-size:.78rem;cursor:pointer;font-family:var(--calligraphic-font);letter-spacing:.08em';
-    }
-  }
-}
+// charset functions removed
 
 
 // ═══════════════════════════════════════════
