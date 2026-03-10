@@ -493,7 +493,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
 <div class="ov" id="moSchool" onclick="closeMo('moSchool',event)"><div class="mo"><div class="mg"></div><div class="mt">新增學校</div><label class="il">學校名稱 *</label><input type="text" class="ii" id="schN" placeholder="例：培道中學"><button class="mb" id="btnSch" onclick="addSchool()">新增學校</button><button class="mb sec" onclick="closeMo('moSchool')">取消</button></div></div>
 
 <div class="ov" id="moStudent" onclick="closeMo('moStudent',event)"><div class="mo">
-  <div class="mg"></div><div class="mt">新增學生</div>
+  <div class="mg"></div><div class="mt" id="moStudentTitle">新增學生</div>
   <label class="il">學生姓名（中）*</label><input type="text" class="ii" id="sName" placeholder="例：陳小明">
   <label class="il">英文姓名</label><input type="text" class="ii" id="sNameEn" placeholder="例：Chan Siu Ming">
   <label class="il">出生日期</label><input type="date" class="ii" id="sDob">
@@ -508,7 +508,7 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
   <label class="il">家長姓名</label><input type="text" class="ii" id="sParent" placeholder="可選">
   <label class="il">聯絡電話</label><input type="tel" class="ii" id="sPhone" placeholder="例：9123 4567">
   <label class="il">備註</label><textarea class="ita" id="sNote" placeholder="例：較活潑，需多鼓勵⋯"></textarea>
-  <button class="mb" id="btnStudent" onclick="addStudent()">儲存學生</button>
+  <button class="mb" id="btnStudent" onclick="saveStudent()">儲存學生</button>
   <button class="mb sec" onclick="closeMo('moStudent')">取消</button>
 </div></div>
 
@@ -711,53 +711,68 @@ const REF_DATA=[
     {t:'表情術語',c:'cantabile（如歌地）、dolce（甜美地）、espressivo（有表情地）、grazioso（優雅地）、legato（連奏）、staccato（斷奏）、marcato（重音）'},
     {t:'結構記號',c:'D.C. al Fine（從頭演奏至Fine）、D.S. al Fine（從 § 演奏至Fine）、Coda（尾聲）、Repeat（重複）'},
   ]},
-  {cat:'中樂專題',icon:'🪘',title:'中樂教學特點',items:[
-    {t:'中樂考級體系',c:'香港主要有：中央音樂學院（CCOM）、人民音樂出版社（人音）、香港中樂考級協會（HKCGEA）。三者程度不完全一致，換考制時需注意銜接。'},
-    {t:'弦樂組特點',c:'二胡、中胡、板胡：注重運弓均勻、換把準確、換弦流暢。初學重點是空弦發音和基本弓法。'},
-    {t:'彈撥樂組特點',c:'琵琶、古箏、阮：右手輪指和彈弦技巧是核心。古琴另有獨特的走手音和滾拂技巧需特別教授。'},
-    {t:'吹管樂組特點',c:'笛子、簫：氣息控制和口風是關鍵。初學最難是發音，需多練長音。笛子的超吹（筒音）技巧要早期建立。'},
-    {t:'中樂樂理',c:'五聲音階（宮商角徵羽）是基礎。民族風格裝飾音（如滑音、顫音）各地風格不同。'},
+  {cat:'中樂專題',icon:'🎼',title:'各派風格比較：老師備課參考',items:[
+    {t:'古琴流派風格',c:'虞山派（代表：吳景略）：清微淡遠，旋律華麗生動；廣陵派（代表：劉少椿）：跌宕起伏，韻味綿長；川派（代表：曾成偉）：峻急奔放，節奏鮮明；九嶷派（代表：管平湖）：剛健穩重，技藝精深；浙派：流暢清和，雅緻秀麗。教學時可讓學生聆聽不同派別演奏同一曲目（如《流水》），感受風格差異。'},
+    {t:'二胡演奏風格',c:'閔惠芬「聲腔化」：將戲曲、民歌韻味融入二胡，每音如說如唱；宋飛：技術精湛兼具詩意，情感細膩；于紅梅：現代與傳統並重，音色醇厚；馬曉暉：融合中西，表現力極強。教學重點：引導學生分辨拉弦時的「氣息感」與「聲腔感」。'},
+    {t:'古箏地域流派',c:'河南派：音色厚實，慣用大滑音；山東派：清新剛健，音色乾淨；潮州派（代表：林玲）：音韻獨特，有南方細膩風格；浙江派：典雅秀麗；陝西派：西北風情，音色蒼勁。教學時介紹流派有助學生理解曲目背景和演奏風格。'},
+    {t:'笛子南北派',c:'南派（陸春齡、趙松庭）：氣息悠長，音色圓潤，重氣韻；北派（馮子存、劉管樂）：音色豪放，技巧快速有力，常用花舌。俞遜發集南北之長，並發明多種新技法。教學時配合聆聽示範，學生較易理解何謂「南方氣息」。'},
+    {t:'琵琶傳統派系',c:'浦東派：渾厚有力；平湖派：詩情婉約，文武並重；無錫派：音色清麗；崇明派：質樸自然；汪派：凝重深沉。劉德海廣學各派，突破門派局限。教學時說明同一曲目在不同派別的詮釋差異，有助學生建立自己的審美觀。'},
   ]},
-  {cat:'中樂專題',icon:'🎵',title:'中樂參考曲目（附YouTube連結）',yt:[
-    {inst:'二胡',pieces:[
-      {name:'《光明行》',url:'https://www.youtube.com/results?search_query=二胡+光明行'},
-      {name:'《賽馬》',url:'https://www.youtube.com/results?search_query=二胡+賽馬'},
-      {name:'《二泉映月》',url:'https://www.youtube.com/results?search_query=二胡+二泉映月'},
-      {name:'《江河水》',url:'https://www.youtube.com/results?search_query=二胡+江河水'},
-      {name:'《良宵》',url:'https://www.youtube.com/results?search_query=二胡+良宵'},
+  {cat:'中樂專題',icon:'🎵',title:'各樂器名家 YouTube 參考（按樂器）',yt:[
+    {inst:'🎻 二胡',pieces:[
+      {name:'閔惠芬（1945–2014，聲腔化代表）',url:'https://www.youtube.com/results?search_query=閔惠芬+二胡'},
+      {name:'宋飛（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=宋飛+二胡'},
+      {name:'于紅梅（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=于紅梅+二胡'},
+      {name:'馬曉暉（上海民族樂團首席）',url:'https://www.youtube.com/results?search_query=马晓晖+二胡'},
+      {name:'王國潼（資深演奏家）',url:'https://www.youtube.com/results?search_query=王国潼+二胡'},
+      {name:'黃安源（香港代表演奏家）',url:'https://www.youtube.com/results?search_query=黄安源+二胡'},
     ]},
-    {inst:'古箏',pieces:[
-      {name:'《漁舟唱晚》',url:'https://www.youtube.com/results?search_query=古箏+漁舟唱晚'},
-      {name:'《高山流水》',url:'https://www.youtube.com/results?search_query=古箏+高山流水'},
-      {name:'《春江花月夜》',url:'https://www.youtube.com/results?search_query=古箏+春江花月夜'},
-      {name:'《蝴蝶》',url:'https://www.youtube.com/results?search_query=古箏+蝴蝶'},
-      {name:'《出水蓮》',url:'https://www.youtube.com/results?search_query=古箏+出水蓮'},
+    {inst:'🎵 古琴',pieces:[
+      {name:'管平湖（1897–1967，管派·九嶷）',url:'https://www.youtube.com/results?search_query=管平湖+古琴'},
+      {name:'吳景略（1907–1987，虞山吳派）',url:'https://www.youtube.com/results?search_query=吴景略+古琴'},
+      {name:'龔一（廣陵派傳人）',url:'https://www.youtube.com/results?search_query=龔一+古琴'},
+      {name:'李祥霆（虞山派，中央音樂學院）',url:'https://www.youtube.com/results?search_query=李祥霆+古琴'},
+      {name:'成公亮（1940–2015，廣陵·現代）',url:'https://www.youtube.com/results?search_query=成公亮+古琴'},
+      {name:'趙家珍（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=赵家珍+古琴'},
+      {name:'戴曉蓮（上海音樂學院·廣陵派）',url:'https://www.youtube.com/results?search_query=戴晓莲+古琴'},
     ]},
-    {inst:'琵琶',pieces:[
-      {name:'《小燕子》',url:'https://www.youtube.com/results?search_query=琵琶+小燕子'},
-      {name:'《彝族舞曲》',url:'https://www.youtube.com/results?search_query=琵琶+彝族舞曲'},
-      {name:'《春江花月夜》',url:'https://www.youtube.com/results?search_query=琵琶+春江花月夜'},
-      {name:'《陽春白雪》',url:'https://www.youtube.com/results?search_query=琵琶+陽春白雪'},
-      {name:'《十面埋伏》',url:'https://www.youtube.com/results?search_query=琵琶+十面埋伏'},
+    {inst:'🎶 古箏',pieces:[
+      {name:'王中山（中國音樂學院教授·當代代表）',url:'https://www.youtube.com/results?search_query=王中山+古箏'},
+      {name:'袁莎（中央音樂學院副教授）',url:'https://www.youtube.com/results?search_query=袁莎+古箏'},
+      {name:'林玲（中國音樂學院教授·潮州派）',url:'https://www.youtube.com/results?search_query=林玲+古箏'},
+      {name:'李萌（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=李萌+古箏'},
+      {name:'周望（河南派·西北風格）',url:'https://www.youtube.com/results?search_query=周望+古箏'},
     ]},
-    {inst:'笛子／簫',pieces:[
-      {name:'《姑蘇行》',url:'https://www.youtube.com/results?search_query=笛子+姑蘇行'},
-      {name:'《牧民新歌》',url:'https://www.youtube.com/results?search_query=笛子+牧民新歌'},
-      {name:'《揚鞭催馬運糧忙》',url:'https://www.youtube.com/results?search_query=笛子+揚鞭催馬運糧忙'},
-      {name:'《梆笛協奏曲》',url:'https://www.youtube.com/results?search_query=笛子+梆笛協奏曲'},
+    {inst:'🎸 琵琶',pieces:[
+      {name:'劉德海（1937–2020，集各派之大成）',url:'https://www.youtube.com/results?search_query=刘德海+琵琶'},
+      {name:'吳蠻（Wu Man·國際知名演奏家）',url:'https://www.youtube.com/results?search_query=吴蛮+Wu+Man+pipa+琵琶'},
+      {name:'方錦龍（跨界演奏，推廣中樂）',url:'https://www.youtube.com/results?search_query=方锦龙+琵琶'},
+      {name:'章紅艷（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=章红艳+琵琶'},
     ]},
-    {inst:'揚琴',pieces:[
-      {name:'《洪湖人民的心願》',url:'https://www.youtube.com/results?search_query=揚琴+洪湖人民的心願'},
-      {name:'《林沖夜奔》',url:'https://www.youtube.com/results?search_query=揚琴+林沖夜奔'},
-      {name:'《天山詩畫》',url:'https://www.youtube.com/results?search_query=揚琴+天山詩畫'},
+    {inst:'🎐 笛子／簫',pieces:[
+      {name:'陸春齡（1921–2018，南派「笛王」）',url:'https://www.youtube.com/results?search_query=陆春龄+笛子'},
+      {name:'俞遜發（南北融合·多項技法發明）',url:'https://www.youtube.com/results?search_query=俞逊发+笛子'},
+      {name:'張維良（上海音樂學院教授）',url:'https://www.youtube.com/results?search_query=张维良+笛子'},
+      {name:'唐俊喬（當代代表演奏家）',url:'https://www.youtube.com/results?search_query=唐俊乔+笛子'},
+    ]},
+    {inst:'🥁 揚琴',pieces:[
+      {name:'黃河（中央音樂學院教授）',url:'https://www.youtube.com/results?search_query=黄河+揚琴'},
+      {name:'項祖華（上海音樂學院）',url:'https://www.youtube.com/results?search_query=项祖华+扬琴'},
+      {name:'王沂甫（資深演奏家）',url:'https://www.youtube.com/results?search_query=王沂甫+扬琴'},
+    ]},
+    {inst:'🪘 中樂合奏 ／ 民樂團',pieces:[
+      {name:'香港中樂團 Hong Kong Chinese Orchestra',url:'https://www.youtube.com/results?search_query=Hong+Kong+Chinese+Orchestra+香港中樂團'},
+      {name:'上海民族樂團',url:'https://www.youtube.com/results?search_query=上海民族乐团'},
+      {name:'中央民族樂團',url:'https://www.youtube.com/results?search_query=中央民族乐团'},
     ]},
   ],items:[]},
-  {cat:'中樂專題',icon:'🏮',title:'推薦中樂教材',items:[
-    {t:'二胡',c:'人音版《二胡考級曲目》；《二胡基礎練習》（楊光熊著）；《劉天華二胡曲集》'},
-    {t:'古箏',c:'人音版《古箏考級曲目》；CCOM古箏考級系列；《古箏入門》（李萌著）'},
-    {t:'琵琶',c:'人音版《琵琶考級曲目》；林石城《琵琶演奏法》；《琵琶基礎教程》'},
-    {t:'笛子',c:'人音版《笛子考級曲目》；趙松庭《笛子演奏法》；《竹笛基礎教程》'},
-    {t:'中級以上',c:'建議廣泛接觸各地民間音樂風格（陝北、江南、廣東）；參加合奏團培養合樂能力；觀摩現場音樂會。'},
+  {cat:'中樂專題',icon:'🌐',title:'網上教學資源（真實網站）',items:[
+    {t:'中國古箏網 guzheng.cn',c:'全面古箏資訊平台，含樂譜、教學文章、考級資料、名家介紹。網址：https://www.guzheng.cn'},
+    {t:'華音網 huain.com',c:'中樂綜合資料庫，涵蓋二胡、古琴、笛子等多種樂器，有名家介紹、演奏技巧文章、曲目賞析。網址：https://www.huain.com'},
+    {t:'中國民族音樂資料館 chinesemusics.com',c:'香港為本的中樂知識庫，詳細介紹各樂器歷史和曲目分析，中英雙語。網址：https://chinesemusics.com'},
+    {t:'香港中樂團 YouTube',c:'大量高質素演出影片，適合讓學生欣賞專業演奏，也有教育節目片段。網址：https://www.youtube.com/@HKChineseOrchestra'},
+    {t:'視奏與節奏練習（YouTube搜尋）',c:'建議搜尋：「古箏視奏練習」「二胡節奏訓練」「笛子音符辨別」「中樂視唱練耳」。YouTube上有大量針對性練習影片，可直接在課堂使用。'},
+    {t:'Noteflight / MuseScore（記譜工具）',c:'老師可在 musescore.com 搜尋現成的中樂曲譜，或自行以 noteflight.com 編寫視奏練習片段，方便課堂即時使用。'},
   ]},
 ];
 
@@ -888,7 +903,12 @@ function handleAdd(){
   if(CP==='detail'){document.getElementById('recTitle').textContent=(S.students.find(x=>x.id===CSD)||{name:'學生'}).name+' · 快速記錄';openMo('moRecord');}
   else if(CP==='timetable'){populateLessonModal();openMo('moLesson');}
   else if(CP==='finance'){document.getElementById('payStudent').innerHTML=S.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');document.getElementById('payDate').value=today();openMo('moPayment');}
-  else{document.getElementById('sSchool').innerHTML=S.schools.length?S.schools.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''):'<option value="">（請先在設定中新增學校）</option>';openMo('moStudent');}
+  else{
+    document.getElementById('moStudentTitle').textContent='新增學生';
+    document.getElementById('sSchool').innerHTML=S.schools.length?S.schools.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''):'<option value="">（請先在設定中新增學校）</option>';
+    window._editStudentId=null;
+    openMo('moStudent');
+  }
 }
 function renderAll(){renderDash();renderStudents();renderSchChips();renderSchMgmt();renderGroupList();if(CP==='detail'&&CSD)renderDetail(CSD,CDT);if(CP==='timetable')renderCal();if(CP==='finance')renderFin();}
 
@@ -1253,7 +1273,9 @@ function renderDetail(sid,tab){
       <div class="ie" contenteditable="true" data-p="點擊記錄喜好⋯" id="pf_${sid}" oninput="saveField('${sid}','prefs',this.textContent)">${s.prefs||''}</div>
       <div class="st jade" style="margin-top:9px">學習曲目</div>
       <div style="background:var(--card);border:1px solid var(--bdr);padding:10px">${pieces.length?pieces.map((p,i)=>`<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px dashed var(--bdr);font-size:.8rem"><span style="font-family:'Noto Serif TC',serif;color:var(--red);font-size:.72rem;min-width:16px">${i+1}</span><span style="color:var(--txt)">${p}</span></div>`).join(''):'<span style="color:var(--txt3);font-size:.76rem">尚未記錄（在課堂記錄中填寫）</span>'}</div>
-      <button class="mb danger" style="margin-top:11px" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
+      <button class="mb" style="margin-top:11px" onclick="openEditStudent('${sid}')">✏️ 編輯學生資料</button>
+      <button class="mb danger" style="margin-top:6px" onclick="deleteStudent('${sid}')">刪除此學生及所有記錄</button>`;
+
   } else if(tab==='fees'){
     const present=recs.filter(r=>r.attend==='present'||!r.attend).length;
     const absent=recs.filter(r=>r.attend==='absent').length;
@@ -1369,7 +1391,11 @@ function renderRef(){
           </div>
         </div>`).join('');
     } else {
-      bodyHtml=r.items.map(i=>`<div class="ref-item"><b>${i.t}</b><span>${i.c}</span></div>`).join('');
+      bodyHtml=r.items.map(i=>{
+        // auto-link URLs in content
+        const content=i.c.replace(/(https?:\/\/[^\s,]+)/g,'<a href="$1" target="_blank" style="color:var(--gold2);text-decoration:underline">$1</a>');
+        return`<div class="ref-item"><b>${i.t}</b><span>${content}</span></div>`;
+      }).join('');
     }
     return`<div class="xcard"><div class="xhd" onclick="this.nextElementSibling.classList.toggle('open')">
       <span style="font-size:.95rem">${r.icon}</span>
@@ -1425,13 +1451,51 @@ async function addSchool(){
 }
 async function delSchool(id){if(!confirm('刪除此學校？'))return;await fbDel('schools',id);S.schools=S.schools.filter(s=>s.id!==id);saveL();renderAll();}
 
-async function addStudent(){
+function openEditStudent(sid){
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  document.getElementById('moStudentTitle').textContent='編輯學生資料';
+  document.getElementById('sSchool').innerHTML=S.schools.length?S.schools.map(sc=>`<option value="${sc.id}"${sc.id===s.schoolId?' selected':''}>${sc.name}</option>`).join(''):'<option value="">（無學校）</option>';
+  document.getElementById('sName').value=s.name||'';
+  document.getElementById('sNameEn').value=s.nameEn||'';
+  document.getElementById('sDob').value=s.dob||'';
+  document.getElementById('sInst').value=s.instrument||'二胡';
+  document.getElementById('sLevel').value=s.level||'初級';
+  document.getElementById('sParent').value=s.parent||'';
+  document.getElementById('sPhone').value=s.phone||'';
+  document.getElementById('sNote').value=s.note||'';
+  window._editStudentId=sid;
+  openMo('moStudent');
+}
+async function saveStudent(){
   const name=document.getElementById('sName').value.trim();if(!name){alert('請輸入學生姓名');return;}
   const btn=document.getElementById('btnStudent');btn.disabled=true;btn.textContent='儲存中⋯';
-  const s={id:Date.now().toString(),name,nameEn:document.getElementById('sNameEn').value.trim(),dob:document.getElementById('sDob').value,schoolId:document.getElementById('sSchool').value,instrument:document.getElementById('sInst').value,level:document.getElementById('sLevel').value,parent:document.getElementById('sParent').value.trim(),phone:document.getElementById('sPhone').value.trim(),note:document.getElementById('sNote').value.trim(),traits:[],createdAt:Date.now()};
-  S.students.push(s);saveL();await fbSet('students',s.id,s);
+  const sid=window._editStudentId;
+  const existing=sid?S.students.find(x=>x.id===sid):null;
+  const s={
+    id:sid||Date.now().toString(),
+    name,
+    nameEn:document.getElementById('sNameEn').value.trim(),
+    dob:document.getElementById('sDob').value,
+    schoolId:document.getElementById('sSchool').value,
+    instrument:document.getElementById('sInst').value,
+    level:document.getElementById('sLevel').value,
+    parent:document.getElementById('sParent').value.trim(),
+    phone:document.getElementById('sPhone').value.trim(),
+    note:document.getElementById('sNote').value.trim(),
+    traits:existing?existing.traits||[]:[],
+    bottleneck:existing?existing.bottleneck||'':'',
+    prefs:existing?existing.prefs||'':'',
+    createdAt:existing?existing.createdAt:Date.now()
+  };
+  const idx=S.students.findIndex(x=>x.id===s.id);
+  if(idx>=0)S.students[idx]=s;else S.students.push(s);
+  saveL();await fbSet('students',s.id,s);
   closeMo('moStudent');['sName','sNameEn','sDob','sParent','sPhone','sNote'].forEach(id=>document.getElementById(id).value='');
-  btn.disabled=false;btn.textContent='儲存學生';renderAll();showBan('✓ 學生已新增',false);
+  window._editStudentId=null;
+  btn.disabled=false;btn.textContent='儲存學生';
+  renderAll();
+  if(sid&&CP==='detail')renderDetail(sid,CDT);
+  showBan(sid?'✓ 學生資料已更新':'✓ 學生已新增',false);
 }
 
 async function addRecord(){
