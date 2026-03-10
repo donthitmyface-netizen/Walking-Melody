@@ -869,75 +869,115 @@ function drawRadar(scores,size){
 }
 function renderScoreTab(sid){
   const s=S.students.find(x=>x.id===sid);if(!s)return'';
-  const sc=getScores(s);
-  const overall=calcOverall(s);
+  const sc=s.scores||{};
+  const autoOv=Math.round(SCORE_DIMS.map(d=>sc[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
+  const overall=s.overallScore!==null&&s.overallScore!==undefined?s.overallScore:autoOv;
   const g=getGrade(overall);
-  const radarHtml=drawRadar(sc,230);
-  const dimsHtml=SCORE_DIMS.map(d=>`
-    <div class="score-item">
-      <div class="score-label"><span style="margin-right:3px">${d.icon}</span>${d.label} <span class="score-val" id="sv_${d.key}_${sid}">${sc[d.key]||5}/10</span></div>
-      <input type="range" class="score-slider" min="1" max="10" value="${sc[d.key]||5}"
-        oninput="updScore('${sid}','${d.key}',this.value)"
-        onchange="saveScore('${sid}','${d.key}',this.value)">
-    </div>`).join('');
-  const overallHtml=`
-    <div class="overall-score">
-      <div class="grade-badge grade-${g.grade}">${g.grade}</div>
-      <div style="flex:1">
-        <div class="overall-lbl">整體評分 <strong style="color:var(--txt);font-size:.82rem">${overall}/100</strong>　<span style="font-size:.6rem;color:var(--txt3)">${g.desc}</span></div>
-        <input type="range" class="overall-slider" min="0" max="100" value="${s.overallScore??overall}"
-          oninput="updOverall('${sid}',this.value)"
-          onchange="saveOverall('${sid}',this.value)">
+  const n=SCORE_DIMS.length;
+  const size=240,cx=size/2,cy=size/2,r=cx-32;
+  function buildSvg(sc2){
+    let sv=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 8px">`;
+    for(let lv=1;lv<=5;lv++){const rr=r*lv/5;const pp=SCORE_DIMS.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');sv+=`<polygon points="${pp}" fill="none" stroke="rgba(184,146,42,${lv===5?0.55:0.22})" stroke-width="${lv===5?1.3:0.6}"/>`;  }
+    SCORE_DIMS.forEach((d,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;const lx=cx+(r+22)*Math.cos(a),ly=cy+(r+22)*Math.sin(a);sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(184,146,42,0.28)" stroke-width="0.7"/>`;sv+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="var(--txt3)" font-family="sans-serif">${d.label}</text>`;});
+    const pts=SCORE_DIMS.map((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
+    sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.18)" stroke="#9b2a1a" stroke-width="1.8" stroke-linejoin="round"/>`;
+    SCORE_DIMS.forEach((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="3.5" fill="#9b2a1a" stroke="var(--card)" stroke-width="1.5"/>`;});
+    sv+='</svg>';return sv;
+  }
+  const cats=[...new Set(SCORE_DIMS.map(d=>d.cat))];
+  let slidersHtml='';
+  cats.forEach(cat=>{
+    const dims=SCORE_DIMS.filter(d=>d.cat===cat);
+    slidersHtml+=`<div style="font-size:.6rem;color:var(--gold2);letter-spacing:.1em;margin:10px 0 5px;border-bottom:1px solid var(--bdr);padding-bottom:3px">${cat}</div>`;
+    dims.forEach(d=>{
+      const v=sc[d.key]||5;const pct=v*10;
+      slidersHtml+=`<div style="margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-bottom:3px">
+          <span style="color:var(--txt2)">${d.icon} ${d.label}${d.note?` <span style="color:var(--txt3);font-size:.58rem">（${d.note}）</span>`:''}</span>
+          <span id="sv_${d.key}_${sid}" style="color:#9b2a1a;font-weight:600;min-width:30px;text-align:right">${v}/10</span>
+        </div>
+        <input type="range" min="1" max="10" value="${v}"
+          style="width:100%;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(to right,#9b2a1a ${pct}%,var(--bdr) ${pct}%);outline:none;cursor:pointer;border-radius:2px"
+          oninput="updScoreSlider(this,'${sid}','${d.key}')"
+          onchange="saveScoreField('${sid}','${d.key}',this.value)">
+      </div>`;
+    });
+  });
+  const ovPct=overall;
+  return `<div style="background:var(--card);border:1px solid var(--bdr);padding:13px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-family:${KAI};font-size:.84rem;color:var(--gold2);letter-spacing:.1em">能力雷達圖</span>
+      <span id="gradeBadge_${sid}" style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:2px solid ${g.color};font-family:${KAI};font-size:1.5rem;color:${g.color};background:${g.color}18">${g.grade}</span>
+    </div>
+    <div id="radarSvgWrap_${sid}">${buildSvg(sc)}</div>
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px">
+        <span style="color:var(--txt3)">整體評分 <strong id="overallVal_${sid}" style="color:var(--txt)">${overall}/100</strong></span>
+        <span id="gradeDesc_${sid}" style="color:var(--txt3);font-size:.62rem">${g.desc}</span>
       </div>
-    </div>`;
-  return`<div class="radar-wrap">
-    <div class="radar-title">能力雷達圖 <span style="font-size:.62rem;color:var(--txt3);letter-spacing:.04em">拖動滑桿調整各項評分</span></div>
-    ${radarHtml}
-    ${overallHtml}
-    <div class="score-grid">${dimsHtml}</div>
-    <div style="font-size:.64rem;color:var(--txt3);line-height:1.8;border-top:1px solid var(--bdr);padding-top:8px;letter-spacing:.04em">
-      評分說明：1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越<br>
-      整體評級由各項平均分計算，老師亦可手動拖動整體滑桿覆蓋自動計算。
+      <input type="range" min="0" max="100" value="${overall}"
+        style="width:100%;-webkit-appearance:none;appearance:none;height:5px;background:linear-gradient(to right,#9b2a1a ${ovPct}%,var(--bdr) ${ovPct}%);outline:none;cursor:pointer;border-radius:3px"
+        oninput="updOverallSlider(this,'${sid}')"
+        onchange="saveOverallScore('${sid}',this.value)">
+      <div style="font-size:.58rem;color:var(--txt3);margin-top:2px">可手動拖動此滑桿覆蓋自動計算</div>
+    </div>
+    ${slidersHtml}
+    <div style="font-size:.6rem;color:var(--txt3);border-top:1px solid var(--bdr);padding-top:7px;line-height:2;margin-top:6px">
+      1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越<br>
+      S≥92 · A≥80 · B≥65 · C≥50 · D≥35 · F&lt;35
     </div>
   </div>`;
 }
-function updScore(sid,key,val){
-  document.getElementById('sv_'+key+'_'+sid).textContent=val+'/10';
-  // Live update radar
+function updScoreSlider(el,sid,key){
+  const val=parseInt(el.value),pct=val*10;
+  el.style.background=`linear-gradient(to right,#9b2a1a ${pct}%,var(--bdr) ${pct}%)`;
+  const lbl=document.getElementById('sv_'+key+'_'+sid);
+  if(lbl)lbl.textContent=val+'/10';
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   if(!s.scores)s.scores={};
-  s.scores[key]=parseInt(val);
-  const radarEl=document.querySelector('.radar-svg');
-  if(radarEl)radarEl.outerHTML=drawRadar(s.scores,230);
+  s.scores[key]=val;
+  // Rebuild radar
+  const wrap=document.getElementById('radarSvgWrap_'+sid);
+  if(wrap){
+    const n=SCORE_DIMS.length,size=240,cx=size/2,cy=size/2,r=cx-32;
+    let sv=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 8px">`;
+    for(let lv=1;lv<=5;lv++){const rr=r*lv/5;const pp=SCORE_DIMS.map((_,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`;}).join(' ');sv+=`<polygon points="${pp}" fill="none" stroke="rgba(184,146,42,${lv===5?0.55:0.22})" stroke-width="${lv===5?1.3:0.6}"/>`;  }
+    SCORE_DIMS.forEach((d,i)=>{const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(184,146,42,0.28)" stroke-width="0.7"/>`;sv+=`<text x="${((cx+(r+22)*Math.cos(a))).toFixed(1)}" y="${((cy+(r+22)*Math.sin(a))).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="var(--txt3)" font-family="sans-serif">${d.label}</text>`;});
+    const sc2=s.scores;const pts=SCORE_DIMS.map((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;return `${(cx+r*v*Math.cos(a)).toFixed(1)},${(cy+r*v*Math.sin(a)).toFixed(1)}`;}).join(' ');
+    sv+=`<polygon points="${pts}" fill="rgba(155,42,26,0.18)" stroke="#9b2a1a" stroke-width="1.8" stroke-linejoin="round"/>`;
+    SCORE_DIMS.forEach((d,i)=>{const v=(sc2[d.key]||5)/10;const a=(i/n)*2*Math.PI-Math.PI/2;sv+=`<circle cx="${(cx+r*v*Math.cos(a)).toFixed(1)}" cy="${(cy+r*v*Math.sin(a)).toFixed(1)}" r="3.5" fill="#9b2a1a" stroke="var(--card)" stroke-width="1.5"/>`;});
+    sv+='</svg>';wrap.innerHTML=sv;
+  }
+  // Auto-update overall if no manual override
+  if(s.overallScore===null||s.overallScore===undefined){
+    const auto=Math.round(SCORE_DIMS.map(d=>s.scores[d.key]||5).reduce((a,b)=>a+b,0)/SCORE_DIMS.length*10);
+    const g2=getGrade(auto);
+    const lbl2=document.getElementById('overallVal_'+sid);if(lbl2)lbl2.textContent=auto+'/100';
+    const badge=document.getElementById('gradeBadge_'+sid);if(badge){badge.textContent=g2.grade;badge.style.borderColor=g2.color;badge.style.color=g2.color;badge.style.background=g2.color+'18';}
+    const desc=document.getElementById('gradeDesc_'+sid);if(desc)desc.textContent=g2.desc;
+  }
 }
-async function saveScore(sid,key,val){
+function updOverallSlider(el,sid){
+  const val=parseInt(el.value);
+  el.style.background=`linear-gradient(to right,#9b2a1a ${val}%,var(--bdr) ${val}%)`;
+  const lbl=document.getElementById('overallVal_'+sid);if(lbl)lbl.textContent=val+'/100';
+  const g=getGrade(val);
+  const badge=document.getElementById('gradeBadge_'+sid);if(badge){badge.textContent=g.grade;badge.style.borderColor=g.color;badge.style.color=g.color;badge.style.background=g.color+'18';}
+  const desc=document.getElementById('gradeDesc_'+sid);if(desc)desc.textContent=g.desc;
+  const s=S.students.find(x=>x.id===sid);if(s)s.overallScore=val;
+}
+async function saveScoreField(sid,key,val){
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   if(!s.scores)s.scores={};
   s.scores[key]=parseInt(val);
-  const overall=calcOverall(s);
-  const g=getGrade(overall);
-  const badge=document.querySelector('.grade-badge');
-  if(badge){badge.className='grade-badge grade-'+g.grade;badge.textContent=g.grade;}
-  const lbl=document.querySelector('.overall-lbl strong');
-  if(lbl)lbl.textContent=overall+'/100';
-  document.querySelector('.overall-slider').value=s.overallScore??overall;
   saveL();await fbSet('students',sid,s);
 }
-function updOverall(sid,val){
+async function saveOverallScore(sid,val){
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   s.overallScore=parseInt(val);
-  const g=getGrade(parseInt(val));
-  const badge=document.querySelector('.grade-badge');
-  if(badge){badge.className='grade-badge grade-'+g.grade;badge.textContent=g.grade;}
-  const lbl=document.querySelector('.overall-lbl strong');
-  if(lbl)lbl.textContent=val+'/100';
-  const gdesc=document.querySelector('.overall-lbl span');
-  if(gdesc)gdesc.textContent=g.desc;
+  saveL();await fbSet('students',sid,s);
 }
-async function saveOverall(sid,val){
-  const s=S.students.find(x=>x.id===sid);if(!s)return;
-  s.overallScore=parseInt(val);saveL();await fbSet('students',sid,s);
-}
+
 
 const THEMES=[
   {id:'dark',label:'深色水墨',preview:'linear-gradient(135deg,#1c1408 50%,#9b2a1a 100%)'},
@@ -1628,6 +1668,9 @@ function renderDetail(sid,tab){
       <div style="display:flex;flex-wrap:wrap;gap:4px">${pieces.map(p=>`<span style="font-size:.68rem;background:var(--sbg);border:1px solid var(--bdr2);padding:2px 7px;color:var(--txt)">♩ ${p}</span>`).join('')}</div>
     </div>`:''}
     <div style="font-size:.65rem;color:var(--jade);padding:7px 10px;background:rgba(61,107,90,.08);border:1px solid rgba(61,107,90,.2);line-height:1.8">⬡ 能力評分請前往「能力評分」分頁 · 17維度雷達圖 · F至S評級</div>`;
+  } else if(tab==='scores'){
+    document.getElementById('detailBody').innerHTML=renderScoreTab(sid);
+    return; // skip the body assignment below
   } else if(tab==='fees'){
     const present=recs.filter(r=>r.attend==='present'||!r.attend).length;
     const absent=recs.filter(r=>r.attend==='absent').length;
@@ -2055,29 +2098,56 @@ const LINEAGE={
     ]},
   ]},
   suona:{label:'嗩吶',icon:'📯',eras:[
-    {era:'民間鼓吹傳統至學院化（1900–1960）',persons:[
-      {name:'任同祥',years:'1927–',sect:'山東鼓吹·現代嗩吶獨奏開創者',sectCls:'sect-guqin-guan',school:'中央廣播民族樂團',desc:'六歲隨伯父學藝，嗩吶、笛、笙兼通。1953年登臺演奏《百鳥朝鳳》，獲第四屆世界青年聯歡節銀質獎，奠定嗩吶現代獨奏表演形式。演奏「乾淨利落，音色華美」，啟發劉雯雯學習嗩吶。',dot:'founder',yt:'https://www.youtube.com/results?search_query=任同祥+嗩吶+百鸟朝凤'},
+    {era:'民間鼓吹先賢（1900–1960）',persons:[
+      {name:'任同祥',years:'1927–',sect:'山東鼓吹·現代嗩吶獨奏奠基人',sectCls:'sect-guqin-guan',
+       school:'山東濟寧出身·後任職上海歌舞劇院',
+       desc:'自幼隨伯父學藝，嗩吶、笛、笙兼通。1953年在北京全國首屆民間音樂舞蹈會演中以《百鳥朝鳳》獲高度評價，同年代表中國赴羅馬尼亞布加勒斯特參加第四屆世界青年聯歡節，奪得民間器樂比賽銀質獎，為首位在國際賽事為嗩吶奪獎的演奏家。整理並確立《百鳥朝鳳》現代演奏版本，對後世影響深遠。',
+       dot:'founder',src:'資料來源：維基百科·百鳥朝鳳條目；曉茵萬事通',
+       yt:'https://www.youtube.com/results?search_query=任同祥+百鳥朝鳳+嗩吶'},
     ]},
-    {era:'學院派代表宗師與當代名家（1960–）',persons:[
-      {name:'劉英',years:'1960–',sect:'「嗩吶皇后」·學院現代化旗手',sectCls:'sect-guqin-guan',school:'上海音樂學院教授・博士生導師',desc:'被譽為「嗩吶皇后」，是中國嗩吶學院派最重要的代表人物。上海音樂學院教授、博士生導師。技藝精湛，創作並首演大量現代嗩吶作品，劉雯雯為其最著名學生。',dot:'founder',yt:'https://www.youtube.com/results?search_query=刘英+嗩吶'},
-      {name:'郭雅志',years:'1963–',sect:'香港嗩吶代表・跨界名家',sectCls:'sect-guqin-guang',school:'香港中樂團前首席嗩吶',desc:'在香港中樂團擔任首席嗩吶多年，是香港嗩吶演奏的代表人物。積極推廣嗩吶於香港及海外，曾多次在香港演藝學院及國際音樂節演出，並參與跨界音樂合作，對香港中樂教育貢獻卓著。',dot:'major',yt:'https://www.youtube.com/results?search_query=郭雅志+嗩吶'},
-      {name:'石磊',years:'1975–',sect:'中央民族樂團首席',sectCls:'sect-guqin-guan',school:'中央民族樂團首席嗩吶',desc:'中央民族樂團首席嗩吶，師從劉英。演奏技藝精湛，對現代音樂語言的駕馭見長，長期推動嗩吶的跨界融合與現代作品創作。',dot:'major',yt:'https://www.youtube.com/results?search_query=石磊+嗩吶'},
-      {name:'劉雯雯',years:'1990–',sect:'中國首位嗩吶博士・90後旗手',sectCls:'sect-guqin-guan',school:'上海音樂學院講師・國家級非遺傳承人',desc:'中國第一位嗩吶演奏博士（2023年），上海音樂學院講師，父為山東魯西南小銅嗩吶第七代傳人，師從劉英。2015年起隨譚盾版《百鳥朝鳳》全球巡演，2024年巴黎演出驚豔法國觀眾，是當今最受矚目的嗩吶年輕演奏家。',dot:'major',yt:'https://www.youtube.com/results?search_query=刘雯雯+嗩吶+百鸟朝凤'},
+    {era:'學院派代表宗師（1960–）',persons:[
+      {name:'劉英',years:'1963–',sect:'學院派·中國現代嗩吶第一人',sectCls:'sect-guqin-wu',
+       school:'上海音樂學院副院長·教授·嗩吶研究生導師',
+       desc:'男，1963年7月生，安徽肥西人。七歲習嗩吶，1978年考入上海音樂學院附中，1982年升讀本科，1986年畢業留校任教。1991年應邀參加香港藝術節，與香港中樂團協奏《天樂》，香港各報以「中國最年輕的嗩吶大師」為題高度評價。曾隨國家領導人出訪歐美。現任上海音樂學院副院長，是劉雯雯的老師。演奏乾淨利落，技術創新，被譽為「中國現代嗩吶第一人」。',
+       dot:'major',src:'資料來源：上海音樂學院官網；華音網；中國民族音樂資料館',
+       yt:'https://www.youtube.com/results?search_query=劉英+嗩吶+天樂'},
+      {name:'郭雅志',years:'1966–',sect:'香港嗩吶代表·活芯嗩吶發明人',sectCls:'sect-guzheng-he',
+       school:'中央音樂學院畢業·香港中樂團嗩吶首席（1999–）',
+       desc:'男，1966年生，山西人。1990年畢業於中央音樂學院，後留校任教。1993年發明嗩吶「活芯」裝置，使傳統嗩吶能準確演奏半音階及全部調式，獲中國文化部科技進步二等獎。1999年出任香港中樂團嗩吶首席，亦任教於香港演藝學院，為香港嗩吶協會首任會長。波士頓電台稱其為「中國的路易斯·阿姆斯特朗」。首演多首現代嗩吶協奏曲，出版逾十張個人唱片。',
+       dot:'major',src:'資料來源：香港中樂團官網；港樂官網；華音網',
+       yt:'https://www.youtube.com/results?search_query=郭雅志+嗩吶'},
     ]},
-  ]},
-  hongkong:{label:'香港',icon:'🏮',eras:[
-    {era:'香港中樂教育奠基人物',persons:[
-      {name:'閻惠昌',years:'1955–',sect:'香港中樂指揮・藝術總監',sectCls:'sect-guqin-wu',school:'香港中樂團藝術總監兼終身指揮（2002–）',desc:'2002年出任香港中樂團藝術總監，任期內大幅提升樂團國際地位，多次帶領樂團登上卡內基音樂廳等國際舞台。積極推動本地中樂創作，委約大量香港及國際作曲家創作新曲。',dot:'founder',yt:'https://www.youtube.com/results?search_query=閻惠昌+香港中樂團'},
-      {name:'余其偉',years:'1948–',sect:'廣東音樂・高胡宗師',sectCls:'sect-guqin-guang',school:'星海音樂學院教授・香港演藝學院客席',desc:'廣東音樂和高胡演奏泰斗，星海音樂學院教授，與香港演藝學院及本地樂壇有長期合作。是傳承廣東音樂傳統最重要的在世演奏家，著有廣東音樂演奏教材。',dot:'major',yt:'https://www.youtube.com/results?search_query=余其偉+高胡+广东音乐'},
+    {era:'新生代突破（1990年代後）',persons:[
+      {name:'劉雯雯',years:'1990年代–',sect:'中國首位嗩吶博士·第13代傳人',sectCls:'sect-guqin-wu',
+       school:'上海音樂學院·劉英學生',
+       desc:'女，90後，出生嗩吶世家，家族從明末清初傳承逾400年，為第13代傳人。2008年考入上海音樂學院師從劉英，2017年成為首位登上雪梨歌劇院的嗩吶演奏家，以《百鳥朝鳳》震驚觀眾。2020年成為中國首位嗩吶博士（上海音樂學院）。積極將嗩吶與爵士、流行音樂結合，打破傳統形象，帶嗩吶走向世界舞台。',
+       dot:'major',src:'資料來源：聯合影音；當代中國；人民日報',
+       yt:'https://www.youtube.com/results?search_query=劉雯雯+嗩吶+百鳥朝鳳'},
     ]},
-    {era:'香港演藝學院中樂系代表師資',persons:[
-      {name:'盧偉良',years:'1968–',sect:'古箏・香港演藝學院主任',sectCls:'sect-guzheng-he',school:'香港演藝學院音樂學院中國音樂系主任',desc:'香港演藝學院音樂學院中國音樂系主任，古箏演奏及教學專家。在香港推動高等中樂教育多年，為本地培育大批中樂教育人才，亦積極參與社區中樂推廣工作。',dot:'major',yt:'https://www.youtube.com/results?search_query=卢伟良+古箏+香港'},
-      {name:'翁榮輝',years:'1967–',sect:'二胡・香港中樂團前首席',sectCls:'sect-guqin-wu',school:'香港中樂團首席二胡・香港演藝學院講師',desc:'香港中樂團首席二胡演奏家，同時在香港演藝學院任教。演奏技藝精湛，風格溫潤細膩，多次舉辦獨奏音樂會，是香港二胡演奏的重要代表人物。',dot:'major',yt:'https://www.youtube.com/results?search_query=翁榮輝+二胡+香港'},
-    ]},
-    {era:'香港年青一輩著名演奏家',persons:[
-      {name:'香港笛子演奏員',years:'',sect:'香港中樂團・本地推廣',sectCls:'sect-guqin-wu',school:'香港中樂團',desc:'香港中樂團設有笛子演奏員職位，積極推廣笛子藝術。建議透過香港中樂團官網查閱現任笛子演奏員名單，資料最為準確。本欄資料由老師自行更新。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂團+笛子+青年演奏家'},
-      {name:'香港琵琶青年演奏家',years:'',sect:'香港演藝學院畢業生',sectCls:'sect-pipa-pu',school:'香港演藝學院中國音樂系',desc:'此欄位建議老師自行填入所認識的本地琵琶年青演奏家，香港演藝學院中國音樂系每年均有琵琶畢業生活躍於本地演奏及教學界。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+琵琶+青年演奏家'},
-      {name:'查詢本地師資',years:'',sect:'香港演藝學院・香港演藝發展局',sectCls:'sect-guqin-zhe',school:'香港演藝學院 ・ 康文署・香港演藝發展局',desc:'建議透過香港演藝學院官網、香港演藝發展局藝術家名冊，或各中樂團樂師名單，查閱最新的香港本地中樂老師及演奏家資訊，資料最為準確。',dot:'major',yt:'https://www.youtube.com/results?search_query=香港+中樂+青年演奏家+2024'},
+  ]}
+
+  hk:{label:'香港',icon:'🏙',eras:[
+    {era:'香港中樂代表人物',persons:[
+      {name:'閻惠昌',years:'1955–',sect:'香港中樂團藝術總監·指揮',sectCls:'sect-guqin-guan',
+       school:'香港中樂團藝術總監及首席指揮',
+       desc:'著名指揮家，中國國家一級指揮。長期執掌香港中樂團，帶領樂團走向國際，委約創作大量新作品，推動香港中樂發展。',
+       dot:'major',src:'資料來源：香港中樂團官網',
+       yt:'https://www.youtube.com/results?search_query=閻惠昌+香港中樂團'},
+      {name:'余其偉',years:'1951–',sect:'廣東音樂·高胡演奏家',sectCls:'sect-guzheng-he',
+       school:'星海音樂學院教授·廣東音樂名家',
+       desc:'著名廣東音樂高胡演奏家，被視為廣東音樂高胡泰斗。長期推廣廣東音樂，亦在香港演出。',
+       dot:'major',src:'資料來源：星海音樂學院',
+       yt:'https://www.youtube.com/results?search_query=余其偉+高胡+廣東音樂'},
+      {name:'盧偉良',years:'',sect:'香港演藝學院·中樂系主任',sectCls:'sect-guqin-zhe',
+       school:'香港演藝學院中國音樂系',
+       desc:'長期在香港演藝學院任教，主持中國音樂系，培育香港本地中樂人才，對香港中樂教育貢獻良多。',
+       dot:'major',src:'建議查閱香港演藝學院官網核實最新資料',
+       yt:'https://www.youtube.com/results?search_query=香港演藝學院+中樂'},
+      {name:'查詢本地師資',years:'',sect:'香港演藝學院・香港演藝發展局',sectCls:'sect-guqin-zhe',
+       school:'香港演藝學院 ・ 康文署・香港演藝發展局',
+       desc:'建議透過香港演藝學院官網、香港演藝發展局藝術家名冊，或各中樂團樂師名單，查閱最新的香港本地中樂老師及演奏家資訊，資料最為準確。',
+       dot:'major',
+       yt:'https://www.youtube.com/results?search_query=香港+中樂+青年演奏家+2024'},
     ]},
   ]}
 };
@@ -2108,6 +2178,7 @@ function renderLineageContent(){
           <div class="lp-school">🏛 ${p.school}</div>
           <div class="lp-desc">${p.desc}</div>
           <div style="margin-top:5px"><span class="lp-sect ${p.sectCls}">${p.sect}</span></div>
+          ${p.src?`<div style="font-size:.58rem;color:var(--txt3);margin-top:5px;padding-top:4px;border-top:1px dashed var(--bdr);line-height:1.6">📚 ${p.src}</div>`:''}
           <a class="lp-yt" href="${p.yt}" target="_blank">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
             YouTube 搜尋演奏
