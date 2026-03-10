@@ -410,6 +410,10 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
   <div id="dayDetail"></div>
   <div class="st" style="margin-top:10px">每週固定課表</div>
   <div id="weekSlots"></div>
+  <div class="st" style="margin-top:12px">班級群組教案</div>
+  <div class="hbox"><b>📚 班級教案</b>為一整班或一個群組建立共用教案，適合多個學生同時進行相同課程（如合奏班、樂理班）。可在教案中標記個別學生需要額外跟進的事項。</div>
+  <div id="groupList"></div>
+  <button class="mb" style="margin-top:4px" onclick="openNewGroup()">＋ 新增班級 ／ 群組教案</button>
 </div>
 </div>
 
@@ -576,7 +580,35 @@ main{padding-top:60px;padding-bottom:68px;min-height:100vh;background:var(--bg);
   <button class="mb sec" onclick="closeMo('moPayment')">取消</button>
 </div></div>
 
-<div class="ov" id="moDayAction" onclick="closeMo('moDayAction',event)"><div class="mo">
+<div class="ov" id="moGroup" onclick="closeMo('moGroup',event)"><div class="mo">
+  <div class="mg"></div><div class="mt" id="moGroupTitle">新增班級 ／ 群組</div>
+  <div class="hbox"><b>💡 什麼是群組教案？</b>建立一個群組（如「二胡初班」、「樂理課」），加入相關學生，然後為每次課堂寫一份共用教案，並可在教案中為個別學生加上特別備注。</div>
+  <label class="il">群組名稱 *</label><input type="text" class="ii" id="grpName" placeholder="例：二胡初班、古箏合奏團、星期三樂理課">
+  <label class="il">成員學生（可多選）</label>
+  <div id="grpStudentPicker" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;max-height:150px;overflow-y:auto;border:1px solid var(--bdr2);padding:8px;background:var(--card)"></div>
+  <label class="il">備注</label><input type="text" class="ii" id="grpNote" placeholder="例：每週三 4:30pm，共8人">
+  <button class="mb" id="btnGrp" onclick="saveGroup()">儲存群組</button>
+  <button class="mb sec" onclick="closeMo('moGroup')">取消</button>
+</div></div>
+
+<div class="ov" id="moGroupPlan" onclick="closeMo('moGroupPlan',event)"><div class="mo">
+  <div class="mg"></div><div class="mt" id="gpTitle">班級教案</div>
+  <div class="hbox" id="gpMembersRow" style="font-size:.74rem"></div>
+  <label class="il">📅 上課日期</label><input type="date" class="ii" id="gpDate">
+  <label class="il">📋 教學目標</label>
+  <textarea class="ita" id="gpGoal" placeholder="例：今日主題——換把練習，全班統一鞏固第三把位⋯"></textarea>
+  <label class="il">📖 課堂教案</label>
+  <textarea class="ita" id="gpPlan" placeholder="例：1. 熱身音階 5分鐘  2. 齊奏練習  3. 各自練習重點段  4. 合奏整首⋯"></textarea>
+  <label class="il">✏️ 實際上課記錄</label>
+  <textarea class="ita" id="gpRecord" placeholder="例：大部分同學已掌握換把，個別需加強的見下方備注⋯"></textarea>
+  <label class="il">👤 個別學生跟進備注</label>
+  <div id="gpIndivNotes" style="border:1px solid var(--bdr2);background:var(--card);padding:8px;margin-bottom:2px"></div>
+  <label class="il">♩ 本堂曲目</label><input type="text" class="ii" id="gpPiece" placeholder="例：《賽馬》第一段">
+  <label class="il">📌 下堂重點 ／ 功課</label><input type="text" class="ii" id="gpHw" placeholder="例：各自練習第8至16小節">
+  <button class="mb" id="btnGp" onclick="saveGroupPlan()">儲存班級教案</button>
+  <button class="mb sec" onclick="closeMo('moGroupPlan')">取消</button>
+</div></div>
+
   <div class="mg"></div><div class="mt" id="dayActionTitle">課堂操作</div>
   <div id="dayActionContent"></div>
   <button class="mb sec" onclick="closeMo('moDayAction')">關閉</button>
@@ -684,25 +716,58 @@ const REF_DATA=[
     {t:'弦樂組特點',c:'二胡、中胡、板胡：注重運弓均勻、換把準確、換弦流暢。初學重點是空弦發音和基本弓法。'},
     {t:'彈撥樂組特點',c:'琵琶、古箏、阮：右手輪指和彈弦技巧是核心。古琴另有獨特的走手音和滾拂技巧需特別教授。'},
     {t:'吹管樂組特點',c:'笛子、簫：氣息控制和口風是關鍵。初學最難是發音，需多練長音。笛子的超吹（筒音）技巧要早期建立。'},
-    {t:'中樂樂理',c:'五聲音階（宮商角徵羽）是基礎。傳統工尺譜雖少用但了解有助理解傳統曲目。民族風格裝飾音（如滑音、顫音）各地風格不同。'},
-    {t:'推薦入門曲目',c:'二胡：《賽馬》片段、《二泉映月》（入門版）\n古箏：《漁舟唱晚》、《高山流水》片段\n琵琶：《春江花月夜》片段、《十面埋伏》節選\n笛子：《牧民新歌》片段'},
+    {t:'中樂樂理',c:'五聲音階（宮商角徵羽）是基礎。民族風格裝飾音（如滑音、顫音）各地風格不同。'},
   ]},
-  {cat:'中樂專題',icon:'🏮',title:'推薦中樂教材（按程度）',items:[
-    {t:'二胡初級',c:'劉天華《二胡曲六首》；人音版《二胡考級曲目》1–3級；《二胡基礎練習》（楊光熊著）'},
-    {t:'古箏初級',c:'《古箏考級曲目》人音版1–3級；《古箏入門》（李萌著）；CCOM古箏考級系列'},
-    {t:'琵琶初級',c:'《琵琶考級曲目》人音版；《觀燈》、《草原小姐妹》等教學版本；林石城《琵琶演奏法》'},
-    {t:'中級以上',c:'建議廣泛接觸各地民間音樂風格（陝北、江南、廣東）；參加合奏團培養合樂能力；觀摩音樂會。'},
-    {t:'樂理參考',c:'《中國音樂理論基礎》；《民族音樂概論》（適合進階）；中央音樂學院樂理系列教材'},
+  {cat:'中樂專題',icon:'🎵',title:'中樂參考曲目（附YouTube連結）',yt:[
+    {inst:'二胡',pieces:[
+      {name:'《光明行》',url:'https://www.youtube.com/results?search_query=二胡+光明行'},
+      {name:'《賽馬》',url:'https://www.youtube.com/results?search_query=二胡+賽馬'},
+      {name:'《二泉映月》',url:'https://www.youtube.com/results?search_query=二胡+二泉映月'},
+      {name:'《江河水》',url:'https://www.youtube.com/results?search_query=二胡+江河水'},
+      {name:'《良宵》',url:'https://www.youtube.com/results?search_query=二胡+良宵'},
+    ]},
+    {inst:'古箏',pieces:[
+      {name:'《漁舟唱晚》',url:'https://www.youtube.com/results?search_query=古箏+漁舟唱晚'},
+      {name:'《高山流水》',url:'https://www.youtube.com/results?search_query=古箏+高山流水'},
+      {name:'《春江花月夜》',url:'https://www.youtube.com/results?search_query=古箏+春江花月夜'},
+      {name:'《蝴蝶》',url:'https://www.youtube.com/results?search_query=古箏+蝴蝶'},
+      {name:'《出水蓮》',url:'https://www.youtube.com/results?search_query=古箏+出水蓮'},
+    ]},
+    {inst:'琵琶',pieces:[
+      {name:'《小燕子》',url:'https://www.youtube.com/results?search_query=琵琶+小燕子'},
+      {name:'《彝族舞曲》',url:'https://www.youtube.com/results?search_query=琵琶+彝族舞曲'},
+      {name:'《春江花月夜》',url:'https://www.youtube.com/results?search_query=琵琶+春江花月夜'},
+      {name:'《陽春白雪》',url:'https://www.youtube.com/results?search_query=琵琶+陽春白雪'},
+      {name:'《十面埋伏》',url:'https://www.youtube.com/results?search_query=琵琶+十面埋伏'},
+    ]},
+    {inst:'笛子／簫',pieces:[
+      {name:'《姑蘇行》',url:'https://www.youtube.com/results?search_query=笛子+姑蘇行'},
+      {name:'《牧民新歌》',url:'https://www.youtube.com/results?search_query=笛子+牧民新歌'},
+      {name:'《揚鞭催馬運糧忙》',url:'https://www.youtube.com/results?search_query=笛子+揚鞭催馬運糧忙'},
+      {name:'《梆笛協奏曲》',url:'https://www.youtube.com/results?search_query=笛子+梆笛協奏曲'},
+    ]},
+    {inst:'揚琴',pieces:[
+      {name:'《洪湖人民的心願》',url:'https://www.youtube.com/results?search_query=揚琴+洪湖人民的心願'},
+      {name:'《林沖夜奔》',url:'https://www.youtube.com/results?search_query=揚琴+林沖夜奔'},
+      {name:'《天山詩畫》',url:'https://www.youtube.com/results?search_query=揚琴+天山詩畫'},
+    ]},
+  ],items:[]},
+  {cat:'中樂專題',icon:'🏮',title:'推薦中樂教材',items:[
+    {t:'二胡',c:'人音版《二胡考級曲目》；《二胡基礎練習》（楊光熊著）；《劉天華二胡曲集》'},
+    {t:'古箏',c:'人音版《古箏考級曲目》；CCOM古箏考級系列；《古箏入門》（李萌著）'},
+    {t:'琵琶',c:'人音版《琵琶考級曲目》；林石城《琵琶演奏法》；《琵琶基礎教程》'},
+    {t:'笛子',c:'人音版《笛子考級曲目》；趙松庭《笛子演奏法》；《竹笛基礎教程》'},
+    {t:'中級以上',c:'建議廣泛接觸各地民間音樂風格（陝北、江南、廣東）；參加合奏團培養合樂能力；觀摩現場音樂會。'},
   ]},
 ];
 
 // ═══════════════════════════════════════════
 // APP STATE
 // ═══════════════════════════════════════════
-let S={schools:[],students:[],lessons:[],records:[],payments:[],lessonPlans:[]};
+let S={schools:[],students:[],lessons:[],records:[],payments:[],lessonPlans:[],groups:[]};
 let CU=null,CSD=null,CDT='records',CP='dashboard',selSch='all';
 let unsubFns=[],calDate=new Date(),finDate=new Date();
-let examCat='全部',refCat='全部',selCalDay=null,currentLpId=null;
+let examCat='全部',refCat='全部',selCalDay=null,currentLpId=null,currentGroupId=null;
 let _st={};// save timers
 
 function uid(){return CU?CU.uid:null}
@@ -731,7 +796,7 @@ async function doLogin(){
 async function doSignOut(){
   if(!confirm('確定登出？'))return;
   unsubFns.forEach(f=>f());unsubFns=[];
-  S={schools:[],students:[],lessons:[],records:[],payments:[],lessonPlans:[]};
+  S={schools:[],students:[],lessons:[],records:[],payments:[],lessonPlans:[],groups:[]};
   await window._fb.signOut(window._auth);
 }
 function showLogin(){
@@ -764,10 +829,16 @@ function startSync(userId){
   unsubFns.forEach(f=>f());unsubFns=[];
   const db=window._db,{collection,query,where,onSnapshot}=window._fb;
   setSS('sy');
-  ['schools','students','lessons','records','payments','lessonPlans'].forEach(col=>{
+  ['schools','students','lessons','records','payments','lessonPlans','groups'].forEach(col=>{
     const u=onSnapshot(query(collection(db,col),where('uid','==',userId)),snap=>{
       S[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
       if(col==='records')S.records.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+      // ── Legacy fix: old lessons without "type" field → treat as fixed ──
+      if(col==='lessons'){
+        let needFix=false;
+        S.lessons.forEach(l=>{if(!l.type){l.type='fixed';needFix=true;}});
+        if(needFix)S.lessons.forEach(l=>{if(!l.type||l.type==='fixed')fbSet('lessons',l.id,l);});
+      }
       saveL();renderAll();setSS('on');
     },err=>{console.error(col,err);setSS('er');renderAll();});
     unsubFns.push(u);
@@ -819,7 +890,7 @@ function handleAdd(){
   else if(CP==='finance'){document.getElementById('payStudent').innerHTML=S.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');document.getElementById('payDate').value=today();openMo('moPayment');}
   else{document.getElementById('sSchool').innerHTML=S.schools.length?S.schools.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''):'<option value="">（請先在設定中新增學校）</option>';openMo('moStudent');}
 }
-function renderAll(){renderDash();renderStudents();renderSchChips();renderSchMgmt();if(CP==='detail'&&CSD)renderDetail(CSD,CDT);if(CP==='timetable')renderCal();if(CP==='finance')renderFin();}
+function renderAll(){renderDash();renderStudents();renderSchChips();renderSchMgmt();renderGroupList();if(CP==='detail'&&CSD)renderDetail(CSD,CDT);if(CP==='timetable')renderCal();if(CP==='finance')renderFin();}
 
 // ═══════════════════════════════════════════
 // THEME
@@ -939,8 +1010,8 @@ function renderDayDetail(){
           <button onclick="openLessonPlan('${l.studentId}','${selCalDay}','${l.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:5px 10px;font-size:.67rem;cursor:pointer;font-family:'Noto Serif TC',serif">${plan?'查看教案記錄':'✏️ 寫教案 ／ 記錄'}</button>
           <button class="gcal-btn" onclick="addToGCal('${l.id}')">+GCal</button>
           ${l.type==='fixed'?`<button onclick="markStatus('${l.id}','${selCalDay}','absent')" style="background:none;border:1px solid rgba(155,42,26,.3);color:var(--red);padding:5px 9px;font-size:.63rem;cursor:pointer">標記請假</button>
-          <button onclick="markStatus('${l.id}','${selCalDay}','makeup')" style="background:none;border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:5px 9px;font-size:.63rem;cursor:pointer">標記補堂</button>`:''}
-        </div>
+          <button onclick="markStatus('${l.id}','${selCalDay}','makeup')" style="background:none;border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:5px 9px;font-size:.63rem;cursor:pointer">標記補堂</button>`
+          :`<button onclick="delLesson('${l.id}')" style="background:none;border:1px solid rgba(155,42,26,.3);color:var(--red);padding:5px 9px;font-size:.63rem;cursor:pointer">刪除此單次課堂</button>`}        </div>
       </div>`;
     });
   }
@@ -1285,14 +1356,29 @@ function selExamCat(c){examCat=c;renderExams();}
 function renderRef(){
   document.getElementById('refChips').innerHTML=REF_CATS.map(c=>`<div class="chip${refCat===c?' active':''}" onclick="selRefCat('${c}')">${c}</div>`).join('');
   const list=refCat==='全部'?REF_DATA:REF_DATA.filter(r=>r.cat===refCat);
-  document.getElementById('refList').innerHTML=list.map(r=>`
-    <div class="xcard"><div class="xhd" onclick="this.nextElementSibling.classList.toggle('open')">
+  document.getElementById('refList').innerHTML=list.map(r=>{
+    let bodyHtml='';
+    if(r.yt&&r.yt.length){
+      bodyHtml=r.yt.map(inst=>`
+        <div style="margin-bottom:11px">
+          <div style="font-family:'Noto Serif TC',serif;font-size:.8rem;color:var(--gold2);margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--bdr)">${inst.inst}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            ${inst.pieces.map(p=>`<a href="${p.url}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:5px 9px;font-size:.72rem;text-decoration:none;font-family:'Noto Serif TC',serif">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--red)"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+              ${p.name}</a>`).join('')}
+          </div>
+        </div>`).join('');
+    } else {
+      bodyHtml=r.items.map(i=>`<div class="ref-item"><b>${i.t}</b><span>${i.c}</span></div>`).join('');
+    }
+    return`<div class="xcard"><div class="xhd" onclick="this.nextElementSibling.classList.toggle('open')">
       <span style="font-size:.95rem">${r.icon}</span>
       <div class="xtitle">${r.title}</div>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
     </div>
-    <div class="xbody">${r.items.map(i=>`<div class="ref-item"><b>${i.t}</b><span>${i.c}</span></div>`).join('')}</div>
-    </div>`).join('');
+    <div class="xbody">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 function selRefCat(c){refCat=c;renderRef();}
 
@@ -1377,6 +1463,135 @@ async function deleteStudent(sid){
   ['records','payments','lessons','lessonPlans'].forEach(k=>S[k]=S[k].filter(x=>x.studentId!==sid));
   S.students=S.students.filter(s=>s.id!==sid);
   saveL();showPage('students',document.querySelectorAll('nav button')[2],'學生名冊',true);renderAll();
+}
+
+// ═══════════════════════════════════════════
+// GROUP (CLASS) PLANS
+// ═══════════════════════════════════════════
+function renderGroupList(){
+  const el=document.getElementById('groupList');if(!el)return;
+  if(!S.groups||!S.groups.length){el.innerHTML='<div style="font-size:.74rem;color:var(--txt3);padding:3px 0;margin-bottom:6px">尚未建立任何群組</div>';return;}
+  el.innerHTML=S.groups.map(g=>{
+    const memberNames=( g.members||[]).map(id=>S.students.find(x=>x.id===id)?.name||'').filter(Boolean);
+    const planCount=(S.lessonPlans||[]).filter(p=>p.groupId===g.id).length;
+    return`<div class="xcard" style="margin-bottom:7px">
+      <div class="xhd" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span style="font-size:.95rem">📚</span>
+        <div style="flex:1">
+          <div class="xtitle">${g.name}</div>
+          <div style="font-size:.62rem;color:var(--txt3);margin-top:1px">${memberNames.slice(0,4).join('、')}${memberNames.length>4?` 等${memberNames.length}人`:''} · ${planCount}份教案</div>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="xbody">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+          <button onclick="openGroupPlan('${g.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.22);color:var(--gold2);padding:6px 11px;font-size:.68rem;cursor:pointer;font-family:'Noto Serif TC',serif">✏️ 新增 ／ 查看教案</button>
+          <button onclick="editGroup('${g.id}')" style="background:none;border:1px solid var(--bdr2);color:var(--txt3);padding:6px 11px;font-size:.68rem;cursor:pointer">編輯群組</button>
+          <button onclick="delGroup('${g.id}')" style="background:none;border:none;color:var(--red);font-size:.68rem;cursor:pointer;padding:6px">刪除</button>
+        </div>
+        ${(S.lessonPlans||[]).filter(p=>p.groupId===g.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3).map(p=>{
+          const[yy,mm,dd]=p.date.split('-');
+          return`<div class="lp-card" style="margin-bottom:5px">
+            <div class="lp-hd" onclick="toggleLP(this)">
+              <div class="lp-date">${parseInt(mm)}月${parseInt(dd)}日</div>
+              <div class="lp-stu" style="flex:1;font-size:.74rem;color:var(--txt3)">${p.goal?p.goal.slice(0,25)+'⋯':'（教案待填）'}</div>
+              <span class="lp-status ${p.record?'done':p.goal?'plan':'plan'}">${p.record?'已完成':p.goal?'計劃中':'待填'}</span>
+            </div>
+            <div class="lp-body">
+              ${p.goal?`<div class="lp-sec"><div class="lp-sec-title">教學目標</div><div class="lp-text">${p.goal}</div></div>`:''}
+              ${p.plan?`<div class="lp-sec"><div class="lp-sec-title">教案</div><div class="lp-text">${p.plan.replace(/\n/g,'<br>')}</div></div>`:''}
+              ${p.record?`<div class="lp-sec"><div class="lp-sec-title">實際記錄</div><div class="lp-text">${p.record}</div></div>`:''}
+              ${p.indivNotes&&Object.keys(p.indivNotes||{}).length?`<div class="lp-sec"><div class="lp-sec-title">個別跟進</div><div class="lp-text">${Object.entries(p.indivNotes).map(([sid,note])=>{const s=S.students.find(x=>x.id===sid);return s&&note?`<div><b style="color:var(--red)">${s.name}：</b>${note}</div>`:''}).filter(Boolean).join('')}</div></div>`:''}
+              <button onclick="openGroupPlanEdit('${g.id}','${p.id}')" style="background:var(--sbg);border:1px solid rgba(184,146,42,.2);color:var(--gold2);padding:4px 9px;font-size:.64rem;cursor:pointer;margin-top:7px">編輯此教案</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+function openNewGroup(){
+  currentGroupId=null;
+  document.getElementById('moGroupTitle').textContent='新增班級 ／ 群組';
+  document.getElementById('grpName').value='';
+  document.getElementById('grpNote').value='';
+  document.getElementById('grpStudentPicker').innerHTML=S.students.map(s=>`
+    <div class="tg" id="grpS_${s.id}" onclick="toggleGrpStu('${s.id}')">${s.name}</div>`).join('');
+  openMo('moGroup');
+}
+function editGroup(gid){
+  currentGroupId=gid;
+  const g=S.groups.find(x=>x.id===gid);if(!g)return;
+  document.getElementById('moGroupTitle').textContent='編輯群組';
+  document.getElementById('grpName').value=g.name||'';
+  document.getElementById('grpNote').value=g.note||'';
+  document.getElementById('grpStudentPicker').innerHTML=S.students.map(s=>`
+    <div class="tg${(g.members||[]).includes(s.id)?' on':''}" id="grpS_${s.id}" onclick="toggleGrpStu('${s.id}')">${s.name}</div>`).join('');
+  openMo('moGroup');
+}
+function toggleGrpStu(sid){const el=document.getElementById('grpS_'+sid);if(el)el.classList.toggle('on');}
+async function saveGroup(){
+  const name=document.getElementById('grpName').value.trim();if(!name){alert('請輸入群組名稱');return;}
+  const btn=document.getElementById('btnGrp');btn.disabled=true;btn.textContent='儲存中⋯';
+  const members=[...document.querySelectorAll('#grpStudentPicker .tg.on')].map(el=>el.id.replace('grpS_',''));
+  const id=currentGroupId||Date.now().toString();
+  const g={id,name,members,note:document.getElementById('grpNote').value,createdAt:Date.now()};
+  const idx=S.groups.findIndex(x=>x.id===id);
+  if(idx>=0)S.groups[idx]=g;else S.groups.push(g);
+  saveL();await fbSet('groups',id,g);
+  closeMo('moGroup');btn.disabled=false;btn.textContent='儲存群組';
+  renderAll();showBan('✓ 群組已儲存',false);
+}
+async function delGroup(gid){
+  if(!confirm('刪除此群組？（教案記錄不會刪除）'))return;
+  await fbDel('groups',gid);S.groups=S.groups.filter(g=>g.id!==gid);saveL();renderAll();
+}
+let currentGpPlanId=null;
+function openGroupPlan(gid){
+  const g=S.groups.find(x=>x.id===gid);if(!g)return;
+  currentGroupId=gid;currentGpPlanId=null;
+  document.getElementById('gpTitle').textContent=g.name+' · 班級教案';
+  const memberNames=(g.members||[]).map(id=>S.students.find(x=>x.id===id)?.name).filter(Boolean);
+  document.getElementById('gpMembersRow').innerHTML=`<b>成員：</b>${memberNames.join('、')||'（未有成員）'}`;
+  document.getElementById('gpDate').value=today();
+  ['gpGoal','gpPlan','gpRecord','gpPiece','gpHw'].forEach(id=>document.getElementById(id).value='');
+  renderGpIndivNotes(g.members||[]);
+  openMo('moGroupPlan');
+}
+function openGroupPlanEdit(gid,planId){
+  const g=S.groups.find(x=>x.id===gid);const p=S.lessonPlans.find(x=>x.id===planId);
+  if(!g||!p)return;
+  currentGroupId=gid;currentGpPlanId=planId;
+  document.getElementById('gpTitle').textContent=g.name+' · 編輯教案';
+  const memberNames=(g.members||[]).map(id=>S.students.find(x=>x.id===id)?.name).filter(Boolean);
+  document.getElementById('gpMembersRow').innerHTML=`<b>成員：</b>${memberNames.join('、')||'（未有成員）'}`;
+  document.getElementById('gpDate').value=p.date||today();
+  document.getElementById('gpGoal').value=p.goal||'';
+  document.getElementById('gpPlan').value=p.plan||'';
+  document.getElementById('gpRecord').value=p.record||'';
+  document.getElementById('gpPiece').value=p.piece||'';
+  document.getElementById('gpHw').value=p.hw||'';
+  renderGpIndivNotes(g.members||[],p.indivNotes||{});
+  openMo('moGroupPlan');
+}
+function renderGpIndivNotes(members,existing={}){
+  document.getElementById('gpIndivNotes').innerHTML=members.length
+    ?members.map(sid=>{const s=S.students.find(x=>x.id===sid);if(!s)return'';return`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="font-family:'Noto Serif TC',serif;font-size:.77rem;color:var(--txt);min-width:52px">${s.name}</div><input type="text" id="gpin_${sid}" class="ii" style="margin-bottom:0;flex:1;padding:5px 8px;font-size:.74rem" placeholder="個別備注（如需要）" value="${(existing[sid]||'').replace(/"/g,'&quot;')}"></div>`;}).join('')
+    :'<div style="font-size:.73rem;color:var(--txt3)">此群組暫無成員</div>';
+}
+async function saveGroupPlan(){
+  const date=document.getElementById('gpDate').value;if(!date){alert('請選擇日期');return;}
+  const g=S.groups.find(x=>x.id===currentGroupId);if(!g)return;
+  const btn=document.getElementById('btnGp');btn.disabled=true;btn.textContent='儲存中⋯';
+  const planId=currentGpPlanId||`grp_${currentGroupId}_${date}_${Date.now()}`;
+  const indivNotes={};
+  (g.members||[]).forEach(sid=>{const el=document.getElementById('gpin_'+sid);if(el&&el.value.trim())indivNotes[sid]=el.value.trim();});
+  const p={id:planId,groupId:currentGroupId,date,goal:document.getElementById('gpGoal').value,plan:document.getElementById('gpPlan').value,record:document.getElementById('gpRecord').value,piece:document.getElementById('gpPiece').value,hw:document.getElementById('gpHw').value,indivNotes,createdAt:Date.now()};
+  const idx=S.lessonPlans.findIndex(x=>x.id===planId);
+  if(idx>=0)S.lessonPlans[idx]=p;else S.lessonPlans.push(p);
+  saveL();await fbSet('lessonPlans',planId,p);
+  closeMo('moGroupPlan');btn.disabled=false;btn.textContent='儲存班級教案';
+  renderAll();showBan('✓ 班級教案已儲存',false);
 }
 
 // ═══════════════════════════════════════════
