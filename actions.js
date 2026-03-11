@@ -340,12 +340,12 @@ function openModalGroup(editGid = null) {
   document.getElementById('gMemberList').innerHTML =
     DB.students.length
       ? DB.students.map(s =>
-          `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.87rem;color:var(--txt2);cursor:pointer">
+          `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.95rem;color:var(--txt2);cursor:pointer">
             <input type="checkbox" value="${s.id}" ${members.includes(s.id) ? 'checked' : ''} style="width:15px;height:15px;accent-color:var(--red)">
             ${s.name}（${s.instrument || '—'}）
           </label>`
         ).join('')
-      : '<div style="font-size:.85rem;color:var(--txt3);padding:8px 0">尚未有學生，請先新增學生</div>';
+      : '<div style="font-size:0.93rem;color:var(--txt3);padding:8px 0">尚未有學生，請先新增學生</div>';
   openMo('moGroup');
 }
 

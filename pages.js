@@ -37,8 +37,8 @@ function renderDash() {
         onclick="${l.groupId ? "goPage('timetable')" : `openDetail('${l.studentId}')`}">
         <div style="font-family:var(--KAI);font-size:1rem;color:var(--gold);min-width:42px;text-align:center">${l.start || '—'}</div>
         <div>
-          <div style="font-size:.9rem;color:var(--txt)">${name}</div>
-          <div style="font-size:.77rem;color:var(--txt3)">${l.dur || 60} 分鐘${l.fee ? ' · HK$' + l.fee : ''}</div>
+          <div style="font-size:0.98rem;color:var(--txt)">${name}</div>
+          <div style="font-size:0.85rem;color:var(--txt3)">${l.dur || 60} 分鐘${l.fee ? ' · HK$' + l.fee : ''}</div>
         </div>
       </div>`;
     });
@@ -51,10 +51,10 @@ function renderDash() {
       if (!s) return;
       h += `<div class="card" style="cursor:pointer;margin-bottom:7px" onclick="openDetail('${s.id}')">
         <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-          <span style="font-family:var(--KAI);font-size:.9rem;color:var(--txt)">${s.name}</span>
-          <span style="font-size:.76rem;color:var(--txt3)">${r.date || ''}</span>
+          <span style="font-family:var(--KAI);font-size:0.98rem;color:var(--txt)">${s.name}</span>
+          <span style="font-size:0.84rem;color:var(--txt3)">${r.date || ''}</span>
         </div>
-        <div style="font-size:.84rem;color:var(--txt2);line-height:1.6">${(r.content || '').slice(0, 65)}${(r.content || '').length > 65 ? '…' : ''}</div>
+        <div style="font-size:0.92rem;color:var(--txt2);line-height:1.6">${(r.content || '').slice(0, 65)}${(r.content || '').length > 65 ? '…' : ''}</div>
       </div>`;
     });
   }
@@ -68,8 +68,8 @@ function renderDash() {
 
 function statTile(label, val, unit) {
   return `<div class="card" style="text-align:center;padding:11px 8px">
-    <div style="font-family:var(--KAI);font-size:1.2rem;color:var(--gold)">${val}<span style="font-size:.75rem;color:var(--txt3)">${unit}</span></div>
-    <div style="font-size:.73rem;color:var(--txt3);margin-top:2px;letter-spacing:.06em">${label}</div>
+    <div style="font-family:var(--KAI);font-size:1.2rem;color:var(--gold)">${val}<span style="font-size:0.83rem;color:var(--txt3)">${unit}</span></div>
+    <div style="font-size:0.81rem;color:var(--txt3);margin-top:2px;letter-spacing:.06em">${label}</div>
   </div>`;
 }
 
@@ -125,6 +125,8 @@ function calDayClick(ds) { UI.calSelDay = ds; renderCal(); }
 function renderDayPanel(ds) {
   if (!ds) return;
   const dow = new Date(ds + 'T00:00:00').getDay();
+  const now = new Date();
+
   const skipSet = new Set(DB.lessons
     .filter(l => l.type === 'once-skip' && l.date === ds)
     .map(l => l.lessonId));
@@ -133,37 +135,50 @@ function renderDayPanel(ds) {
     (l.type === 'once'  && l.date === ds)
   ).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
 
-  // Check which lessons are skipped on this date
-  const skipped = new Set((DB.records || [])
-    .filter(r => r.date === ds && r.attend === 'absent' && r.lessonId)
-    .map(r => r.lessonId));
-  // Check which are confirmed attended
-  const attended = new Set((DB.records || [])
-    .filter(r => r.date === ds && r.attend === 'present' && r.lessonId)
-    .map(r => r.lessonId));
+  const skipped  = new Set((DB.records || []).filter(r => r.date === ds && r.attend === 'absent'  && r.lessonId).map(r => r.lessonId));
+  const attended = new Set((DB.records || []).filter(r => r.date === ds && r.attend === 'present' && r.lessonId).map(r => r.lessonId));
 
   let h = `<div class="sh">${ds}</div>`;
   if (!lessons.length) {
-    h += `<div style="font-size:.86rem;color:var(--txt3);padding:8px 0">此日無課堂安排</div>`;
+    h += `<div style="font-size:0.94rem;color:var(--txt3);padding:8px 0">此日無課堂安排</div>`;
   } else {
     lessons.forEach(l => {
       const name = lessonName(l);
       const isGrp = !!l.groupId;
       const isSkip = skipped.has(l.id);
-      const isDone = attended.has(l.id);
-      // Credits for this student
+      let isDone = attended.has(l.id);
+      let isAuto = false;
+
+      // Auto-confirm: if lesson end time has passed and no manual record
+      if (!isDone && !isSkip && l.start) {
+        const [hh, mm] = l.start.split(':').map(Number);
+        const lessonEnd = new Date(ds + 'T00:00:00');
+        lessonEnd.setMinutes(hh * 60 + mm + parseInt(l.dur || 60));
+        if (now > lessonEnd) { isDone = true; isAuto = true; }
+      }
+
       const cred = l.studentId ? (DB.credits || []).find(c => c.studentId === l.studentId) : null;
       const credLeft = cred ? (cred.total - cred.used) : null;
-      h += `<div class="card" style="display:flex;gap:10px;margin-bottom:7px;${isSkip?'opacity:.5;border-left:3px solid var(--red)':''}${isDone?'border-left:3px solid var(--jade)':''}">
-        <div style="font-family:var(--KAI);font-size:.89rem;color:var(--gold);min-width:40px;flex-shrink:0;padding-top:2px">${l.start || '—'}</div>
+      const border = isSkip ? 'border-left:3px solid var(--red)' : isDone ? 'border-left:3px solid var(--jade)' : '';
+
+      h += `<div class="card" style="display:flex;gap:10px;margin-bottom:7px;${border}">
+        <div style="font-family:var(--KAI);font-size:0.97rem;color:var(--gold);min-width:40px;flex-shrink:0;padding-top:2px">${l.start || '—'}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.9rem;color:var(--txt);margin-bottom:2px">${name}${isGrp ? ' <span style="font-size:.72rem;color:var(--jade);border:1px solid var(--jade);padding:1px 4px">群組</span>' : ''}${isSkip?' <span style="font-size:.72rem;color:var(--red)">請假</span>':''}${isDone?' <span style="font-size:.72rem;color:var(--jade)">✓已上堂</span>':''}</div>
-          <div style="font-size:.76rem;color:var(--txt3)">${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${credLeft!==null&&!isPrivacyHidden()?` · 剩 ${credLeft} 節`:''}</div>
+          <div style="font-size:0.98rem;color:var(--txt);margin-bottom:2px">
+            ${name}
+            ${isGrp ? ' <span style="font-size:0.80rem;color:var(--jade);border:1px solid var(--jade);padding:1px 4px">群組</span>' : ''}
+            ${isSkip ? ' <span style="font-size:0.80rem;color:var(--red)">請假</span>' : ''}
+            ${isDone ? ` <span style="font-size:0.80rem;color:var(--jade)">${isAuto ? '已上堂' : '✓已上堂'}</span>` : ''}
+          </div>
+          <div style="font-size:0.84rem;color:var(--txt3)">${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${credLeft!==null&&!isPrivacyHidden()?' · 剩 '+credLeft+' 節':''}</div>
           <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
-            ${!isDone && !isSkip ? `<button onclick="confirmAttend('${l.id}','${ds}')" class="btn s sm" style="font-size:.72rem;padding:2px 7px">✓確認上堂</button>` : ''}
-            ${!isSkip && !isDone ? `<button onclick="skipLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.72rem;padding:2px 7px;color:var(--red)">請假</button>` : ''}
-            ${isSkip ? `<button onclick="unskipLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.72rem;padding:2px 7px">取消請假</button>` : ''}
-            ${l.type==='once'?`<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="font-size:.72rem;padding:2px 7px;color:var(--red)">刪除</button>`:`<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.72rem;padding:2px 7px">單次刪除</button>`}
+            ${!isDone && !isSkip ? `<button onclick="confirmAttend('${l.id}','${ds}')" class="btn s sm">✓確認上堂</button>` : ''}
+            ${isSkip
+              ? `<button onclick="unskipLesson('${l.id}','${ds}')" class="btn s sm">取消請假</button>`
+              : `<button onclick="skipLesson('${l.id}','${ds}')" class="btn s sm" style="color:var(--red)">請假</button>`}
+            ${l.type==='once'
+              ? `<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="color:var(--red)">刪除</button>`
+              : `<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm">單次刪除</button>`}
           </div>
         </div>
       </div>`;
@@ -206,11 +221,11 @@ function renderStudents() {
     return `<div class="sc" onclick="openDetail('${s.id}')">
       <div class="av">${s.name[0]}</div>
       <div class="si">
-        <div class="sn">${s.name}${s.nameEn ? `<span style="font-size:.77rem;color:var(--txt3);font-weight:400;margin-left:5px">${s.nameEn}</span>` : ''}</div>
+        <div class="sn">${s.name}${s.nameEn ? `<span style="font-size:0.85rem;color:var(--txt3);font-weight:400;margin-left:5px">${s.nameEn}</span>` : ''}</div>
         <div class="ss">${[s.instrument, s.level, sch ? sch.name : null].filter(Boolean).join(' · ')}</div>
-        <div style="font-size:.73rem;color:var(--txt3);margin-top:1px">${rc} 條記錄</div>
+        <div style="font-size:0.81rem;color:var(--txt3);margin-top:1px">${rc} 條記錄</div>
       </div>
-      ${_hideGrade ? `<div class="gc" style="border-color:var(--bdr2);color:var(--txt3);font-size:.64rem">●●</div>` : (g ? `<div class="gc" style="border-color:${g.color};color:${g.color}">${g.grade}</div>` : '')}
+      ${_hideGrade ? `<div class="gc" style="border-color:var(--bdr2);color:var(--txt3);font-size:0.72rem">●●</div>` : (g ? `<div class="gc" style="border-color:${g.color};color:${g.color}">${g.grade}</div>` : '')}
     </div>`;
   }).join('');
 }
@@ -229,8 +244,8 @@ function renderTabRecords(s) {
     <div class="ri ${r.attend === 'absent' ? 'absent' : r.attend === 'makeup' ? 'makeup' : ''}">
       <div class="rd">${r.date || ''} <span class="pill ${attendCls[r.attend] || 'p'}">${attendLabel[r.attend] || '出席'}</span></div>
       <div class="rc">${r.content || ''}</div>
-      ${r.piece ? `<div style="font-size:.79rem;color:var(--gold2);margin-top:3px">♩ ${r.piece}</div>` : ''}
-      <div style="font-size:.76rem;color:var(--txt3);margin-top:4px">
+      ${r.piece ? `<div style="font-size:0.87rem;color:var(--gold2);margin-top:3px">♩ ${r.piece}</div>` : ''}
+      <div style="font-size:0.84rem;color:var(--txt3);margin-top:4px">
         ${'★'.repeat(parseInt(r.rating) || 3)} ${['','待改進','一般','良好','優秀','卓越'][parseInt(r.rating) || 3]}
         ${r.hw ? ` · 功課：${r.hw}` : ''}
       </div>
@@ -245,11 +260,11 @@ function renderTabPlans(s) {
   if (!plans.length) return h + emptyState('案', '尚未有教案記錄');
   h += plans.map(p => `
     <div class="pc">
-      <div style="font-size:.76rem;color:var(--txt3);margin-bottom:6px">${p.date || ''}</div>
+      <div style="font-size:0.84rem;color:var(--txt3);margin-bottom:6px">${p.date || ''}</div>
       ${p.goal   ? `<div class="psl">教學目標</div><div class="pt">${p.goal}</div>` : ''}
       ${p.plan   ? `<div class="psl" style="margin-top:6px">教案內容</div><div class="pt">${p.plan}</div>` : ''}
       ${p.record ? `<div class="psl" style="margin-top:8px;color:var(--jade)">實際記錄</div><div class="pt">${p.record}</div>` : ''}
-      ${p.hw     ? `<div style="font-size:.78rem;color:var(--txt3);margin-top:5px">功課：${p.hw}</div>` : ''}
+      ${p.hw     ? `<div style="font-size:0.86rem;color:var(--txt3);margin-top:5px">功課：${p.hw}</div>` : ''}
     </div>`).join('');
   return h;
 }
@@ -260,7 +275,7 @@ function renderTabProfile(s) {
   const genderLabel = { M:'男', F:'女' };
 
   let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
-    <div style="font-size:.85rem;color:var(--txt2)">學生資料</div>
+    <div style="font-size:0.93rem;color:var(--txt2)">學生資料</div>
     <button class="btn s sm" onclick="openModalStudent('${s.id}')">編輯資料</button>
   </div>`;
 
@@ -305,7 +320,7 @@ function renderTabProfile(s) {
   )].slice(0, 10);
   if (pieces.length) {
     h += `<div class="card" style="margin-top:0">
-      <div style="font-size:.73rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:6px">近期曲目</div>
+      <div style="font-size:0.81rem;color:var(--gold2);letter-spacing:.1em;margin-bottom:6px">近期曲目</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${pieces.map(p => `<span class="pill">♩ ${p}</span>`).join('')}</div>
     </div>`;
   }
@@ -332,19 +347,19 @@ function renderTabFees(s) {
 
   let h = `<div class="card gold" style="margin-bottom:10px">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:9px">
-      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--jade)">${present}</div><div style="font-size:.73rem;color:var(--txt3)">已上堂</div></div>
-      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--red)">${absent}</div><div style="font-size:.73rem;color:var(--txt3)">請假</div></div>
-      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--gold2)">${makeup}</div><div style="font-size:.73rem;color:var(--txt3)">補堂</div></div>
+      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--jade)">${present}</div><div style="font-size:0.81rem;color:var(--txt3)">已上堂</div></div>
+      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--red)">${absent}</div><div style="font-size:0.81rem;color:var(--txt3)">請假</div></div>
+      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--gold2)">${makeup}</div><div style="font-size:0.81rem;color:var(--txt3)">補堂</div></div>
     </div>
     ${!hide ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-top:9px;border-top:1px solid var(--bdr)">
       <div style="text-align:center">
         <div style="font-family:var(--KAI);font-size:1.1rem;color:var(--jade)">${credLeft}</div>
-        <div style="font-size:.73rem;color:var(--txt3)">剩餘課節</div>
+        <div style="font-size:0.81rem;color:var(--txt3)">剩餘課節</div>
       </div>
       <div style="text-align:center">
         <div style="font-family:var(--KAI);font-size:1.1rem;color:var(--txt2)">HK$${Math.round(total)}</div>
-        <div style="font-size:.73rem;color:var(--txt3)">總收款</div>
+        <div style="font-size:0.81rem;color:var(--txt3)">總收款</div>
       </div>
     </div>` : ''}
   </div>
@@ -355,17 +370,17 @@ function renderTabFees(s) {
   </div>`;
 
   if (!pays.length) {
-    h += `<div class="sh">收款記錄</div><div style="font-size:.86rem;color:var(--txt3);padding:6px 0">尚未有收款記錄</div>`;
+    h += `<div class="sh">收款記錄</div><div style="font-size:0.94rem;color:var(--txt3);padding:6px 0">尚未有收款記錄</div>`;
     return h;
   }
 
   h += `<div class="sh">收款記錄</div>`;
   h += pays.map(p => `<div class="card" style="margin-bottom:7px">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:var(--KAI);font-size:.95rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</div>
-      <div style="font-size:.76rem;color:var(--txt3)">${p.date || ''}</div>
+      <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</div>
+      <div style="font-size:0.84rem;color:var(--txt3)">${p.date || ''}</div>
     </div>
-    <div style="font-size:.79rem;color:var(--txt3);margin-top:2px">
+    <div style="font-size:0.87rem;color:var(--txt3);margin-top:2px">
       ${[p.period, p.method, p.note, p.credits ? '+' + p.credits + '節' : ''].filter(Boolean).join(' · ')}
     </div>
   </div>`).join('');
@@ -428,11 +443,9 @@ function buildHexSvg(sc, overall) {
 
 function renderTabScores(s) {
   const sc = s.scores || {};
-  const autoOv = calcOverall(sc);
-  const overall = s.overallScore != null ? s.overallScore : autoOv;
+  const overall = calcOverall(sc);
   const g = getGrade(overall);
 
-  // Axis summary bars
   const axBars = AXES.map(ax => {
     const v = axisVal(sc, ax);
     const pct = Math.round(v * 10);
@@ -446,7 +459,6 @@ function renderTabScores(s) {
     </div>`;
   }).join('');
 
-  // Dimension sliders (grouped by category)
   const cats = [...new Set(DIMS.map(d => d.cat))];
   const sliders = cats.map(cat => {
     const dims = DIMS.filter(d => d.cat === cat);
@@ -454,7 +466,7 @@ function renderTabScores(s) {
       const v = sc[d.key] || 5;
       return `<div class="drow">
         <div class="dhd">
-          <span class="dl">${d.label}${d.note ? ` <span style="font-size:.71rem;color:#8a7a62">（${d.note}）</span>` : ''}</span>
+          <span class="dl">${d.label}${d.note ? ` <span style="font-size:0.79rem;color:#8a7a62">（${d.note}）</span>` : ''}</span>
           <span class="dv" id="dv_${d.key}_${s.id}">${v}/10</span>
         </div>
         <input type="range" min="1" max="10" value="${v}"
@@ -466,31 +478,25 @@ function renderTabScores(s) {
 
   return `<div class="sw">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-family:var(--KAI);font-size:.9rem;color:var(--gold2);letter-spacing:.1em">六維能力圖</span>
+      <span style="font-family:var(--KAI);font-size:0.98rem;color:var(--gold2);letter-spacing:.1em">六維能力圖</span>
       <div class="gc" id="gBadge_${s.id}" style="border-color:${g.color};color:${g.color}">${g.grade}</div>
     </div>
 
     <div id="hexWrap_${s.id}">${buildHexSvg(sc, overall)}</div>
 
-    <div style="margin-bottom:13px">
-      <div style="display:flex;justify-content:space-between;font-size:.81rem;margin-bottom:4px">
-        <span style="color:var(--txt3)">整體評分 <strong id="ovNum_${s.id}" style="color:var(--txt)">${overall}/100</strong></span>
-        <span id="ovDesc_${s.id}" style="font-size:.74rem;color:var(--txt3)">${g.desc}</span>
-      </div>
-      <input type="range" min="0" max="100" value="${overall}"
-        oninput="onOverallSlide(this,'${s.id}')"
-        onchange="saveOverall('${s.id}',this.value)">
-      <div style="font-size:.71rem;color:var(--txt3);margin-top:2px">手動拖動可覆蓋自動計算</div>
+    <div style="display:flex;justify-content:space-between;font-size:0.89rem;margin-bottom:14px">
+      <span style="color:var(--txt3)">整體評分 <strong id="ovNum_${s.id}" style="color:var(--txt)">${overall}/100</strong></span>
+      <span id="ovDesc_${s.id}" style="color:var(--txt3)">${g.desc}</span>
     </div>
 
     <div style="margin-bottom:12px">${axBars}</div>
 
     <details>
-      <summary style="font-size:.8rem;color:var(--gold2);padding:5px 0;letter-spacing:.06em">展開各項詳細評分</summary>
+      <summary class="expand-btn">▸ 展開各項詳細評分</summary>
       <div style="margin-top:9px">${sliders}</div>
     </details>
 
-    <div style="font-size:.73rem;color:var(--txt3);border-top:1px solid var(--bdr);padding-top:6px;line-height:2;margin-top:8px">
+    <div style="font-size:0.81rem;color:var(--txt3);border-top:1px solid var(--bdr);padding-top:6px;line-height:2;margin-top:8px">
       評分：1–3 待努力　4–5 一般　6–7 良好　8–9 優秀　10 卓越<br>
       S≥92 · A≥80 · B≥65 · C≥50 · D≥35 · F&lt;35
     </div>
@@ -509,49 +515,27 @@ function onDimSlide(el, sid, key) {
   refreshHex(sid);
 }
 
-function onOverallSlide(el, sid) {
-  const val = parseInt(el.value);
-  const g = getGrade(val);
-  const lbl = document.getElementById('ovNum_' + sid);
-  if (lbl) lbl.textContent = val + '/100';
-  const desc = document.getElementById('ovDesc_' + sid);
-  if (desc) desc.textContent = g.desc;
-  const badge = document.getElementById('gBadge_' + sid);
-  if (badge) { badge.textContent = g.grade; badge.style.borderColor = g.color; badge.style.color = g.color; }
-  const s = DB.students.find(x => x.id === sid);
-  if (s) s.overallScore = val;
-}
-
 function refreshHex(sid) {
   const s = DB.students.find(x => x.id === sid);
   if (!s) return;
   const sc = s.scores || {};
-  const autoOv = calcOverall(sc);
-  const overall = s.overallScore != null ? s.overallScore : autoOv;
-
+  const overall = calcOverall(sc);
+  const g = getGrade(overall);
   const wrap = document.getElementById('hexWrap_' + sid);
   if (wrap) wrap.innerHTML = buildHexSvg(sc, overall);
-
-  // Refresh axis bars
   AXES.forEach(ax => {
-    const v = axisVal(sc, ax);
-    const pct = Math.round(v * 10);
+    const pct = Math.round(axisVal(sc, ax) * 10);
     const lbl = document.getElementById('axv_' + ax.key + '_' + sid);
     const bar = document.getElementById('axf_' + ax.key + '_' + sid);
     if (lbl) lbl.textContent = pct;
     if (bar) bar.style.width = pct + '%';
   });
-
-  // Update badge if using auto score
-  if (s.overallScore == null) {
-    const g = getGrade(autoOv);
-    const lbl = document.getElementById('ovNum_' + sid);
-    if (lbl) lbl.textContent = autoOv + '/100';
-    const badge = document.getElementById('gBadge_' + sid);
-    if (badge) { badge.textContent = g.grade; badge.style.borderColor = g.color; badge.style.color = g.color; }
-    const desc = document.getElementById('ovDesc_' + sid);
-    if (desc) desc.textContent = g.desc;
-  }
+  const lbl = document.getElementById('ovNum_' + sid);
+  if (lbl) lbl.textContent = overall + '/100';
+  const badge = document.getElementById('gBadge_' + sid);
+  if (badge) { badge.textContent = g.grade; badge.style.borderColor = g.color; badge.style.color = g.color; }
+  const desc = document.getElementById('ovDesc_' + sid);
+  if (desc) desc.textContent = g.desc;
 }
 
 async function saveDim(sid, key, val) {
@@ -559,14 +543,6 @@ async function saveDim(sid, key, val) {
   if (!s) return;
   if (!s.scores) s.scores = {};
   s.scores[key] = parseInt(val);
-  saveLocal();
-  await fbSave('students', sid, s);
-}
-
-async function saveOverall(sid, val) {
-  const s = DB.students.find(x => x.id === sid);
-  if (!s) return;
-  s.overallScore = parseInt(val);
   saveLocal();
   await fbSave('students', sid, s);
 }
@@ -589,16 +565,16 @@ function renderIncome() {
     const total = pays.reduce((a, p) => a + parseFloat(p.amount || 0), 0);
     const ymLabel = ym.replace('-', ' 年 ') + ' 月';
     h += `<div class="sh">${ymLabel}`;
-    if (!hide) h += ` <span style="color:var(--jade);font-size:.87rem;margin-left:4px">HK$${Math.round(total)}</span>`;
+    if (!hide) h += ` <span style="color:var(--jade);font-size:0.95rem;margin-left:4px">HK$${Math.round(total)}</span>`;
     h += `</div>`;
     pays.forEach(p => {
       const stu = DB.students.find(x => x.id === p.studentId);
       h += `<div class="card" style="margin-bottom:7px">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-family:var(--KAI);font-size:.95rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</span>
-          <span style="font-size:.76rem;color:var(--txt3)">${p.date || ''}</span>
+          <span style="font-family:var(--KAI);font-size:0.99rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</span>
+          <span style="font-size:0.84rem;color:var(--txt3)">${p.date || ''}</span>
         </div>
-        <div style="font-size:.81rem;color:var(--txt3);margin-top:2px">
+        <div style="font-size:0.89rem;color:var(--txt3);margin-top:2px">
           ${[stu ? stu.name : '—', p.period, p.method, p.note, p.credits ? '+' + p.credits + '節' : ''].filter(Boolean).join(' · ')}
         </div>
       </div>`;
@@ -645,8 +621,8 @@ function renderSettings() {
         ${CU.photoURL ? `<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover">` : (CU.displayName || CU.email || '?')[0].toUpperCase()}
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-family:var(--KAI);font-size:.96rem;color:var(--txt);margin-bottom:2px">${CU.displayName || ''}</div>
-        <div style="font-size:.78rem;color:var(--txt3);overflow:hidden;text-overflow:ellipsis">${CU.email || ''}</div>
+        <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--txt);margin-bottom:2px">${CU.displayName || ''}</div>
+        <div style="font-size:0.86rem;color:var(--txt3);overflow:hidden;text-overflow:ellipsis">${CU.email || ''}</div>
       </div>
       <button class="btn s sm" onclick="doSignOut()">登出</button>
     </div>`;
@@ -677,13 +653,13 @@ function renderSettings() {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
     <div onclick="goPage('ref')" class="card" style="cursor:pointer;text-align:center;padding:14px 8px">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      <div style="font-family:var(--KAI);font-size:.83rem;color:var(--gold2);margin-top:6px">教學參考</div>
-      <div style="font-size:.7rem;color:var(--txt3);margin-top:2px">傳承 · 考級 · 資源</div>
+      <div style="font-family:var(--KAI);font-size:0.91rem;color:var(--gold2);margin-top:6px">教學參考</div>
+      <div style="font-size:0.78rem;color:var(--txt3);margin-top:2px">傳承 · 考級 · 資源</div>
     </div>
     <div onclick="goPage('tasks')" class="card" style="cursor:pointer;text-align:center;padding:14px 8px">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="9" y="11" width="4" height="10"/><path d="M9 11V6a3 3 0 0 1 6 0v5"/><rect x="3" y="6" width="18" height="5" rx="1"/></svg>
-      <div style="font-family:var(--KAI);font-size:.83rem;color:var(--gold2);margin-top:6px">任務管理</div>
-      <div style="font-size:.7rem;color:var(--txt3);margin-top:2px">派發 · 追蹤進度</div>
+      <div style="font-family:var(--KAI);font-size:0.91rem;color:var(--gold2);margin-top:6px">任務管理</div>
+      <div style="font-size:0.78rem;color:var(--txt3);margin-top:2px">派發 · 追蹤進度</div>
     </div>
   </div>`;
 
@@ -693,8 +669,8 @@ function renderSettings() {
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:12px">
       <div style="flex:1">
-        <div style="font-size:.88rem;color:var(--txt2);margin-bottom:3px">一鍵隱藏所有隱私資訊</div>
-        <div style="font-size:.75rem;color:var(--txt3);line-height:1.7">隱藏學費金額、收款記錄、能力評級及課節數量，以 ●●●● 顯示</div>
+        <div style="font-size:0.96rem;color:var(--txt2);margin-bottom:3px">一鍵隱藏所有隱私資訊</div>
+        <div style="font-size:0.83rem;color:var(--txt3);line-height:1.7">隱藏學費金額、收款記錄、能力評級及課節數量，以 ●●●● 顯示</div>
       </div>
       <div class="priv-toggle${hideAll?' on':''}" onclick="toggleAllPrivacy()">
         <div class="priv-thumb"></div>
@@ -706,8 +682,8 @@ function renderSettings() {
   h += `<div class="sh">學校管理</div>`;
   DB.schools.forEach(sch => {
     h += `<div class="card" style="display:flex;align-items:center;margin-bottom:7px">
-      <span style="flex:1;font-size:.88rem;color:var(--txt2)">${sch.name}</span>
-      <button onclick="deleteSchool('${sch.id}')" style="font-size:.81rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px 5px">刪除</button>
+      <span style="flex:1;font-size:0.96rem;color:var(--txt2)">${sch.name}</span>
+      <button onclick="deleteSchool('${sch.id}')" style="font-size:0.89rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px 5px">刪除</button>
     </div>`;
   });
   h += `<button class="btn s sm" onclick="openMo('moSchool')" style="margin-bottom:14px">新增學校</button>`;
@@ -717,11 +693,11 @@ function renderSettings() {
   DB.groups.forEach(g => {
     h += `<div class="card" style="margin-bottom:7px">
       <div style="display:flex;align-items:center">
-        <span style="flex:1;font-size:.88rem;color:var(--txt2)">${g.name}</span>
-        <button onclick="openModalGroup('${g.id}')" style="font-size:.81rem;color:var(--gold2);background:none;border:none;cursor:pointer;margin-right:9px">編輯</button>
-        <button onclick="deleteGroup('${g.id}')" style="font-size:.81rem;color:var(--txt3);background:none;border:none;cursor:pointer">刪除</button>
+        <span style="flex:1;font-size:0.96rem;color:var(--txt2)">${g.name}</span>
+        <button onclick="openModalGroup('${g.id}')" style="font-size:0.89rem;color:var(--gold2);background:none;border:none;cursor:pointer;margin-right:9px">編輯</button>
+        <button onclick="deleteGroup('${g.id}')" style="font-size:0.89rem;color:var(--txt3);background:none;border:none;cursor:pointer">刪除</button>
       </div>
-      <div style="font-size:.75rem;color:var(--txt3);margin-top:3px">${(g.members || []).length} 名成員</div>
+      <div style="font-size:0.83rem;color:var(--txt3);margin-top:3px">${(g.members || []).length} 名成員</div>
     </div>`;
   });
   h += `<button class="btn s sm" onclick="openModalGroup(null)" style="margin-bottom:14px">新增群組</button>`;
@@ -750,18 +726,18 @@ function applyFs() {
 // EXAM DATABASE PAGE
 // ────────────────────────────────────────────
 function renderExam() {
-  let h = `<div style="font-size:.81rem;color:var(--txt3);line-height:1.9;margin-bottom:14px;padding:10px 12px;background:var(--card);border-left:3px solid var(--gold2)">
+  let h = `<div style="font-size:0.89rem;color:var(--txt3);line-height:1.9;margin-bottom:14px;padding:10px 12px;background:var(--card);border-left:3px solid var(--gold2)">
     以下考級資料僅供參考，請以各機構官方網站公佈為準。
   </div>`;
 
   EXAMS.forEach(ex => {
     h += `<div class="card gold" style="margin-bottom:10px">
-      <div style="font-family:var(--KAI);font-size:.95rem;color:var(--gold);margin-bottom:4px">${ex.name}</div>
-      <div style="font-size:.8rem;color:var(--jade);letter-spacing:.06em;margin-bottom:6px">${ex.grades}</div>
-      <div style="font-size:.83rem;color:var(--txt2);line-height:1.7;margin-bottom:7px">${ex.note}</div>
+      <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--gold);margin-bottom:4px">${ex.name}</div>
+      <div style="font-size:0.88rem;color:var(--jade);letter-spacing:.06em;margin-bottom:6px">${ex.grades}</div>
+      <div style="font-size:0.91rem;color:var(--txt2);line-height:1.7;margin-bottom:7px">${ex.note}</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:.7rem;color:var(--txt3)">來源：${ex.src}</div>
-        <a href="${ex.url}" target="_blank" style="font-size:.76rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none;letter-spacing:.06em">官網 ↗</a>
+        <div style="font-size:0.78rem;color:var(--txt3)">來源：${ex.src}</div>
+        <a href="${ex.url}" target="_blank" style="font-size:0.84rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none;letter-spacing:.06em">官網 ↗</a>
       </div>
     </div>`;
   });
@@ -856,7 +832,7 @@ function buildLineageHtml() {
         <div class="lm" style="border-left-color:${sec.color};margin-bottom:0">
           <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px">
             <span class="lmn">${m.name}</span>
-            ${m.sect?`<span style="font-size:.73rem;color:var(--txt3);padding:1px 6px;border:1px solid var(--bdr)">${m.sect}</span>`:''}
+            ${m.sect?`<span style="font-size:0.81rem;color:var(--txt3);padding:1px 6px;border:1px solid var(--bdr)">${m.sect}</span>`:''}
           </div>
           ${m.school?`<div class="lms">${m.school}</div>`:''}
           <div class="lmd">${m.desc}</div>
@@ -874,16 +850,16 @@ function buildLineageHtml() {
 }
 
 function buildExamHtml() {
-  let h = `<div style="font-size:.81rem;color:var(--txt3);line-height:1.9;margin-bottom:12px;padding:9px 11px;background:var(--card);border-left:3px solid var(--gold2)">
+  let h = `<div style="font-size:0.89rem;color:var(--txt3);line-height:1.9;margin-bottom:12px;padding:9px 11px;background:var(--card);border-left:3px solid var(--gold2)">
     以下考級資料僅供參考，請以各機構官方網站公佈為準。</div>`;
   EXAMS.forEach(ex => {
     h += `<div class="card gold" style="margin-bottom:10px">
-      <div style="font-family:var(--KAI);font-size:.96rem;color:var(--gold);margin-bottom:4px">${ex.name}</div>
-      <div style="font-size:.79rem;color:var(--jade);letter-spacing:.06em;margin-bottom:6px">${ex.grades}</div>
-      <div style="font-size:.82rem;color:var(--txt2);line-height:1.7;margin-bottom:7px">${ex.note}</div>
+      <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--gold);margin-bottom:4px">${ex.name}</div>
+      <div style="font-size:0.87rem;color:var(--jade);letter-spacing:.06em;margin-bottom:6px">${ex.grades}</div>
+      <div style="font-size:0.90rem;color:var(--txt2);line-height:1.7;margin-bottom:7px">${ex.note}</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:.7rem;color:var(--txt3)">來源：${ex.src}</div>
-        <a href="${ex.url}" target="_blank" style="font-size:.75rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none">官網 ↗</a>
+        <div style="font-size:0.78rem;color:var(--txt3)">來源：${ex.src}</div>
+        <a href="${ex.url}" target="_blank" style="font-size:0.83rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none">官網 ↗</a>
       </div>
     </div>`;
   });
@@ -898,11 +874,11 @@ function buildLinksHtml() {
       h += `<div class="card" style="margin-bottom:8px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
           <div style="flex:1">
-            <div style="font-size:.88rem;color:var(--txt);margin-bottom:3px">${item.title}</div>
-            <div style="font-size:.79rem;color:var(--txt3);line-height:1.6">${item.note}</div>
+            <div style="font-size:0.96rem;color:var(--txt);margin-bottom:3px">${item.title}</div>
+            <div style="font-size:0.87rem;color:var(--txt3);line-height:1.6">${item.note}</div>
           </div>
           <a href="${item.url}" target="_blank"
-            style="font-size:.75rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none;white-space:nowrap;flex-shrink:0">開啟 ↗</a>
+            style="font-size:0.83rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none;white-space:nowrap;flex-shrink:0">開啟 ↗</a>
         </div>
       </div>`;
     });
@@ -941,17 +917,17 @@ function renderTasks() {
       taskHtml += `<div class="card" style="margin-bottom:9px;border-left:3px solid ${done?'var(--jade)':'var(--gold2)'}">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
           <div style="flex:1">
-            <div style="font-family:var(--KAI);font-size:.94rem;color:var(--txt);margin-bottom:2px">${t.title}</div>
-            <div style="font-size:.76rem;color:var(--txt3);margin-bottom:5px">
+            <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--txt);margin-bottom:2px">${t.title}</div>
+            <div style="font-size:0.84rem;color:var(--txt3);margin-bottom:5px">
               ${stu?stu.name:'?'} · ${t.dueDate?'截止：'+t.dueDate:''} ·
               <span style="color:${done?'var(--jade)':'var(--gold2)'}">${done?'已完成':'待完成'}</span>
             </div>
-            ${t.desc?`<div style="font-size:.83rem;color:var(--txt2);line-height:1.65;margin-bottom:5px">${t.desc}</div>`:''}
-            ${t.progress?`<div style="font-size:.81rem;color:var(--jade);padding:5px 8px;background:var(--card2);border-left:2px solid var(--jade)">學生回報：${t.progress}</div>`:''}
+            ${t.desc?`<div style="font-size:0.91rem;color:var(--txt2);line-height:1.65;margin-bottom:5px">${t.desc}</div>`:''}
+            ${t.progress?`<div style="font-size:0.89rem;color:var(--jade);padding:5px 8px;background:var(--card2);border-left:2px solid var(--jade)">學生回報：${t.progress}</div>`:''}
           </div>
           <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
             <button onclick="deleteTask('${t.id}')"
-              style="font-size:.73rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px">刪除</button>
+              style="font-size:0.81rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px">刪除</button>
           </div>
         </div>
       </div>`;
@@ -978,13 +954,13 @@ function renderMyTasks() {
     tasks.forEach(t => {
       const done = t.status === 'done';
       h += `<div class="card" style="margin-bottom:9px;border-left:3px solid ${done?'var(--jade)':'var(--gold2)'}">
-        <div style="font-family:var(--KAI);font-size:.96rem;color:var(--txt);margin-bottom:3px">${t.title}</div>
-        <div style="font-size:.76rem;color:var(--txt3);margin-bottom:6px">
+        <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--txt);margin-bottom:3px">${t.title}</div>
+        <div style="font-size:0.84rem;color:var(--txt3);margin-bottom:6px">
           ${t.dueDate?'截止：'+t.dueDate+' · ':''}
           <span style="color:${done?'var(--jade)':'var(--gold2)'}">${done?'✓ 已完成':'待完成'}</span>
         </div>
-        ${t.desc?`<div style="font-size:.85rem;color:var(--txt2);line-height:1.65;margin-bottom:8px">${t.desc}</div>`:''}
-        ${t.progress&&!done?`<div style="font-size:.81rem;color:var(--txt2);margin-bottom:6px">你的回報：${t.progress}</div>`:''}
+        ${t.desc?`<div style="font-size:0.93rem;color:var(--txt2);line-height:1.65;margin-bottom:8px">${t.desc}</div>`:''}
+        ${t.progress&&!done?`<div style="font-size:0.89rem;color:var(--txt2);margin-bottom:6px">你的回報：${t.progress}</div>`:''}
         ${!done?`
           <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
             <input id="prog_${t.id}" class="fi" style="flex:1;min-width:0;padding:6px 9px"
@@ -992,7 +968,7 @@ function renderMyTasks() {
             <button class="btn p sm" onclick="reportProgress('${t.id}')">回報</button>
             <button class="btn s sm" onclick="markTaskDone('${t.id}')">標為完成</button>
           </div>
-        `:`<div style="font-size:.76rem;color:var(--jade)">✓ 已完成</div>`}
+        `:`<div style="font-size:0.84rem;color:var(--jade)">✓ 已完成</div>`}
       </div>`;
     });
   }
@@ -1007,8 +983,8 @@ function renderContact() {
   const teacherEmail = USER_PROFILE.teacherEmail || '';
   const h = `
     <div class="card gold" style="margin-bottom:14px">
-      <div style="font-family:var(--KAI);font-size:.94rem;color:var(--gold);margin-bottom:4px">聯絡老師</div>
-      <div style="font-size:.81rem;color:var(--txt2);line-height:1.8">
+      <div style="font-family:var(--KAI);font-size:0.99rem;color:var(--gold);margin-bottom:4px">聯絡老師</div>
+      <div style="font-size:0.89rem;color:var(--txt2);line-height:1.8">
         ${teacherEmail
           ? `老師電郵：<a href="mailto:${teacherEmail}" style="color:var(--gold2)">${teacherEmail}</a>`
           : '老師電郵暫未設定，請向老師查詢。'}
@@ -1019,7 +995,7 @@ function renderContact() {
       <textarea class="fi" id="msgBody" placeholder="輸入要傳送給老師的訊息…" style="min-height:120px"></textarea>
     </div>
     <button class="btn p" onclick="sendContactMsg()" style="margin-bottom:10px">傳送（開啟電郵）</button>
-    <div style="font-size:.75rem;color:var(--txt3);line-height:1.8">
+    <div style="font-size:0.83rem;color:var(--txt3);line-height:1.8">
       此功能會開啟裝置預設電郵程式，直接傳送給老師。
     </div>`;
   document.getElementById('pg-contact').querySelector('.dc').innerHTML = h;
