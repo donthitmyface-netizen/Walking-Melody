@@ -2,45 +2,73 @@
 // ui.js — 導航、彈窗、通知列、共用 UI 工具
 // ═══════════════════════════════════════════════════════════════
 
-// ── 頁面導航 ──
 const PAGE_TITLES = {
   dash:      '總覽',
   timetable: '時間表',
   students:  '學生管理',
   detail:    '',
   income:    '收入管理',
-  lineage:   '名師傳承',
+  tasks:     '任務派發',
   exam:      '考級資料庫',
   ref:       '教學參考',
   settings:  '設定',
 };
+
+// ── 身份對應可見頁面 ──
+const TEACHER_PAGES = new Set(['dash','timetable','students','detail','income','tasks','ref','exam','settings']);
+const STUDENT_PAGES = new Set(['mytasks','contact','settings']);
+const PARENT_PAGES  = new Set(['mytasks','contact','settings']);
+
+function canSeePage(p) {
+  if (!USER_ROLE || USER_ROLE === 'teacher') return TEACHER_PAGES.has(p);
+  if (USER_ROLE === 'student') return STUDENT_PAGES.has(p);
+  if (USER_ROLE === 'parent')  return PARENT_PAGES.has(p);
+  return false;
+}
+
+// ── 更新 nav 按鈕高亮 ──
+function updateNav(p) {
+  const isTeacher = !USER_ROLE || USER_ROLE === 'teacher';
+  // Teacher-only nav items
+  const teacherOnly  = new Set(['dash','timetable','students','income','tasks']);
+  // Student/parent nav items (hidden by default in HTML)
+  const studentOnly  = new Set(['mytasks','contact']);
+
+  document.querySelectorAll('.ni').forEach(el => {
+    el.classList.toggle('on', el.dataset.p === p);
+    if (studentOnly.has(el.dataset.p)) {
+      el.style.display = isTeacher ? 'none' : '';
+    } else if (teacherOnly.has(el.dataset.p)) {
+      el.style.display = isTeacher ? '' : 'none';
+    }
+    // 'settings' is always visible
+  });
+}
 
 function goPage(p) {
   UI.prevPage = UI.page;
   UI.page = p;
 
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(el => el.classList.remove('on'));
-
   const pg = document.getElementById('pg-' + p);
   if (pg) pg.classList.add('active');
 
-  const nb = document.querySelector(`.ni[data-p="${p}"]`);
-  if (nb) nb.classList.add('on');
+  updateNav(p);
 
   document.getElementById('hdrTitle').textContent = PAGE_TITLES[p] || '履音';
   document.getElementById('hdrBtn').style.display = 'none';
   document.getElementById('main').scrollTop = 0;
 
-  // 按頁面渲染
   const renders = {
     dash:      renderDash,
     timetable: renderCal,
     income:    renderIncome,
-    lineage:   renderLineage,
-    exam:      renderExam,
+    tasks:     renderTasks,
     ref:       renderRef,
+    exam:      renderExam,
     settings:  renderSettings,
+    mytasks:   renderMyTasks,
+    contact:   renderContact,
   };
   if (renders[p]) renders[p]();
   else if (p === 'students') { renderSchChips(); renderStudents(); }
@@ -56,7 +84,7 @@ function openDetail(sid) {
   if (!s) return;
 
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(el => el.classList.remove('on'));
+  updateNav('detail');
   document.getElementById('pg-detail').classList.add('active');
 
   const sch = DB.schools.find(x => x.id === s.schoolId);
@@ -64,17 +92,12 @@ function openDetail(sid) {
   document.getElementById('dtName').textContent = s.name;
   document.getElementById('dtSub').textContent =
     [s.instrument, s.level, sch ? sch.name : null].filter(Boolean).join(' · ');
-
   document.getElementById('hdrTitle').textContent = s.name;
 
-  // 頭部按鈕：新增記錄
   const hb = document.getElementById('hdrBtn');
-  hb.textContent = '＋記錄';
-  hb.onclick = () => openModalRecord(sid);
-  hb.style.display = 'block';
+  hb.textContent = '＋記錄'; hb.onclick = () => openModalRecord(sid); hb.style.display = 'block';
 
-  renderDetailTabs();
-  renderDetailBody();
+  renderDetailTabs(); renderDetailBody();
 }
 
 function backPage() {
@@ -84,15 +107,14 @@ function backPage() {
 
 // ── 彈窗 ──
 function openMo(id) {
-  document.getElementById(id).classList.add('open');
-  document.getElementById(id).scrollTop = 0;
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('open'); el.scrollTop = 0; }
 }
 function closeMo(id) {
-  document.getElementById(id).classList.remove('open');
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
 }
-function overlayTap(e, id) {
-  if (e.target.id === id) closeMo(id);
-}
+function overlayTap(e, id) { if (e.target.id === id) closeMo(id); }
 
 // ── 通知橫幅 ──
 let _banTimer = null;
@@ -104,7 +126,7 @@ function showBan(msg, isErr = false) {
   _banTimer = setTimeout(() => { el.className = 'ban'; }, 2800);
 }
 
-// ── 詳情分頁 ──
+// ── 詳情分頁（老師可見全部，學生/家長不可進入詳情頁） ──
 const DETAIL_TABS = [
   { id:'records', label:'課堂記錄' },
   { id:'plans',   label:'教案計劃' },
@@ -121,9 +143,7 @@ function renderDetailTabs() {
 }
 
 function switchTab(tab) {
-  UI.detailTab = tab;
-  renderDetailTabs();
-  renderDetailBody();
+  UI.detailTab = tab; renderDetailTabs(); renderDetailBody();
 }
 
 function renderDetailBody() {
@@ -144,12 +164,10 @@ function renderDetailBody() {
 function emptyState(char, text) {
   return `<div class="empty"><div class="ec">${char}</div><div class="et">${text}</div></div>`;
 }
-
 function infoRow(label, val) {
   if (!val) return '';
   return `<div class="row"><div class="rl">${label}</div><div class="rv">${val}</div></div>`;
 }
-
 function infoCard(title, rows) {
   const content = rows.filter(Boolean).join('');
   if (!content) return '';
@@ -161,10 +179,11 @@ function infoCard(title, rows) {
 
 // ── 按鈕狀態 ──
 function setBtnLoading(id, text) {
-  const el = document.getElementById(id);
-  if (el) { el.disabled = true; el.textContent = text; }
+  const el = document.getElementById(id); if (el) { el.disabled = true; el.textContent = text; }
 }
 function setBtnDone(id, text) {
-  const el = document.getElementById(id);
-  if (el) { el.disabled = false; el.textContent = text; }
+  const el = document.getElementById(id); if (el) { el.disabled = false; el.textContent = text; }
 }
+
+// ── Privacy masking helper ──
+function masked(val) { return '●●●●'; }

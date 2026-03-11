@@ -173,7 +173,8 @@ function renderStudents() {
 
   el.innerHTML = list.map(s => {
     const sch = DB.schools.find(x => x.id === s.schoolId);
-    const g = s.overallScore != null ? getGrade(s.overallScore) : null;
+    const _hideGrade = privacyHide('hideGrade');
+    const g = (!_hideGrade && s.overallScore != null) ? getGrade(s.overallScore) : null;
     const rc = DB.records.filter(r => r.studentId === s.id).length;
     return `<div class="sc" onclick="openDetail('${s.id}')">
       <div class="av">${s.name[0]}</div>
@@ -182,7 +183,7 @@ function renderStudents() {
         <div class="ss">${[s.instrument, s.level, sch ? sch.name : null].filter(Boolean).join(' · ')}</div>
         <div style="font-size:.6rem;color:var(--txt3);margin-top:1px">${rc} 條記錄</div>
       </div>
-      ${g ? `<div class="gc" style="border-color:${g.color};color:${g.color}">${g.grade}</div>` : ''}
+      ${_hideGrade ? `<div class="gc" style="border-color:var(--bdr2);color:var(--txt3);font-size:.5rem">●●</div>` : (g ? `<div class="gc" style="border-color:${g.color};color:${g.color}">${g.grade}</div>` : '')}
     </div>`;
   }).join('');
 }
@@ -255,9 +256,10 @@ function renderTabProfile(s) {
     infoRow('電郵', s.email),
   ]);
 
+  const _hideAmt = privacyHide('hideAmount');
   if (s.defaultFee || s.payMethod) {
     h += infoCard('學費', [
-      infoRow('每堂學費', s.defaultFee ? 'HK$' + s.defaultFee : ''),
+      infoRow('每堂學費', s.defaultFee ? (_hideAmt ? '●●●●' : 'HK$' + s.defaultFee) : ''),
       infoRow('繳費方式', s.payMethod),
     ]);
   }
@@ -535,7 +537,7 @@ function renderIncome() {
       const s = DB.students.find(x => x.id === p.studentId);
       h += `<div class="card" style="margin-bottom:7px">
         <div style="display:flex;justify-content:space-between">
-          <span style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">HK$${Math.round(parseFloat(p.amount || 0))}</span>
+          <span style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">${_hideAmt?'●●●●':'HK$'+Math.round(parseFloat(p.amount||0))}</span>
           <span style="font-size:.63rem;color:var(--txt3)">${p.date || ''}</span>
         </div>
         <div style="font-size:.68rem;color:var(--txt3);margin-top:2px">
@@ -552,63 +554,9 @@ function renderIncome() {
 // ────────────────────────────────────────────
 // LINEAGE
 // ────────────────────────────────────────────
-// ── 傳承頁：按樂器分頁 + 時間軸 ──
-let _lineageTab = 'guqin';
+// ── 傳承頁：已移至教學參考頁（renderRef） ──
 
-function renderLineage(tab) {
-  if (tab) _lineageTab = tab;
-  const secOrder = ['guqin','guzheng','pipa','dizi','suona','hk'];
-
-  // Tab bar
-  let tabHtml = `<div class="tabs" style="margin-bottom:16px">` +
-    secOrder.map(k => {
-      const sec = LINEAGE[k];
-      return `<button class="tb${_lineageTab === k ? ' on' : ''}" onclick="renderLineage('${k}')">${sec.label}</button>`;
-    }).join('') +
-  `</div>`;
-
-  const sec = LINEAGE[_lineageTab];
-  if (!sec) return;
-
-  // Sort masters by birth year
-  const sorted = [...sec.masters].sort((a, b) => {
-    const ya = parseInt(a.years.replace(/[^\d]/g, '').slice(0, 4)) || 9999;
-    const yb = parseInt(b.years.replace(/[^\d]/g, '').slice(0, 4)) || 9999;
-    return ya - yb;
-  });
-
-  // Timeline
-  let timelineHtml = `<div class="tl">`;
-  sorted.forEach((m, i) => {
-    const isLast = i === sorted.length - 1;
-    timelineHtml += `
-      <div class="tl-item">
-        <div class="tl-axis">
-          <div class="tl-dot" style="background:${sec.color};border-color:${sec.color}"></div>
-          ${isLast ? '' : `<div class="tl-line" style="background:linear-gradient(to bottom,${sec.color}88,${sec.color}22)"></div>`}
-        </div>
-        <div class="tl-body">
-          <div class="tl-year" style="color:${sec.color}">${m.years}</div>
-          <div class="lm" style="border-left-color:${sec.color};margin-bottom:0">
-            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px">
-              <span class="lmn">${m.name}</span>
-              ${m.sect ? `<span style="font-size:.6rem;color:var(--txt3);padding:1px 6px;border:1px solid var(--bdr)">${m.sect}</span>` : ''}
-            </div>
-            ${m.school ? `<div class="lms">${m.school}</div>` : ''}
-            <div class="lmd">${m.desc}</div>
-            ${m.src ? `<div class="lmsrc">資料來源：${m.src}</div>` : ''}
-            <a href="${m.yt}" target="_blank" class="ytl">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>
-              YouTube 搜尋
-            </a>
-          </div>
-        </div>
-      </div>`;
-  });
-  timelineHtml += `</div>`;
-
-  document.getElementById('pg-lineage').querySelector('.dc').innerHTML = tabHtml + timelineHtml;
-}
+function renderLineage(tab) { renderRef('lineage'); }
 
 // ────────────────────────────────────────────
 // SETTINGS
@@ -669,15 +617,39 @@ function renderSettings() {
   // Quick navigation
   h += `<div class="sh">功能頁面</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
-    <div onclick="goPage('exam')" class="card" style="cursor:pointer;text-align:center;padding:14px 8px">
-      <div style="font-size:1.3rem;margin-bottom:5px">📋</div>
-      <div style="font-family:var(--KAI);font-size:.72rem;color:var(--gold2)">考級資料庫</div>
-    </div>
     <div onclick="goPage('ref')" class="card" style="cursor:pointer;text-align:center;padding:14px 8px">
-      <div style="font-size:1.3rem;margin-bottom:5px">📚</div>
-      <div style="font-family:var(--KAI);font-size:.72rem;color:var(--gold2)">教學參考</div>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <div style="font-family:var(--KAI);font-size:.72rem;color:var(--gold2);margin-top:6px">教學參考</div>
+      <div style="font-size:.56rem;color:var(--txt3);margin-top:2px">傳承 · 考級 · 資源</div>
+    </div>
+    <div onclick="goPage('tasks')" class="card" style="cursor:pointer;text-align:center;padding:14px 8px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="9" y="11" width="4" height="10"/><path d="M9 11V6a3 3 0 0 1 6 0v5"/><rect x="3" y="6" width="18" height="5" rx="1"/></svg>
+      <div style="font-family:var(--KAI);font-size:.72rem;color:var(--gold2);margin-top:6px">任務管理</div>
+      <div style="font-size:.56rem;color:var(--txt3);margin-top:2px">派發 · 追蹤進度</div>
     </div>
   </div>`;
+
+  // Privacy toggles (老師專用)
+  h += `<div class="sh">隱私設定</div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:.68rem;color:var(--txt3);margin-bottom:10px;line-height:1.7">控制哪些資訊顯示於學生資料卡和列表中。</div>`;
+  const privOpts = [
+    { key:'hideAmount', label:'隱藏金額資訊', note:'學費、收款記錄以 ●●●● 顯示' },
+    { key:'hideGrade',  label:'隱藏能力評級', note:'學生列表的評級徽章以 ●●●● 顯示' },
+  ];
+  privOpts.forEach(opt => {
+    const on = privacyHide(opt.key);
+    h += `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)">
+      <div style="flex:1">
+        <div style="font-size:.76rem;color:var(--txt2)">${opt.label}</div>
+        <div style="font-size:.6rem;color:var(--txt3);margin-top:1px">${opt.note}</div>
+      </div>
+      <div class="priv-toggle${on?' on':''}" onclick="togglePrivacy('${opt.key}')">
+        <div class="priv-thumb"></div>
+      </div>
+    </div>`;
+  });
+  h += `</div>`;
 
   // Schools
   h += `<div class="sh">學校管理</div>`;
@@ -774,7 +746,100 @@ const REF_ITEMS = [
   ]},
 ];
 
-function renderRef() {
+// ── 教學參考：包含名師傳承 + 資源連結 ──
+let _refTab = 'lineage';
+let _lineageTab = 'guqin';
+
+function renderRef(tab) {
+  if (tab) _refTab = tab;
+
+  // Top-level tab bar
+  const topTabs = [
+    { id:'lineage', label:'名師傳承' },
+    { id:'exam',    label:'考級資料' },
+    { id:'links',   label:'教學資源' },
+  ];
+  let h = `<div class="tabs" style="margin-bottom:16px">` +
+    topTabs.map(t =>
+      `<button class="tb${_refTab===t.id?' on':''}" onclick="renderRef('${t.id}')">${t.label}</button>`
+    ).join('') + `</div>`;
+
+  if (_refTab === 'lineage') {
+    h += buildLineageHtml();
+  } else if (_refTab === 'exam') {
+    h += buildExamHtml();
+  } else {
+    h += buildLinksHtml();
+  }
+
+  document.getElementById('pg-ref').querySelector('.dc').innerHTML = h;
+}
+
+function buildLineageHtml() {
+  const secOrder = ['guqin','guzheng','pipa','dizi','suona','hk'];
+  let h = `<div class="tabs" style="margin-bottom:14px">` +
+    secOrder.map(k => {
+      const sec = LINEAGE[k];
+      return `<button class="tb${_lineageTab===k?' on':''}" onclick="_lineageTab='${k}';renderRef('lineage')">${sec.label}</button>`;
+    }).join('') + `</div>`;
+
+  const sec = LINEAGE[_lineageTab];
+  if (!sec) return h;
+
+  const sorted = [...sec.masters].sort((a,b) => {
+    const ya = parseInt(a.years.replace(/[^\d]/g,'').slice(0,4)) || 9999;
+    const yb = parseInt(b.years.replace(/[^\d]/g,'').slice(0,4)) || 9999;
+    return ya - yb;
+  });
+
+  h += `<div class="tl">`;
+  sorted.forEach((m, i) => {
+    const isLast = i === sorted.length - 1;
+    h += `<div class="tl-item">
+      <div class="tl-axis">
+        <div class="tl-dot" style="border-color:${sec.color}"></div>
+        ${isLast ? '' : `<div class="tl-line" style="background:linear-gradient(to bottom,${sec.color}88,${sec.color}22)"></div>`}
+      </div>
+      <div class="tl-body">
+        <div class="tl-year" style="color:${sec.color}">${m.years}</div>
+        <div class="lm" style="border-left-color:${sec.color};margin-bottom:0">
+          <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            <span class="lmn">${m.name}</span>
+            ${m.sect?`<span style="font-size:.6rem;color:var(--txt3);padding:1px 6px;border:1px solid var(--bdr)">${m.sect}</span>`:''}
+          </div>
+          ${m.school?`<div class="lms">${m.school}</div>`:''}
+          <div class="lmd">${m.desc}</div>
+          ${m.src?`<div class="lmsrc">資料來源：${m.src}</div>`:''}
+          <a href="${m.yt}" target="_blank" class="ytl">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>
+            YouTube 搜尋
+          </a>
+        </div>
+      </div>
+    </div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+function buildExamHtml() {
+  let h = `<div style="font-size:.68rem;color:var(--txt3);line-height:1.9;margin-bottom:12px;padding:9px 11px;background:var(--card);border-left:3px solid var(--gold2)">
+    以下考級資料僅供參考，請以各機構官方網站公佈為準。</div>`;
+  EXAMS.forEach(ex => {
+    h += `<div class="card gold" style="margin-bottom:10px">
+      <div style="font-family:var(--KAI);font-size:.88rem;color:var(--gold);margin-bottom:4px">${ex.name}</div>
+      <div style="font-size:.66rem;color:var(--jade);letter-spacing:.06em;margin-bottom:6px">${ex.grades}</div>
+      <div style="font-size:.71rem;color:var(--txt2);line-height:1.7;margin-bottom:7px">${ex.note}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:.56rem;color:var(--txt3)">來源：${ex.src}</div>
+        <a href="${ex.url}" target="_blank" style="font-size:.62rem;color:var(--gold2);border:1px solid var(--bdr2);padding:3px 9px;text-decoration:none">官網 ↗</a>
+      </div>
+    </div>`;
+  });
+  return h;
+}
+
+function buildLinksHtml() {
   let h = '';
   REF_ITEMS.forEach(sec => {
     h += `<div class="sh">${sec.cat}</div>`;
@@ -791,6 +856,121 @@ function renderRef() {
       </div>`;
     });
   });
-  document.getElementById('pg-ref').querySelector('.dc').innerHTML = h;
+  return h;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// 任務派發（老師視角）
+// ═══════════════════════════════════════════════════════════════
+let _taskFilter = 'all'; // 'all' | studentId
+
+function renderTasks() {
+  const students = DB.students;
+  const tasks = DB.tasks || [];
+
+  // Filter bar
+  let filterHtml = `<div class="chips" style="margin-bottom:12px">
+    <div class="ch${_taskFilter==='all'?' on':''}" onclick="_taskFilter='all';renderTasks()">全部</div>`;
+  students.forEach(s => {
+    filterHtml += `<div class="ch${_taskFilter===s.id?' on':''}" onclick="_taskFilter='${s.id}';renderTasks()">${s.name}</div>`;
+  });
+  filterHtml += `</div>`;
+
+  const filtered = _taskFilter === 'all' ? tasks : tasks.filter(t => t.studentId === _taskFilter);
+  const sorted = [...filtered].sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+  let taskHtml = '';
+  if (!sorted.length) {
+    taskHtml = emptyState('任', '尚未派發任務');
+  } else {
+    sorted.forEach(t => {
+      const stu = students.find(s => s.id === t.studentId);
+      const done = t.status === 'done';
+      taskHtml += `<div class="card" style="margin-bottom:9px;border-left:3px solid ${done?'var(--jade)':'var(--gold2)'}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="flex:1">
+            <div style="font-family:var(--KAI);font-size:.86rem;color:var(--txt);margin-bottom:2px">${t.title}</div>
+            <div style="font-size:.63rem;color:var(--txt3);margin-bottom:5px">
+              ${stu?stu.name:'?'} · ${t.dueDate?'截止：'+t.dueDate:''} ·
+              <span style="color:${done?'var(--jade)':'var(--gold2)'}">${done?'已完成':'待完成'}</span>
+            </div>
+            ${t.desc?`<div style="font-size:.72rem;color:var(--txt2);line-height:1.65;margin-bottom:5px">${t.desc}</div>`:''}
+            ${t.progress?`<div style="font-size:.68rem;color:var(--jade);padding:5px 8px;background:var(--card2);border-left:2px solid var(--jade)">學生回報：${t.progress}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
+            <button onclick="deleteTask('${t.id}')"
+              style="font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px">刪除</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  const h = `
+    <button class="btn p sm" onclick="openMo('moTask')" style="margin-bottom:12px">＋ 派發任務</button>
+    ${filterHtml}${taskHtml}`;
+
+  document.getElementById('pg-tasks').querySelector('.dc').innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 我的任務（學生 / 家長視角）
+// ═══════════════════════════════════════════════════════════════
+function renderMyTasks() {
+  const tasks = (DB.tasks || []).sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+
+  let h = '';
+  if (!tasks.length) {
+    h = emptyState('任', '目前沒有任務');
+  } else {
+    tasks.forEach(t => {
+      const done = t.status === 'done';
+      h += `<div class="card" style="margin-bottom:9px;border-left:3px solid ${done?'var(--jade)':'var(--gold2)'}">
+        <div style="font-family:var(--KAI);font-size:.88rem;color:var(--txt);margin-bottom:3px">${t.title}</div>
+        <div style="font-size:.63rem;color:var(--txt3);margin-bottom:6px">
+          ${t.dueDate?'截止：'+t.dueDate+' · ':''}
+          <span style="color:${done?'var(--jade)':'var(--gold2)'}">${done?'✓ 已完成':'待完成'}</span>
+        </div>
+        ${t.desc?`<div style="font-size:.74rem;color:var(--txt2);line-height:1.65;margin-bottom:8px">${t.desc}</div>`:''}
+        ${t.progress&&!done?`<div style="font-size:.68rem;color:var(--txt2);margin-bottom:6px">你的回報：${t.progress}</div>`:''}
+        ${!done?`
+          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+            <input id="prog_${t.id}" class="fi" style="flex:1;min-width:0;padding:6px 9px"
+              placeholder="回報進度…" value="${t.progress||''}">
+            <button class="btn p sm" onclick="reportProgress('${t.id}')">回報</button>
+            <button class="btn s sm" onclick="markTaskDone('${t.id}')">標為完成</button>
+          </div>
+        `:`<div style="font-size:.63rem;color:var(--jade)">✓ 已完成</div>`}
+      </div>`;
+    });
+  }
+
+  document.getElementById('pg-mytasks').querySelector('.dc').innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 聯絡老師（學生 / 家長視角）
+// ═══════════════════════════════════════════════════════════════
+function renderContact() {
+  const teacherEmail = USER_PROFILE.teacherEmail || '';
+  const h = `
+    <div class="card gold" style="margin-bottom:14px">
+      <div style="font-family:var(--KAI);font-size:.86rem;color:var(--gold);margin-bottom:4px">聯絡老師</div>
+      <div style="font-size:.7rem;color:var(--txt2);line-height:1.8">
+        ${teacherEmail
+          ? `老師電郵：<a href="mailto:${teacherEmail}" style="color:var(--gold2)">${teacherEmail}</a>`
+          : '老師電郵暫未設定，請向老師查詢。'}
+      </div>
+    </div>
+    <div class="sh">傳送訊息</div>
+    <div class="fg"><label class="fl">訊息</label>
+      <textarea class="fi" id="msgBody" placeholder="輸入要傳送給老師的訊息…" style="min-height:120px"></textarea>
+    </div>
+    <button class="btn p" onclick="sendContactMsg()" style="margin-bottom:10px">傳送（開啟電郵）</button>
+    <div style="font-size:.62rem;color:var(--txt3);line-height:1.8">
+      此功能會開啟裝置預設電郵程式，直接傳送給老師。
+    </div>`;
+  document.getElementById('pg-contact').querySelector('.dc').innerHTML = h;
 }
 

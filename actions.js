@@ -377,3 +377,110 @@ async function doLogin() {
 function doSignOut() {
   if (confirm('確定登出？')) firebase.auth().signOut();
 }
+
+// ── 任務功能 ──
+function openModalTask() {
+  const sel = document.getElementById('tStu');
+  sel.innerHTML = DB.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  document.getElementById('tTitle').value = '';
+  document.getElementById('tDesc').value  = '';
+  document.getElementById('tDue').value   = '';
+  openMo('moTask');
+}
+
+async function saveTask() {
+  const title = document.getElementById('tTitle').value.trim();
+  if (!title) { showBan('請填寫任務名稱', true); return; }
+  const studentId = document.getElementById('tStu').value;
+  const stu = DB.students.find(s => s.id === studentId);
+  if (!stu) { showBan('請選擇學生', true); return; }
+
+  setBtnLoading('btnSaveTask', '儲存中…');
+  const t = {
+    id:         newId(),
+    title,
+    desc:       document.getElementById('tDesc').value.trim(),
+    dueDate:    document.getElementById('tDue').value,
+    studentId,
+    createdBy:  getUid(),
+    status:     'pending',
+    progress:   '',
+    createdAt:  Date.now(),
+  };
+
+  if (!DB.tasks) DB.tasks = [];
+  DB.tasks.push(t);
+  saveLocal();
+  // Save to Firestore with the STUDENT's uid field so they can read it
+  // We store createdBy (teacher uid) but also studentId for querying
+  try {
+    await getDb().collection('tasks').doc(t.id).set({ ...t, uid: getUid() }, { merge: true });
+  } catch(e) {
+    console.warn('saveTask fbSave:', e.message);
+    showBan('雲端同步失敗（本地已儲存）', true);
+  }
+
+  closeMo('moTask');
+  setBtnDone('btnSaveTask', '派發任務');
+  renderTasks();
+  showBan(`已派任務給 ${stu.name}`);
+}
+
+async function deleteTask(id) {
+  if (!confirm('確定刪除此任務？')) return;
+  DB.tasks = (DB.tasks || []).filter(t => t.id !== id);
+  saveLocal();
+  await fbDel('tasks', id);
+  renderTasks();
+  showBan('任務已刪除');
+}
+
+// 學生/家長：回報進度
+async function reportProgress(taskId) {
+  const inp = document.getElementById('prog_' + taskId);
+  if (!inp) return;
+  const progress = inp.value.trim();
+  if (!progress) { showBan('請先填寫進度說明', true); return; }
+
+  const t = (DB.tasks || []).find(x => x.id === taskId);
+  if (!t) return;
+  t.progress = progress;
+  saveLocal();
+  try {
+    await getDb().collection('tasks').doc(taskId).update({ progress });
+  } catch(e) { console.warn('reportProgress:', e.message); }
+  renderMyTasks();
+  showBan('進度已回報');
+}
+
+async function markTaskDone(taskId) {
+  const t = (DB.tasks || []).find(x => x.id === taskId);
+  if (!t) return;
+  t.status = 'done';
+  saveLocal();
+  try {
+    await getDb().collection('tasks').doc(taskId).update({ status: 'done' });
+  } catch(e) { console.warn('markTaskDone:', e.message); }
+  renderMyTasks();
+  showBan('任務已標為完成');
+}
+
+// 學生/家長：開啟電郵聯絡老師
+function sendContactMsg() {
+  const body = (document.getElementById('msgBody')?.value || '').trim();
+  const to   = USER_PROFILE.teacherEmail || '';
+  const sub  = encodeURIComponent('【履音】學生/家長留言');
+  const msg  = encodeURIComponent(body);
+  if (!body) { showBan('請填寫訊息', true); return; }
+  window.location.href = `mailto:${to}?subject=${sub}&body=${msg}`;
+}
+
+// ── Privacy toggle ──
+function togglePrivacy(key) {
+  const cur = privacyHide(key);
+  setPrivacy(key, !cur);
+  renderSettings();
+  // 重渲學生列表（如果在相關頁面）
+  if (UI.page === 'students') renderStudents();
+  if (UI.page === 'detail' && (key === 'hideAmount' || key === 'hideGrade')) renderDetailBody();
+}

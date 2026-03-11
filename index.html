@@ -149,6 +149,15 @@
     <!-- Income -->
     <div id="pg-income" class="page"><div class="dc"></div></div>
 
+    <!-- Tasks (teacher view) -->
+    <div id="pg-tasks" class="page"><div class="dc"></div></div>
+
+    <!-- My Tasks (student/parent view) -->
+    <div id="pg-mytasks" class="page"><div class="dc"></div></div>
+
+    <!-- Contact Teacher (student/parent view) -->
+    <div id="pg-contact" class="page"><div class="dc"></div></div>
+
     <!-- Lineage -->
     <div id="pg-lineage" class="page"><div class="dc"></div></div>
 
@@ -181,9 +190,18 @@
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <span>收入</span>
     </button>
-    <button class="ni" data-p="lineage" onclick="goPage('lineage')">
-      <svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><line x1="6" y1="15" x2="6" y2="6"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-      <span>傳承</span>
+    <button class="ni" data-p="tasks" onclick="goPage('tasks')">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>任務</span>
+    </button>
+    <!-- Student/parent nav (hidden for teacher, shown by updateNav) -->
+    <button class="ni" data-p="mytasks" onclick="goPage('mytasks')" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>我的任務</span>
+    </button>
+    <button class="ni" data-p="contact" onclick="goPage('contact')" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>聯絡</span>
     </button>
     <button class="ni" data-p="settings" onclick="goPage('settings')">
       <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="6" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="4" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="8" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="4" x2="15" y2="4"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -413,6 +431,20 @@
   </div>
 </div>
 
+<!-- Task Modal -->
+<div id="moTask" class="ov" onclick="overlayTap(event,'moTask')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moTask')">✕</button>
+    <div class="mt">派發任務</div>
+    <div class="fg"><label class="fl">指定學生 *</label><select class="fi" id="tStu"></select></div>
+    <div class="fg"><label class="fl">任務名稱 *</label><input class="fi" id="tTitle" placeholder="例：練習音階 C 大調"></div>
+    <div class="fg"><label class="fl">任務說明</label><textarea class="fi" id="tDesc" placeholder="詳細說明、練習要求…"></textarea></div>
+    <div class="fg"><label class="fl">截止日期</label><input class="fi" id="tDue" type="date"></div>
+    <button class="btn p" id="btnSaveTask" onclick="saveTask()" style="margin-top:4px">派發任務</button>
+    <button class="btn s" onclick="closeMo('moTask')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
 <!-- ══ SCRIPTS ══ -->
 <script src="data.js"></script>
 <script src="store.js"></script>
@@ -437,10 +469,18 @@ firebase.auth().onAuthStateChanged(async user => {
     else av.textContent = (user.displayName || user.email || user.uid[0] || '?')[0].toUpperCase();
     applyTheme(); applyFs();
     loadLocal();
-    renderDash(); renderSchChips(); renderStudents();
+
+    if (USER_ROLE === 'student' || USER_ROLE === 'parent') {
+      updateNav('mytasks');
+      goPage('mytasks');
+    } else {
+      renderDash(); renderSchChips(); renderStudents();
+    }
+
     loadAll().then(() => {
-      renderDash();
       const p = UI.page;
+      if (p === 'dash')    renderDash();
+      if (p === 'mytasks') renderMyTasks();
       if (p === 'students')  { renderSchChips(); renderStudents(); }
       else if (p === 'detail') renderDetailBody();
       else if (p === 'income') renderIncome();

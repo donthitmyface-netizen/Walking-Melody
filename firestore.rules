@@ -2,79 +2,74 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() {
-      return request.auth != null;
-    }
+    function signedIn() { return request.auth != null; }
 
-    // 取得用戶 role（預設 teacher）
     function userRole() {
       return signedIn()
-        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'teacher')
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role','teacher')
         : null;
     }
 
-    // 用戶只能讀寫自己的 profile
+    function isTeacher() { return userRole() == 'teacher'; }
+
+    function myUid() { return request.auth.uid; }
+
+    // ── users: 只能讀寫自己 ──
     match /users/{userId} {
-      allow read, write: if signedIn() && request.auth.uid == userId;
+      allow read, write: if signedIn() && myUid() == userId;
     }
 
-    // 學生、課堂記錄、教案、收款、學校、群組：
-    // 老師可讀寫自己 uid 下的所有資料
-    // 學生/家長只能讀取 linkedStudentIds 相關資料
+    // ── 老師資料（uid 欄位 == 登入者）──
     match /students/{docId} {
       allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
+        isTeacher() && (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid())
       );
     }
 
     match /records/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
     }
 
     match /lessons/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
     }
 
     match /payments/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() && isTeacher() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
     }
 
     match /plans/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
     }
 
     match /schools/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() && isTeacher() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
     }
 
     match /groups/{docId} {
-      allow read, write: if signedIn() && (
-        resource == null ||
-        resource.data.uid == request.auth.uid ||
-        request.resource.data.uid == request.auth.uid
-      );
+      allow read, write: if signedIn() && isTeacher() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
+    }
+
+    // ── tasks：老師建立 / 學生家長可讀取及更新進度 ──
+    match /tasks/{docId} {
+      // 老師：完全控制（uid == 自己）
+      allow read, write, delete: if signedIn() && isTeacher() &&
+        (resource == null || resource.data.uid == myUid() || request.resource.data.uid == myUid());
+
+      // 學生/家長：可讀取分配給自己 studentId 的任務
+      allow read: if signedIn() && !isTeacher() &&
+        resource.data.studentId in get(/databases/$(database)/documents/users/$(myUid())).data.get('linkedStudentIds',[]);
+
+      // 學生/家長：可更新 progress 和 status 欄位（只能改這兩個）
+      allow update: if signedIn() && !isTeacher() &&
+        resource.data.studentId in get(/databases/$(database)/documents/users/$(myUid())).data.get('linkedStudentIds',[]) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress','status']);
     }
   }
 }
