@@ -10,6 +10,7 @@ let DB = {
   schools: [], students: [], lessons: [],
   records: [], payments: [], plans: [], groups: [],
   tasks: [],   // { id, title, desc, studentId, dueDate, createdBy, status:'pending'|'done', progress:'', uid }
+  credits: [], // { id, studentId, total, used, createdAt, uid } — 可上課節數
 };
 
 let UI = {
@@ -22,15 +23,17 @@ let UI = {
   editSid: null, editGid: null,
 };
 
-// ── Privacy toggles (老師專用) ──
-function getPrivacy() {
-  try { return JSON.parse(localStorage.getItem('luyin_privacy') || '{}'); } catch(e) { return {}; }
+// ── Privacy toggle (老師專用) — 單一開關隱藏所有隱私 ──
+function isPrivacyHidden() {
+  return localStorage.getItem('luyin_hideAll') === '1';
 }
-function setPrivacy(key, val) {
-  const p = getPrivacy(); p[key] = val;
-  localStorage.setItem('luyin_privacy', JSON.stringify(p));
+function toggleHideAll() {
+  localStorage.setItem('luyin_hideAll', isPrivacyHidden() ? '0' : '1');
 }
-function privacyHide(key) { return getPrivacy()[key] === true; }
+// backwards compat shims
+function privacyHide(key) { return isPrivacyHidden(); }
+function getPrivacy() { return {}; }
+function setPrivacy(key, val) {}
 
 // ── 本地快取 ──
 function lsKey() { return 'luyin6_' + (CU ? CU.uid : 'x'); }
@@ -94,6 +97,8 @@ async function loadAll() {
       if (results[i] !== null && results[i].length > 0) DB[c] = results[i];
     });
     tasks = await fbLoad('tasks');
+    const cr = await fbLoad('credits');
+    if (cr !== null && cr.length > 0) DB.credits = cr;
   } else {
     // 學生/家長：只載入任務
     tasks = await fbLoadTasksForLinked();

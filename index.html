@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1c1408">
@@ -399,6 +399,7 @@
       </select>
     </div>
     <div class="fg"><label class="fl">備注</label><input class="fi" id="payNote"></div>
+    <div class="fg"><label class="fl">同時增加課節數（可留空）</label><input class="fi" id="payCredits" type="number" min="0" placeholder="例：4"></div>
     <button class="btn p" id="btnSavePay" onclick="savePayment()" style="margin-top:4px">記錄收款</button>
     <button class="btn s" onclick="closeMo('moPayment')" style="margin-top:8px">取消</button>
   </div>
@@ -428,6 +429,27 @@
     <div class="fg"><label class="fl">備注</label><textarea class="fi" id="gNote"></textarea></div>
     <button class="btn p" id="btnSaveGrp" onclick="saveGroup()" style="margin-top:4px">儲存群組</button>
     <button class="btn s" onclick="closeMo('moGroup')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Credits Modal -->
+<div id="moCredits" class="ov" onclick="overlayTap(event,'moCredits')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moCredits')">✕</button>
+    <div class="mt">增加可上課節</div>
+    <div class="card gold" style="margin-bottom:12px">
+      <div style="font-family:var(--KAI);font-size:.9rem;color:var(--txt);margin-bottom:4px" id="credStuName"></div>
+      <div style="font-size:.68rem;color:var(--txt3)" id="credCurrent"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">增加課節數 *</label>
+      <input class="fi" id="credAmt" type="number" min="1" max="100" placeholder="例：4（代表繳交4堂學費）">
+    </div>
+    <div style="font-size:.62rem;color:var(--txt3);margin-bottom:12px;line-height:1.7">
+      學生繳交學費後，老師在此增加對應課節數量。老師在時間表確認上堂後自動扣除。
+    </div>
+    <button class="btn p" id="btnSaveCred" onclick="saveCredits()" style="margin-top:4px">確認增加</button>
+    <button class="btn s" onclick="closeMo('moCredits')" style="margin-top:8px">取消</button>
   </div>
 </div>
 

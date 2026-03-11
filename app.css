@@ -168,21 +168,26 @@ body { background: var(--bg); color: var(--txt); }
   border-top: 1px solid var(--bdr);
   display: flex;
   align-items: stretch;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+#nav::-webkit-scrollbar { display: none; }
 [data-theme="light"] #nav { background: rgba(245,237,224,.94); }
 [data-theme="hc"]    #nav { background: rgba(0,0,0,.97); }
 
 .ni {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   color: var(--txt3);
   transition: color .14s;
-  padding: 0 3px;
+  padding: 0 4px;
   overflow: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;

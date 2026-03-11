@@ -26,7 +26,7 @@ function renderDash() {
     ${statTile('學生人數', DB.students.length, '人')}
     ${statTile('今日課堂', todayLessons.length, '堂')}
     ${statTile('所屬學校', DB.schools.length, '所')}
-    ${statTile('本月收入', 'HK$' + Math.round(monthIncome), '')}
+    ${statTile('本月收入', isPrivacyHidden() ? '●●●●' : 'HK$' + Math.round(monthIncome), '')}
   </div>`;
 
   if (todayLessons.length) {
@@ -94,13 +94,18 @@ function renderCal() {
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const today = todayISO();
 
+  // Build set of once-skip dates per lessonId
+  const onceSkips = new Set(DB.lessons
+    .filter(l => l.type === 'once-skip')
+    .map(l => l.lessonId + '|' + l.date));
+
   let html = '';
   for (let i = 0; i < firstDow; i++) html += `<div class="cd" style="background:transparent;cursor:default"></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dow = new Date(y, m, d).getDay();
     const hasL = DB.lessons.some(l =>
-      (l.type === 'fixed' && parseInt(l.day) === dow) ||
+      (l.type === 'fixed' && parseInt(l.day) === dow && !onceSkips.has(l.id + '|' + ds)) ||
       (l.type === 'once'  && l.date === ds)
     );
     const isToday = ds === today;
@@ -119,11 +124,23 @@ function calDayClick(ds) { UI.calSelDay = ds; renderCal(); }
 
 function renderDayPanel(ds) {
   if (!ds) return;
-  const dow = new Date(ds).getDay();
+  const dow = new Date(ds + 'T00:00:00').getDay();
+  const skipSet = new Set(DB.lessons
+    .filter(l => l.type === 'once-skip' && l.date === ds)
+    .map(l => l.lessonId));
   const lessons = DB.lessons.filter(l =>
-    (l.type === 'fixed' && parseInt(l.day) === dow) ||
+    (l.type === 'fixed' && parseInt(l.day) === dow && !skipSet.has(l.id)) ||
     (l.type === 'once'  && l.date === ds)
   ).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+
+  // Check which lessons are skipped on this date
+  const skipped = new Set((DB.records || [])
+    .filter(r => r.date === ds && r.attend === 'absent' && r.lessonId)
+    .map(r => r.lessonId));
+  // Check which are confirmed attended
+  const attended = new Set((DB.records || [])
+    .filter(r => r.date === ds && r.attend === 'present' && r.lessonId)
+    .map(r => r.lessonId));
 
   let h = `<div class="sh">${ds}</div>`;
   if (!lessons.length) {
@@ -132,13 +149,23 @@ function renderDayPanel(ds) {
     lessons.forEach(l => {
       const name = lessonName(l);
       const isGrp = !!l.groupId;
-      h += `<div class="card" style="display:flex;gap:10px;margin-bottom:7px">
-        <div style="font-family:var(--KAI);font-size:.78rem;color:var(--gold);min-width:40px;flex-shrink:0">${l.start || '—'}</div>
-        <div style="flex:1">
-          <div style="font-size:.82rem;color:var(--txt);margin-bottom:2px">${name}${isGrp ? ' <span style="font-size:.58rem;color:var(--jade);border:1px solid var(--jade);padding:1px 4px">群組</span>' : ''}</div>
-          <div style="font-size:.64rem;color:var(--txt3)">${l.dur || 60} 分 · ${l.type === 'fixed' ? '固定每週' : '單次'}</div>
+      const isSkip = skipped.has(l.id);
+      const isDone = attended.has(l.id);
+      // Credits for this student
+      const cred = l.studentId ? (DB.credits || []).find(c => c.studentId === l.studentId) : null;
+      const credLeft = cred ? (cred.total - cred.used) : null;
+      h += `<div class="card" style="display:flex;gap:10px;margin-bottom:7px;${isSkip?'opacity:.5;border-left:3px solid var(--red)':''}${isDone?'border-left:3px solid var(--jade)':''}">
+        <div style="font-family:var(--KAI);font-size:.78rem;color:var(--gold);min-width:40px;flex-shrink:0;padding-top:2px">${l.start || '—'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;color:var(--txt);margin-bottom:2px">${name}${isGrp ? ' <span style="font-size:.58rem;color:var(--jade);border:1px solid var(--jade);padding:1px 4px">群組</span>' : ''}${isSkip?' <span style="font-size:.58rem;color:var(--red)">請假</span>':''}${isDone?' <span style="font-size:.58rem;color:var(--jade)">✓已上堂</span>':''}</div>
+          <div style="font-size:.63rem;color:var(--txt3)">${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${credLeft!==null&&!isPrivacyHidden()?` · 剩 ${credLeft} 節`:''}</div>
+          <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
+            ${!isDone && !isSkip ? `<button onclick="confirmAttend('${l.id}','${ds}')" class="btn s sm" style="font-size:.58rem;padding:2px 7px">✓確認上堂</button>` : ''}
+            ${!isSkip && !isDone ? `<button onclick="skipLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.58rem;padding:2px 7px;color:var(--red)">請假</button>` : ''}
+            ${isSkip ? `<button onclick="unskipLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.58rem;padding:2px 7px">取消請假</button>` : ''}
+            ${l.type==='once'?`<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="font-size:.58rem;padding:2px 7px;color:var(--red)">刪除</button>`:`<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm" style="font-size:.58rem;padding:2px 7px">單次刪除</button>`}
+          </div>
         </div>
-        <button onclick="deleteLesson('${l.id}')" style="color:var(--txt3);font-size:.9rem;padding:0 4px;background:none;border:none;cursor:pointer;align-self:flex-start">✕</button>
       </div>`;
     });
   }
@@ -173,7 +200,7 @@ function renderStudents() {
 
   el.innerHTML = list.map(s => {
     const sch = DB.schools.find(x => x.id === s.schoolId);
-    const _hideGrade = privacyHide('hideGrade');
+    const _hideGrade = isPrivacyHidden();
     const g = (!_hideGrade && s.overallScore != null) ? getGrade(s.overallScore) : null;
     const rc = DB.records.filter(r => r.studentId === s.id).length;
     return `<div class="sc" onclick="openDetail('${s.id}')">
@@ -256,8 +283,8 @@ function renderTabProfile(s) {
     infoRow('電郵', s.email),
   ]);
 
-  const _hideAmt = privacyHide('hideAmount');
   if (s.defaultFee || s.payMethod) {
+    const _hideAmt = isPrivacyHidden();
     h += infoCard('學費', [
       infoRow('每堂學費', s.defaultFee ? (_hideAmt ? '●●●●' : 'HK$' + s.defaultFee) : ''),
       infoRow('繳費方式', s.payMethod),
@@ -288,34 +315,58 @@ function renderTabProfile(s) {
 }
 
 function renderTabFees(s) {
+  const hide = isPrivacyHidden();
   const recs = DB.records.filter(r => r.studentId === s.id);
   const pays = DB.payments.filter(p => p.studentId === s.id)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const cred = (DB.credits || []).find(c => c.studentId === s.id);
 
-  const present = recs.filter(r => !r.attend || r.attend === 'present').length;
+  const present = recs.filter(r => r.attend === 'present' || !r.attend).length;
   const absent  = recs.filter(r => r.attend === 'absent').length;
   const makeup  = recs.filter(r => r.attend === 'makeup').length;
   const total   = pays.reduce((a, p) => a + parseFloat(p.amount || 0), 0);
 
+  const credTotal = cred ? cred.total : 0;
+  const credUsed  = cred ? cred.used  : 0;
+  const credLeft  = credTotal - credUsed;
+
   let h = `<div class="card gold" style="margin-bottom:10px">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
-      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--jade)">${present}</div><div style="font-size:.6rem;color:var(--txt3)">出席</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:9px">
+      <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--jade)">${present}</div><div style="font-size:.6rem;color:var(--txt3)">已上堂</div></div>
       <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--red)">${absent}</div><div style="font-size:.6rem;color:var(--txt3)">請假</div></div>
       <div><div style="font-family:var(--KAI);font-size:1.15rem;color:var(--gold2)">${makeup}</div><div style="font-size:.6rem;color:var(--txt3)">補堂</div></div>
     </div>
-    <div style="border-top:1px solid var(--bdr);margin-top:9px;padding-top:7px;text-align:center;font-size:.76rem;color:var(--jade)">總收款 HK$${Math.round(total)}</div>
+    ${!hide ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-top:9px;border-top:1px solid var(--bdr)">
+      <div style="text-align:center">
+        <div style="font-family:var(--KAI);font-size:1.1rem;color:var(--jade)">${credLeft}</div>
+        <div style="font-size:.6rem;color:var(--txt3)">剩餘課節</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:var(--KAI);font-size:1.1rem;color:var(--txt2)">HK$${Math.round(total)}</div>
+        <div style="font-size:.6rem;color:var(--txt3)">總收款</div>
+      </div>
+    </div>` : ''}
   </div>
-  <button class="btn p sm" onclick="openModalPayment('${s.id}')" style="margin-bottom:10px">新增收款</button>`;
 
-  if (!pays.length) return h + `<div style="font-size:.75rem;color:var(--txt3)">尚未有收款記錄</div>`;
+  <div style="display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn p sm" onclick="openModalPayment('${s.id}')">新增收款</button>
+    <button class="btn s sm" onclick="openModalAddCredits('${s.id}')">增加課節</button>
+  </div>`;
 
+  if (!pays.length) {
+    h += `<div class="sh">收款記錄</div><div style="font-size:.75rem;color:var(--txt3);padding:6px 0">尚未有收款記錄</div>`;
+    return h;
+  }
+
+  h += `<div class="sh">收款記錄</div>`;
   h += pays.map(p => `<div class="card" style="margin-bottom:7px">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">HK$${Math.round(parseFloat(p.amount || 0))}</div>
+      <div style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</div>
       <div style="font-size:.63rem;color:var(--txt3)">${p.date || ''}</div>
     </div>
     <div style="font-size:.66rem;color:var(--txt3);margin-top:2px">
-      ${[p.period, p.method, p.note].filter(Boolean).join(' · ')}
+      ${[p.period, p.method, p.note, p.credits ? '+' + p.credits + '節' : ''].filter(Boolean).join(' · ')}
     </div>
   </div>`).join('');
   return h;
@@ -524,30 +575,37 @@ async function saveOverall(sid, val) {
 // INCOME
 // ────────────────────────────────────────────
 function renderIncome() {
+  const hide = isPrivacyHidden();
   let h = `<button class="btn p sm" onclick="openModalPayment(null)" style="margin-bottom:12px">新增收款</button>`;
 
+  // Monthly totals summary (top 6 months)
+  let hasAny = false;
   for (let i = 0; i < 6; i++) {
     const ym = monthISO(-i);
     const pays = DB.payments.filter(p => p.date && p.date.startsWith(ym))
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     if (!pays.length) continue;
+    hasAny = true;
     const total = pays.reduce((a, p) => a + parseFloat(p.amount || 0), 0);
-    h += `<div class="sh">${ym.replace('-', ' 年 ')} 月 <span style="color:var(--jade);font-size:.76rem;margin-left:4px">HK$${Math.round(total)}</span></div>`;
+    const ymLabel = ym.replace('-', ' 年 ') + ' 月';
+    h += `<div class="sh">${ymLabel}`;
+    if (!hide) h += ` <span style="color:var(--jade);font-size:.76rem;margin-left:4px">HK$${Math.round(total)}</span>`;
+    h += `</div>`;
     pays.forEach(p => {
-      const s = DB.students.find(x => x.id === p.studentId);
+      const stu = DB.students.find(x => x.id === p.studentId);
       h += `<div class="card" style="margin-bottom:7px">
-        <div style="display:flex;justify-content:space-between">
-          <span style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">${_hideAmt?'●●●●':'HK$'+Math.round(parseFloat(p.amount||0))}</span>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:var(--KAI);font-size:.9rem;color:var(--jade)">${hide ? '●●●●' : 'HK$' + Math.round(parseFloat(p.amount || 0))}</span>
           <span style="font-size:.63rem;color:var(--txt3)">${p.date || ''}</span>
         </div>
         <div style="font-size:.68rem;color:var(--txt3);margin-top:2px">
-          ${[s ? s.name : '—', p.period, p.method, p.note].filter(Boolean).join(' · ')}
+          ${[stu ? stu.name : '—', p.period, p.method, p.note, p.credits ? '+' + p.credits + '節' : ''].filter(Boolean).join(' · ')}
         </div>
       </div>`;
     });
   }
 
-  if (!DB.payments.length) h += emptyState('帳', '尚未有收款記錄');
+  if (!hasAny) h += emptyState('帳', '尚未有收款記錄');
   document.getElementById('pg-income').querySelector('.dc').innerHTML = h;
 }
 
@@ -629,27 +687,20 @@ function renderSettings() {
     </div>
   </div>`;
 
-  // Privacy toggles (老師專用)
-  h += `<div class="sh">隱私設定</div>
+  // Privacy toggle — single switch
+  const hideAll = isPrivacyHidden();
+  h += `<div class="sh">隱私模式</div>
   <div class="card" style="margin-bottom:12px">
-    <div style="font-size:.68rem;color:var(--txt3);margin-bottom:10px;line-height:1.7">控制哪些資訊顯示於學生資料卡和列表中。</div>`;
-  const privOpts = [
-    { key:'hideAmount', label:'隱藏金額資訊', note:'學費、收款記錄以 ●●●● 顯示' },
-    { key:'hideGrade',  label:'隱藏能力評級', note:'學生列表的評級徽章以 ●●●● 顯示' },
-  ];
-  privOpts.forEach(opt => {
-    const on = privacyHide(opt.key);
-    h += `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)">
+    <div style="display:flex;align-items:center;gap:12px">
       <div style="flex:1">
-        <div style="font-size:.76rem;color:var(--txt2)">${opt.label}</div>
-        <div style="font-size:.6rem;color:var(--txt3);margin-top:1px">${opt.note}</div>
+        <div style="font-size:.8rem;color:var(--txt2);margin-bottom:3px">一鍵隱藏所有隱私資訊</div>
+        <div style="font-size:.62rem;color:var(--txt3);line-height:1.7">隱藏學費金額、收款記錄、能力評級及課節數量，以 ●●●● 顯示</div>
       </div>
-      <div class="priv-toggle${on?' on':''}" onclick="togglePrivacy('${opt.key}')">
+      <div class="priv-toggle${hideAll?' on':''}" onclick="toggleAllPrivacy()">
         <div class="priv-thumb"></div>
       </div>
-    </div>`;
-  });
-  h += `</div>`;
+    </div>
+  </div>`;
 
   // Schools
   h += `<div class="sh">學校管理</div>`;

@@ -264,25 +264,46 @@ async function savePayment() {
   if (!amt) { showBan('請填寫金額', true); return; }
 
   setBtnLoading('btnSavePay', '記錄中…');
+  const creditsEl = document.getElementById('payCredits');
+  const creditsAmt = creditsEl ? parseInt(creditsEl.value) || 0 : 0;
+  const sid = document.getElementById('payStus').value;
+
   const p = {
     id: newId(),
-    studentId: document.getElementById('payStus').value,
-    amount: parseFloat(amt),
-    date:   document.getElementById('payDate').value,
-    period: document.getElementById('payPeriod').value,
-    method: document.getElementById('payMethod').value,
-    note:   document.getElementById('payNote').value,
+    studentId: sid,
+    amount:  parseFloat(amt),
+    date:    document.getElementById('payDate').value,
+    period:  document.getElementById('payPeriod').value,
+    method:  document.getElementById('payMethod').value,
+    note:    document.getElementById('payNote').value,
+    credits: creditsAmt || null,
     createdAt: Date.now(),
   };
   DB.payments.push(p);
+
+  // Auto-add credits if specified
+  if (creditsAmt > 0 && sid) {
+    if (!DB.credits) DB.credits = [];
+    let cred = DB.credits.find(c => c.studentId === sid);
+    if (cred) {
+      cred.total = (cred.total || 0) + creditsAmt;
+      await fbSave('credits', cred.id, cred);
+    } else {
+      cred = { id: newId(), studentId: sid, total: creditsAmt, used: 0, createdAt: Date.now() };
+      DB.credits.push(cred);
+      await fbSave('credits', cred.id, cred);
+    }
+  }
+
   saveLocal();
   await fbSave('payments', p.id, p);
+  if (creditsEl) creditsEl.value = '';
   closeMo('moPayment');
   setBtnDone('btnSavePay', '記錄收款');
   if (UI.page === 'detail') renderDetailBody();
   renderDash();
-  renderIncome();
-  showBan('收款已記錄');
+  if (UI.page === 'income') renderIncome();
+  showBan(creditsAmt > 0 ? `收款已記錄，已增加 ${creditsAmt} 課節` : '收款已記錄');
 }
 
 // ── 學校 ──
@@ -476,11 +497,166 @@ function sendContactMsg() {
 }
 
 // ── Privacy toggle ──
-function togglePrivacy(key) {
-  const cur = privacyHide(key);
-  setPrivacy(key, !cur);
+function toggleAllPrivacy() {
+  toggleHideAll();
   renderSettings();
-  // 重渲學生列表（如果在相關頁面）
-  if (UI.page === 'students') renderStudents();
-  if (UI.page === 'detail' && (key === 'hideAmount' || key === 'hideGrade')) renderDetailBody();
+  if (UI.page === 'students')  renderStudents();
+  if (UI.page === 'detail')    renderDetailBody();
+  if (UI.page === 'income')    renderIncome();
+  if (UI.page === 'dash')      renderDash();
+}
+// legacy compat
+function togglePrivacy(key) { toggleAllPrivacy(); }
+
+// ═══════════════════════════════════════════════════════════════
+// 課堂出席 / 請假 / 確認上堂
+// ═══════════════════════════════════════════════════════════════
+
+// 確認上堂：記錄 attend=present，扣除一課節
+async function confirmAttend(lessonId, ds) {
+  const l = DB.lessons.find(x => x.id === lessonId);
+  if (!l) return;
+
+  // 避免重複確認
+  const already = DB.records.find(r =>
+    r.lessonId === lessonId && r.date === ds && r.attend === 'present'
+  );
+  if (already) { showBan('此課堂已確認上堂', true); return; }
+
+  const rec = {
+    id: newId(),
+    studentId: l.studentId || null,
+    groupId:   l.groupId   || null,
+    lessonId,
+    date: ds,
+    attend: 'present',
+    content: '',
+    rating: null,
+    createdAt: Date.now(),
+  };
+  DB.records.push(rec);
+
+  // 扣除課節
+  if (l.studentId) {
+    let cred = DB.credits.find(c => c.studentId === l.studentId);
+    if (cred) {
+      cred.used = (cred.used || 0) + 1;
+      await fbSave('credits', cred.id, cred);
+    }
+  }
+
+  saveLocal();
+  await fbSave('records', rec.id, rec);
+  renderDayPanel(ds);
+  renderDash();
+  showBan('已確認上堂');
+}
+
+// 請假：記錄 attend=absent（不扣課節）
+async function skipLesson(lessonId, ds) {
+  const l = DB.lessons.find(x => x.id === lessonId);
+  if (!l) return;
+
+  const already = DB.records.find(r =>
+    r.lessonId === lessonId && r.date === ds && r.attend === 'absent'
+  );
+  if (already) { showBan('已標記請假', true); return; }
+
+  const rec = {
+    id: newId(),
+    studentId: l.studentId || null,
+    groupId:   l.groupId   || null,
+    lessonId, date: ds,
+    attend: 'absent',
+    content: '請假',
+    rating: null,
+    createdAt: Date.now(),
+  };
+  DB.records.push(rec);
+  saveLocal();
+  await fbSave('records', rec.id, rec);
+  renderDayPanel(ds);
+  showBan('已標記請假');
+}
+
+// 取消請假
+async function unskipLesson(lessonId, ds) {
+  const rec = DB.records.find(r =>
+    r.lessonId === lessonId && r.date === ds && r.attend === 'absent'
+  );
+  if (!rec) return;
+  DB.records = DB.records.filter(r => r.id !== rec.id);
+  saveLocal();
+  await fbDel('records', rec.id);
+  renderDayPanel(ds);
+  showBan('已取消請假');
+}
+
+// 單次刪除（固定課堂這次不上，加一個 once-skip record）
+async function skipOneLesson(lessonId, ds) {
+  if (!confirm(`確定要刪除 ${ds} 這次課堂？（只刪除這一次，固定安排不受影響）`)) return;
+  // Add a one-off skip marker
+  const l = DB.lessons.find(x => x.id === lessonId);
+  const oneOff = {
+    id: newId(),
+    type: 'once-skip',
+    lessonId,
+    date: ds,
+    studentId: l?.studentId || null,
+    uid: getUid(),
+    createdAt: Date.now(),
+  };
+  // Store in lessons as a once-skip entry
+  DB.lessons.push(oneOff);
+  saveLocal();
+  await fbSave('lessons', oneOff.id, oneOff);
+  renderCal();
+  showBan('此次課堂已刪除');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 增加可上課節（學費繳交後）
+// ═══════════════════════════════════════════════════════════════
+let _creditSid = null;
+
+function openModalAddCredits(sid) {
+  _creditSid = sid;
+  const stu = DB.students.find(s => s.id === sid);
+  const existing = (DB.credits || []).find(c => c.studentId === sid);
+  document.getElementById('credStuName').textContent = stu ? stu.name : '';
+  document.getElementById('credCurrent').textContent = existing
+    ? `現有：${existing.total - existing.used} 節（共 ${existing.total} 節，已上 ${existing.used} 節）`
+    : '現有：0 節';
+  document.getElementById('credAmt').value = '';
+  openMo('moCredits');
+}
+
+async function saveCredits() {
+  const amt = parseInt(document.getElementById('credAmt').value);
+  if (!amt || amt <= 0) { showBan('請填寫課節數量', true); return; }
+
+  setBtnLoading('btnSaveCred', '儲存中…');
+  if (!DB.credits) DB.credits = [];
+
+  let cred = DB.credits.find(c => c.studentId === _creditSid);
+  if (cred) {
+    cred.total = (cred.total || 0) + amt;
+    await fbSave('credits', cred.id, cred);
+  } else {
+    cred = {
+      id: newId(),
+      studentId: _creditSid,
+      total: amt,
+      used: 0,
+      createdAt: Date.now(),
+    };
+    DB.credits.push(cred);
+    await fbSave('credits', cred.id, cred);
+  }
+  saveLocal();
+  closeMo('moCredits');
+  setBtnDone('btnSaveCred', '確認增加');
+
+  if (UI.page === 'detail') renderDetailBody();
+  showBan(`已增加 ${amt} 課節`);
 }
