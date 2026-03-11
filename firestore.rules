@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // 取得用戶 role（預設 teacher）
+    function userRole() {
+      return signedIn()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'teacher')
+        : null;
+    }
+
+    // 用戶只能讀寫自己的 profile
+    match /users/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // 學生、課堂記錄、教案、收款、學校、群組：
+    // 老師可讀寫自己 uid 下的所有資料
+    // 學生/家長只能讀取 linkedStudentIds 相關資料
+    match /students/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /records/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /lessons/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /payments/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /plans/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /schools/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+
+    match /groups/{docId} {
+      allow read, write: if signedIn() && (
+        resource == null ||
+        resource.data.uid == request.auth.uid ||
+        request.resource.data.uid == request.auth.uid
+      );
+    }
+  }
+}
