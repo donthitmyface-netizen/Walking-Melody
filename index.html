@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1c1408">
+<title>履音 · 音樂教學助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ══ SPLASH ══ -->
+<div id="splash" style="position:fixed;inset:0;z-index:9999;background:#1c1408;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="font-family:'Noto Serif TC',serif;font-size:4.5rem;color:#9b2a1a;border:3px solid #9b2a1a;width:96px;height:96px;display:flex;align-items:center;justify-content:center">履</div>
+  <div style="font-family:'Noto Serif TC',serif;font-size:.88rem;color:#b8862a;letter-spacing:.32em">素履往　無咎</div>
+  <div style="font-size:.65rem;color:#5a4a30;letter-spacing:.2em;margin-top:2px">履音 · 音樂教學助手</div>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginPage" style="display:none;position:fixed;inset:0;z-index:800;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px">
+  <div style="font-family:var(--KAI);font-size:4rem;color:var(--red);border:3px solid var(--red);width:84px;height:84px;display:flex;align-items:center;justify-content:center">履</div>
+  <div style="font-family:var(--KAI);font-size:1.1rem;color:var(--gold);letter-spacing:.22em">履音</div>
+  <div style="font-size:.76rem;color:var(--txt3);letter-spacing:.1em;text-align:center;line-height:1.9">音樂教學助手<br>記錄學生進度　備課管理</div>
+  <button onclick="doLogin()" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr2);color:var(--txt);padding:12px 22px;cursor:pointer;font-size:.8rem;letter-spacing:.08em;margin-top:8px">
+    <svg width="18" height="18" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
+    以 Google 帳號登入
+  </button>
+  <div id="loginStatus" style="font-size:.67rem;color:var(--txt3);min-height:18px;text-align:center"></div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <div id="hdr">
+    <div id="hdrSeal">履</div>
+    <div id="hdrTitle">總覽</div>
+    <button id="hdrBtn" class="btn s" style="display:none"></button>
+    <div id="hdrAvatar" onclick="goPage('settings')"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main">
+
+    <!-- Dashboard -->
+    <div id="pg-dash" class="page active"><div class="dc"></div></div>
+
+    <!-- Timetable -->
+    <div id="pg-timetable" class="page">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+        <button onclick="calPrev()" class="btn s sm" style="width:34px;padding:5px">‹</button>
+        <div id="calLabel" style="font-family:var(--KAI);font-size:.9rem;color:var(--gold);letter-spacing:.1em"></div>
+        <button onclick="calNext()" class="btn s sm" style="width:34px;padding:5px">›</button>
+      </div>
+      <div class="cg" style="margin-bottom:3px">
+        <div class="chd">日</div><div class="chd">一</div><div class="chd">二</div>
+        <div class="chd">三</div><div class="chd">四</div><div class="chd">五</div><div class="chd">六</div>
+      </div>
+      <div id="calGrid" class="cg" style="margin-bottom:12px"></div>
+      <div id="calPanel"></div>
+      <button class="btn p" onclick="openModalLesson(UI.calSelDay)" style="margin-top:6px">新增課堂</button>
+    </div>
+
+    <!-- Students -->
+    <div id="pg-students" class="page">
+      <div class="sb">
+        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="stuQ" type="text" placeholder="搜尋學生姓名…" oninput="renderStudents()">
+      </div>
+      <div id="schChips" class="chips"></div>
+      <div id="stuList"></div>
+      <button class="btn p" onclick="openModalStudent(null)" style="margin-top:6px">新增學生</button>
+    </div>
+
+    <!-- Student Detail -->
+    <div id="pg-detail" class="page">
+      <button onclick="backPage()" style="font-size:.73rem;color:var(--txt3);display:flex;align-items:center;gap:3px;margin-bottom:11px;background:none;border:none;cursor:pointer">‹ 返回</button>
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
+        <div id="dtAv" style="width:50px;height:50px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--KAI);font-size:1.4rem;color:#fff;flex-shrink:0"></div>
+        <div>
+          <div id="dtName" style="font-family:var(--KAI);font-size:1.05rem;color:var(--txt)"></div>
+          <div id="dtSub"  style="font-size:.68rem;color:var(--txt3);margin-top:2px"></div>
+        </div>
+      </div>
+      <div id="dtTabs" class="tabs"></div>
+      <div id="dtBody"></div>
+    </div>
+
+    <!-- Income -->
+    <div id="pg-income" class="page"><div class="dc"></div></div>
+
+    <!-- Lineage -->
+    <div id="pg-lineage" class="page"><div class="dc"></div></div>
+
+    <!-- Settings -->
+    <div id="pg-settings" class="page"><div class="dc"></div></div>
+
+  </div><!-- /main -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="nav">
+    <button class="ni on" data-p="dash" onclick="goPage('dash')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span>總覽</span>
+    </button>
+    <button class="ni" data-p="timetable" onclick="goPage('timetable')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>時間表</span>
+    </button>
+    <button class="ni" data-p="students" onclick="goPage('students')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>學生</span>
+    </button>
+    <button class="ni" data-p="income" onclick="goPage('income')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>收入</span>
+    </button>
+    <button class="ni" data-p="lineage" onclick="goPage('lineage')">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span>傳承</span>
+    </button>
+    <button class="ni" data-p="settings" onclick="goPage('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>設定</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- BANNER -->
+<div id="ban" class="ban"></div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Student -->
+<div id="moStudent" class="ov" onclick="overlayTap(event,'moStudent')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moStudent')">✕</button>
+    <div class="mt" id="moStuTitle">新增學生</div>
+
+    <div class="sh">基本資料</div>
+    <div class="fg"><label class="fl">姓名 *</label><input class="fi" id="sName" placeholder="例：陳小明"></div>
+    <div class="fg"><label class="fl">英文姓名</label><input class="fi" id="sNameEn" placeholder="Chan Siu Ming"></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">出生日期</label><input class="fi" id="sDob" type="date"></div>
+      <div class="fg"><label class="fl">性別</label>
+        <select class="fi" id="sGender"><option value="">不填</option><option value="M">男</option><option value="F">女</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">所屬學校</label><select class="fi" id="sSchool"></select></div>
+    <div class="fg"><label class="fl">就讀年級</label>
+      <select class="fi" id="sGrade">
+        <option value="">不填</option>
+        <option>幼稚園 K1</option><option>幼稚園 K2</option><option>幼稚園 K3</option>
+        <option>小一</option><option>小二</option><option>小三</option>
+        <option>小四</option><option>小五</option><option>小六</option>
+        <option>中一</option><option>中二</option><option>中三</option>
+        <option>中四</option><option>中五</option><option>中六</option>
+        <option>大學 / 成人</option>
+      </select>
+    </div>
+
+    <div class="sh">樂器與程度</div>
+    <div class="fg"><label class="fl">樂器 *</label><select class="fi" id="sInst"></select></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">程度</label><select class="fi" id="sLevel"></select></div>
+      <div class="fg"><label class="fl">學習年數</label>
+        <select class="fi" id="sYears">
+          <option value="">不填</option><option>不足 1 年</option>
+          <option>1 年</option><option>2 年</option><option>3 年</option>
+          <option>4 年</option><option>5 年</option><option>6–8 年</option>
+          <option>9–12 年</option><option>12 年以上</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">目前考級 / 目標</label><input class="fi" id="sExam" placeholder="例：ABRSM Grade 4 已通過，目標 Grade 5"></div>
+
+    <div class="sh">聯絡資料</div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">家長 / 監護人</label><input class="fi" id="sParent" placeholder="陳大文"></div>
+      <div class="fg"><label class="fl">關係</label>
+        <select class="fi" id="sParentRel">
+          <option value="">不填</option><option>父親</option><option>母親</option>
+          <option>祖父母</option><option>其他監護人</option><option>本人（成人）</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">聯絡電話</label><input class="fi" id="sPhone" type="tel" placeholder="9123 4567"></div>
+      <div class="fg"><label class="fl">電郵</label><input class="fi" id="sEmail" type="email" placeholder="parent@email.com"></div>
+    </div>
+
+    <div class="sh">學費資料</div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">每堂學費 (HK$)</label><input class="fi" id="sFee" type="number" placeholder="400"></div>
+      <div class="fg"><label class="fl">繳費方式</label>
+        <select class="fi" id="sPayMethod">
+          <option value="">不填</option><option>現金</option><option>轉數快 FPS</option>
+          <option>銀行轉帳</option><option>支票</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sh">個人背景</div>
+    <div class="fg"><label class="fl">性格描述</label><textarea class="fi" id="sPersonality" placeholder="例：活潑好動，專注力較短"></textarea></div>
+    <div class="fg"><label class="fl">學習瓶頸</label><textarea class="fi" id="sBottleneck" placeholder="例：節奏感不穩，左右手配合需加強"></textarea></div>
+    <div class="fg"><label class="fl">學習喜好</label><textarea class="fi" id="sPrefs" placeholder="例：喜歡流行曲風格"></textarea></div>
+    <div class="fg"><label class="fl">備注</label><textarea class="fi" id="sNote"></textarea></div>
+
+    <button class="btn p" id="btnSaveStu" onclick="saveStudent()" style="margin-top:4px">儲存學生</button>
+    <button class="btn s" onclick="closeMo('moStudent')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Lesson -->
+<div id="moLesson" class="ov" onclick="overlayTap(event,'moLesson')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moLesson')">✕</button>
+    <div class="mt">新增課堂</div>
+
+    <div class="fg">
+      <label class="fl">對象類型</label>
+      <select class="fi" id="lTargetType" onchange="onLessonTargetChange()">
+        <option value="student">個人學生</option>
+        <option value="group">群組 / 班級</option>
+      </select>
+    </div>
+    <div id="lStuRow" class="fg"><label class="fl">學生 *</label><select class="fi" id="lStu"></select></div>
+    <div id="lGrpRow" class="fg" style="display:none"><label class="fl">群組 *</label><select class="fi" id="lGrp"></select></div>
+
+    <div class="fg">
+      <label class="fl">課堂類型</label>
+      <select class="fi" id="lType" onchange="onLessonTypeChange()">
+        <option value="fixed">固定課堂（每週重複）</option>
+        <option value="once">單次課堂（指定日期）</option>
+      </select>
+    </div>
+    <div id="lFixedRow" class="fg">
+      <label class="fl">星期</label>
+      <select class="fi" id="lDay">
+        <option value="0">週日</option><option value="1">週一</option><option value="2">週二</option>
+        <option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option>
+      </select>
+    </div>
+    <div id="lOnceRow" class="fg" style="display:none">
+      <label class="fl">日期</label><input class="fi" id="lDate" type="date">
+    </div>
+
+    <div class="fg2">
+      <div class="fg"><label class="fl">開始時間</label><input class="fi" id="lStart" type="time" value="15:00"></div>
+      <div class="fg"><label class="fl">時長（分鐘）</label>
+        <select class="fi" id="lDur"><option>30</option><option>45</option><option selected>60</option><option>90</option><option>120</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">每節學費 (HK$)</label><input class="fi" id="lFeeAmt" type="number" placeholder="400"></div>
+
+    <button class="btn p" id="btnSaveLesson" onclick="saveLesson()" style="margin-top:4px">儲存課堂</button>
+    <button class="btn s" onclick="closeMo('moLesson')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Record -->
+<div id="moRecord" class="ov" onclick="overlayTap(event,'moRecord')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moRecord')">✕</button>
+    <div class="mt">新增課堂記錄</div>
+    <div class="fg"><label class="fl">日期</label><input class="fi" id="rDate" type="date"></div>
+    <div class="fg"><label class="fl">出席情況</label>
+      <select class="fi" id="rAttend">
+        <option value="present">出席</option><option value="absent">請假</option><option value="makeup">補堂</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">課堂內容 *</label><textarea class="fi" id="rContent" placeholder="今天學習了…"></textarea></div>
+    <div class="fg"><label class="fl">練習曲目</label><input class="fi" id="rPiece" placeholder="例：小星星 第一段"></div>
+    <div class="fg"><label class="fl">評分</label>
+      <select class="fi" id="rRating">
+        <option value="5">5 星 — 卓越</option><option value="4">4 星 — 優秀</option>
+        <option value="3" selected>3 星 — 良好</option><option value="2">2 星 — 一般</option><option value="1">1 星 — 待改進</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">功課 / 練習指示</label><textarea class="fi" id="rHw" placeholder="回家練習…"></textarea></div>
+    <button class="btn p" id="btnSaveRec" onclick="saveRecord()" style="margin-top:4px">記錄入冊</button>
+    <button class="btn s" onclick="closeMo('moRecord')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Plan -->
+<div id="moPlan" class="ov" onclick="overlayTap(event,'moPlan')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moPlan')">✕</button>
+    <div class="mt">課堂教案</div>
+    <div class="fg"><label class="fl">日期</label><input class="fi" id="pDate" type="date"></div>
+    <div class="fg"><label class="fl">教學目標（上課前填寫）</label><textarea class="fi" id="pGoal" placeholder="今堂目標…"></textarea></div>
+    <div class="fg"><label class="fl">教案內容（上課前填寫）</label><textarea class="fi" id="pPlan" placeholder="教學步驟…"></textarea></div>
+    <div class="fg"><label class="fl">實際記錄（上課後填寫）</label><textarea class="fi" id="pRecord" placeholder="實際進行了…"></textarea></div>
+    <div class="fg"><label class="fl">練習曲目</label><input class="fi" id="pPiece"></div>
+    <div class="fg"><label class="fl">功課</label><textarea class="fi" id="pHw"></textarea></div>
+    <button class="btn p" id="btnSavePlan" onclick="savePlan()" style="margin-top:4px">儲存教案</button>
+    <button class="btn s" onclick="closeMo('moPlan')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Payment -->
+<div id="moPayment" class="ov" onclick="overlayTap(event,'moPayment')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moPayment')">✕</button>
+    <div class="mt">新增收款記錄</div>
+    <div class="fg"><label class="fl">學生</label><select class="fi" id="payStus"></select></div>
+    <div class="fg"><label class="fl">金額 (HK$) *</label><input class="fi" id="payAmt" type="number" placeholder="400"></div>
+    <div class="fg"><label class="fl">日期</label><input class="fi" id="payDate" type="date"></div>
+    <div class="fg"><label class="fl">繳費月份</label><input class="fi" id="payPeriod" placeholder="例：2025 年 1 月"></div>
+    <div class="fg"><label class="fl">繳費方式</label>
+      <select class="fi" id="payMethod">
+        <option>現金</option><option>轉數快 FPS</option><option>銀行轉帳</option><option>支票</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">備注</label><input class="fi" id="payNote"></div>
+    <button class="btn p" id="btnSavePay" onclick="savePayment()" style="margin-top:4px">記錄收款</button>
+    <button class="btn s" onclick="closeMo('moPayment')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- School -->
+<div id="moSchool" class="ov" onclick="overlayTap(event,'moSchool')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moSchool')">✕</button>
+    <div class="mt">新增學校</div>
+    <div class="fg"><label class="fl">學校名稱 *</label><input class="fi" id="schoolName" placeholder="例：陳瑞祺喇沙小學"></div>
+    <button class="btn p" onclick="saveSchool()" style="margin-top:4px">儲存</button>
+    <button class="btn s" onclick="closeMo('moSchool')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- Group -->
+<div id="moGroup" class="ov" onclick="overlayTap(event,'moGroup')">
+  <div class="mo">
+    <button class="mx" onclick="closeMo('moGroup')">✕</button>
+    <div class="mt" id="moGrpTitle">新增群組</div>
+    <div class="fg"><label class="fl">群組名稱 *</label><input class="fi" id="gName" placeholder="例：週六初級班"></div>
+    <div class="fg">
+      <label class="fl">成員（可多選）</label>
+      <div id="gMemberList" style="max-height:150px;overflow-y:auto;border:1px solid var(--bdr);padding:8px;background:var(--card2)"></div>
+    </div>
+    <div class="fg"><label class="fl">備注</label><textarea class="fi" id="gNote"></textarea></div>
+    <button class="btn p" id="btnSaveGrp" onclick="saveGroup()" style="margin-top:4px">儲存群組</button>
+    <button class="btn s" onclick="closeMo('moGroup')" style="margin-top:8px">取消</button>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script src="data.js"></script>
+<script src="store.js"></script>
+<script src="ui.js"></script>
+<script src="pages.js"></script>
+<script src="actions.js"></script>
+<script>
+// ── App Boot ──
+firebase.initializeApp(FB_CFG);
+
+firebase.auth().onAuthStateChanged(async user => {
+  document.getElementById('splash').style.display = 'none';
+  if (user) {
+    CU = user;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    // Avatar
+    const av = document.getElementById('hdrAvatar');
+    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}">`;
+    else av.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+
+    applyTheme();
+    applyFs();
+    loadLocal();
+    renderDash();
+    renderSchChips();
+    renderStudents();
+
+    // Load from Firebase in background
+    loadAll().then(() => {
+      renderDash();
+      if (UI.page === 'students') { renderSchChips(); renderStudents(); }
+      else if (UI.page === 'detail') renderDetailBody();
+    });
+
+  } else {
+    CU = null;
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
