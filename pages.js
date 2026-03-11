@@ -85,6 +85,25 @@ function lessonName(l) {
 // ────────────────────────────────────────────
 // TIMETABLE
 // ────────────────────────────────────────────
+// ── Google Calendar URL builder ──
+function buildGcalUrl(l, ds) {
+  const name = lessonName(l);
+  const title = encodeURIComponent('音樂課：' + name);
+  const loc = l.location ? encodeURIComponent(l.location) : '';
+  const details = encodeURIComponent((l.note || '') + (l.fee ? ' HK$' + l.fee : ''));
+  if (!l.start || !ds) return 'https://calendar.google.com/';
+  const [hh, mm] = l.start.split(':').map(Number);
+  const dur = parseInt(l.dur || 60);
+  // Format: YYYYMMDDTHHmmss
+  const pad = n => String(n).padStart(2,'0');
+  const startStr = ds.replace(/-/g,'') + 'T' + pad(hh) + pad(mm) + '00';
+  const endDate = new Date(ds + 'T' + pad(hh) + ':' + pad(mm) + ':00');
+  endDate.setMinutes(endDate.getMinutes() + dur);
+  const endStr = endDate.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'').replace('Z','');
+  const recur = l.type === 'fixed' ? '&recur=RRULE:FREQ%3DWEEKLY' : '';
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&location=${loc}&details=${details}${recur}`;
+}
+
 function renderCal() {
   const y = UI.calYear, m = UI.calMonth;
   const MON = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -161,6 +180,17 @@ function renderDayPanel(ds) {
       const credLeft = cred ? (cred.total - cred.used) : null;
       const border = isSkip ? 'border-left:3px solid var(--red)' : isDone ? 'border-left:3px solid var(--jade)' : '';
 
+      // Location line with Maps link
+      const locHtml = l.location
+        ? `<div style="font-size:0.80rem;color:var(--txt3);margin-top:2px">
+             📍 <a href="https://maps.google.com/?q=${encodeURIComponent(l.location)}" target="_blank"
+                style="color:var(--gold2);text-decoration:underline">${l.location}</a>
+           </div>`
+        : '';
+
+      // Google Calendar link for this specific occurrence
+      const gcalUrl = buildGcalUrl(l, ds);
+
       h += `<div class="card" style="display:flex;gap:10px;margin-bottom:7px;${border}">
         <div style="font-family:var(--KAI);font-size:0.97rem;color:var(--gold);min-width:40px;flex-shrink:0;padding-top:2px">${l.start || '—'}</div>
         <div style="flex:1;min-width:0">
@@ -171,6 +201,7 @@ function renderDayPanel(ds) {
             ${isDone ? ` <span style="font-size:0.80rem;color:var(--jade)">${isAuto ? '已上堂' : '✓已上堂'}</span>` : ''}
           </div>
           <div style="font-size:0.84rem;color:var(--txt3)">${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${credLeft!==null&&!isPrivacyHidden()?' · 剩 '+credLeft+' 節':''}</div>
+          ${locHtml}
           <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
             ${!isDone && !isSkip ? `<button onclick="confirmAttend('${l.id}','${ds}')" class="btn s sm">✓確認上堂</button>` : ''}
             ${isSkip
@@ -179,6 +210,8 @@ function renderDayPanel(ds) {
             ${l.type==='once'
               ? `<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="color:var(--red)">刪除</button>`
               : `<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm">單次刪除</button>`}
+            <button onclick="openModalLesson(null,'${l.id}')" class="btn s sm">編輯</button>
+            <a href="${gcalUrl}" target="_blank" class="btn s sm" style="text-decoration:none">📅 加入日曆</a>
           </div>
         </div>
       </div>`;

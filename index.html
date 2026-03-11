@@ -300,8 +300,9 @@
 <div id="moLesson" class="ov" onclick="overlayTap(event,'moLesson')">
   <div class="mo">
     <button class="mx" onclick="closeMo('moLesson')">✕</button>
-    <div class="mt">新增課堂</div>
+    <div class="mt" id="moLessonTitle">新增課堂</div>
 
+    <!-- 學生 / 群組 -->
     <div class="fg">
       <label class="fl">對象類型</label>
       <select class="fi" id="lTargetType" onchange="onLessonTargetChange()">
@@ -309,9 +310,44 @@
         <option value="group">群組 / 班級</option>
       </select>
     </div>
-    <div id="lStuRow" class="fg"><label class="fl">學生 *</label><select class="fi" id="lStu"></select></div>
-    <div id="lGrpRow" class="fg" style="display:none"><label class="fl">群組 *</label><select class="fi" id="lGrp"></select></div>
+    <div id="lStuRow" class="fg">
+      <label class="fl">學生 *</label>
+      <div style="display:flex;gap:6px">
+        <select class="fi" id="lStu" style="flex:1"></select>
+        <button class="btn s sm" onclick="inlineSwitchToNewStudent()" style="white-space:nowrap;flex-shrink:0">+ 新學生</button>
+      </div>
+    </div>
+    <div id="lGrpRow" class="fg" style="display:none">
+      <label class="fl">群組 *</label>
+      <div style="display:flex;gap:6px">
+        <select class="fi" id="lGrp" style="flex:1"></select>
+        <button class="btn s sm" onclick="inlineSwitchToNewGroup()" style="white-space:nowrap;flex-shrink:0">+ 新群組</button>
+      </div>
+    </div>
 
+    <!-- 快速新增學生（收合） -->
+    <div id="lInlineStu" style="display:none;background:var(--card2);border:1px solid var(--bdr2);padding:10px;margin-bottom:8px">
+      <div style="font-size:0.78rem;color:var(--gold2);margin-bottom:8px;letter-spacing:.06em">快速新增學生</div>
+      <div class="fg"><label class="fl">姓名 *</label><input class="fi" id="lnStuName" placeholder="陳小明"></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">樂器</label><select class="fi" id="lnStuInst"></select></div>
+        <div class="fg"><label class="fl">電話</label><input class="fi" id="lnStuPhone" type="tel" placeholder="9123 4567"></div>
+      </div>
+      <div class="fg"><label class="fl">每堂學費</label><input class="fi" id="lnStuFee" type="number" placeholder="400"></div>
+      <button class="btn p sm" onclick="inlineSaveNewStudent()">建立並選擇此學生</button>
+      <button class="btn s sm" onclick="document.getElementById('lInlineStu').style.display='none'" style="margin-top:6px">取消</button>
+    </div>
+
+    <!-- 快速新增群組（收合） -->
+    <div id="lInlineGrp" style="display:none;background:var(--card2);border:1px solid var(--bdr2);padding:10px;margin-bottom:8px">
+      <div style="font-size:0.78rem;color:var(--gold2);margin-bottom:8px;letter-spacing:.06em">快速新增群組</div>
+      <div class="fg"><label class="fl">群組名稱 *</label><input class="fi" id="lnGrpName" placeholder="例：週六初級班"></div>
+      <div class="fg"><label class="fl">備注</label><input class="fi" id="lnGrpNote" placeholder="可選"></div>
+      <button class="btn p sm" onclick="inlineSaveNewGroup()">建立並選擇此群組</button>
+      <button class="btn s sm" onclick="document.getElementById('lInlineGrp').style.display='none'" style="margin-top:6px">取消</button>
+    </div>
+
+    <!-- 課堂類型 -->
     <div class="fg">
       <label class="fl">課堂類型</label>
       <select class="fi" id="lType" onchange="onLessonTypeChange()">
@@ -330,13 +366,23 @@
       <label class="fl">日期</label><input class="fi" id="lDate" type="date">
     </div>
 
+    <!-- 時間 -->
     <div class="fg2">
       <div class="fg"><label class="fl">開始時間</label><input class="fi" id="lStart" type="time" value="15:00"></div>
       <div class="fg"><label class="fl">時長（分鐘）</label>
         <select class="fi" id="lDur"><option>30</option><option>45</option><option selected>60</option><option>90</option><option>120</option></select>
       </div>
     </div>
+
+    <!-- 地點 -->
+    <div class="fg">
+      <label class="fl">上課地點</label>
+      <input class="fi" id="lLocation" placeholder="例：荃灣荃景圍 123 號 / 學生家中">
+    </div>
+
+    <!-- 學費 -->
     <div class="fg"><label class="fl">每節學費 (HK$)</label><input class="fi" id="lFeeAmt" type="number" placeholder="400"></div>
+    <div class="fg"><label class="fl">備注</label><input class="fi" id="lNote" placeholder="可選"></div>
 
     <button class="btn p" id="btnSaveLesson" onclick="saveLesson()" style="margin-top:4px">儲存課堂</button>
     <button class="btn s" onclick="closeMo('moLesson')" style="margin-top:8px">取消</button>

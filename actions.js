@@ -161,7 +161,19 @@ async function savePlan() {
 }
 
 // ── 課堂時間表 ──
-function openModalLesson(presetDate = null) {
+function openModalLesson(presetDate = null, editLessonId = null) {
+  const editL = editLessonId ? DB.lessons.find(x => x.id === editLessonId) : null;
+  UI.editLessonId = editLessonId || null;
+
+  document.getElementById('moLessonTitle').textContent = editL ? '編輯課堂' : '新增課堂';
+  document.getElementById('btnSaveLesson').textContent = editL ? '更新課堂' : '儲存課堂';
+
+  // Populate instruments for inline student form
+  const instEl = document.getElementById('lnStuInst');
+  if (instEl && !instEl.options.length) {
+    instEl.innerHTML = (INSTRUMENTS || []).map(i => `<option>${i}</option>`).join('');
+  }
+
   // Populate student select
   document.getElementById('lStu').innerHTML =
     DB.students.length
@@ -174,33 +186,43 @@ function openModalLesson(presetDate = null) {
       ? DB.groups.map(g => `<option value="${g.id}">${g.name}（${(g.members || []).length} 人）</option>`).join('')
       : '<option value="">（尚未建立群組）</option>';
 
-  // Reset target type to student
-  document.getElementById('lTargetType').value = 'student';
-  onLessonTargetChange();
+  // Hide inline forms
+  document.getElementById('lInlineStu').style.display = 'none';
+  document.getElementById('lInlineGrp').style.display = 'none';
 
-  // Reset lesson type
-  document.getElementById('lType').value = 'fixed';
-  onLessonTypeChange();
-
-  if (presetDate) {
-    document.getElementById('lDate').value = presetDate;
-    const dow = new Date(presetDate).getDay();
-    document.getElementById('lDay').value = dow;
+  if (editL) {
+    // Fill with existing lesson data
+    document.getElementById('lTargetType').value = editL.targetType || 'student';
+    onLessonTargetChange();
+    if (editL.studentId) document.getElementById('lStu').value = editL.studentId;
+    if (editL.groupId)   document.getElementById('lGrp').value = editL.groupId;
+    document.getElementById('lType').value = editL.type || 'fixed';
+    onLessonTypeChange();
+    if (editL.day  != null) document.getElementById('lDay').value  = editL.day;
+    if (editL.date)         document.getElementById('lDate').value = editL.date;
+    document.getElementById('lStart').value    = editL.start || '15:00';
+    document.getElementById('lDur').value      = editL.dur   || '60';
+    document.getElementById('lFeeAmt').value   = editL.fee   || '';
+    document.getElementById('lLocation').value = editL.location || '';
+    document.getElementById('lNote').value     = editL.note  || '';
+  } else {
+    // Reset for new lesson
+    document.getElementById('lTargetType').value = 'student';
+    onLessonTargetChange();
+    document.getElementById('lType').value = 'fixed';
+    onLessonTypeChange();
+    document.getElementById('lStart').value    = '15:00';
+    document.getElementById('lDur').value      = '60';
+    document.getElementById('lFeeAmt').value   = '';
+    document.getElementById('lLocation').value = '';
+    document.getElementById('lNote').value     = '';
+    if (presetDate) {
+      document.getElementById('lDate').value = presetDate;
+      document.getElementById('lDay').value  = new Date(presetDate + 'T00:00:00').getDay();
+    }
   }
 
   openMo('moLesson');
-}
-
-function onLessonTargetChange() {
-  const t = document.getElementById('lTargetType').value;
-  document.getElementById('lStuRow').style.display = t === 'student' ? '' : 'none';
-  document.getElementById('lGrpRow').style.display = t === 'group'   ? '' : 'none';
-}
-
-function onLessonTypeChange() {
-  const t = document.getElementById('lType').value;
-  document.getElementById('lFixedRow').style.display = t === 'fixed' ? '' : 'none';
-  document.getElementById('lOnceRow').style.display  = t === 'once'  ? '' : 'none';
 }
 
 async function saveLesson() {
@@ -217,25 +239,107 @@ async function saveLesson() {
   }
 
   setBtnLoading('btnSaveLesson', '儲存中…');
+  const id = UI.editLessonId || newId();
+  const existing = UI.editLessonId ? DB.lessons.find(x => x.id === id) : null;
+
   const l = {
-    id: newId(),
-    studentId, groupId, targetType, type,
-    day:   type === 'fixed' ? document.getElementById('lDay').value  : null,
-    date:  type === 'once'  ? document.getElementById('lDate').value : null,
-    start: document.getElementById('lStart').value,
-    dur:   document.getElementById('lDur').value,
-    fee:   document.getElementById('lFeeAmt').value,
-    createdAt: Date.now(),
+    id, studentId, groupId, targetType, type,
+    day:      type === 'fixed' ? document.getElementById('lDay').value   : null,
+    date:     type === 'once'  ? document.getElementById('lDate').value  : null,
+    start:    document.getElementById('lStart').value,
+    dur:      document.getElementById('lDur').value,
+    fee:      document.getElementById('lFeeAmt').value,
+    location: document.getElementById('lLocation').value.trim(),
+    note:     document.getElementById('lNote').value.trim(),
+    createdAt: existing?.createdAt || Date.now(),
   };
-  DB.lessons.push(l);
+
+  const idx = DB.lessons.findIndex(x => x.id === id);
+  if (idx >= 0) DB.lessons[idx] = l; else DB.lessons.push(l);
+
   saveLocal();
   await fbSave('lessons', l.id, l);
+  UI.editLessonId = null;
   closeMo('moLesson');
   setBtnDone('btnSaveLesson', '儲存課堂');
   renderCal();
   renderDash();
-  showBan('課堂已新增');
+  showBan(existing ? '課堂已更新' : '課堂已新增');
 }
+
+// ── Inline new student inside lesson modal ──
+function inlineSwitchToNewStudent() {
+  document.getElementById('lInlineStu').style.display = '';
+  document.getElementById('lInlineGrp').style.display = 'none';
+}
+async function inlineSaveNewStudent() {
+  const name = document.getElementById('lnStuName').value.trim();
+  if (!name) { showBan('請填寫學生姓名', true); return; }
+  const s = {
+    id: newId(), name,
+    instrument: document.getElementById('lnStuInst').value,
+    phone:      document.getElementById('lnStuPhone').value,
+    defaultFee: document.getElementById('lnStuFee').value,
+    scores: {}, createdAt: Date.now(),
+  };
+  DB.students.push(s);
+  saveLocal();
+  await fbSave('students', s.id, s);
+  // Add to select and choose it
+  const opt = document.createElement('option');
+  opt.value = s.id; opt.textContent = `${s.name}（${s.instrument || '—'}）`;
+  document.getElementById('lStu').appendChild(opt);
+  document.getElementById('lStu').value = s.id;
+  document.getElementById('lTargetType').value = 'student';
+  onLessonTargetChange();
+  document.getElementById('lInlineStu').style.display = 'none';
+  document.getElementById('lnStuName').value = '';
+  document.getElementById('lnStuPhone').value = '';
+  document.getElementById('lnStuFee').value = '';
+  showBan('學生已新增');
+}
+
+// ── Inline new group inside lesson modal ──
+function inlineSwitchToNewGroup() {
+  document.getElementById('lInlineGrp').style.display = '';
+  document.getElementById('lInlineStu').style.display = 'none';
+}
+async function inlineSaveNewGroup() {
+  const name = document.getElementById('lnGrpName').value.trim();
+  if (!name) { showBan('請填寫群組名稱', true); return; }
+  const g = {
+    id: newId(), name,
+    note: document.getElementById('lnGrpNote').value.trim(),
+    members: [], createdAt: Date.now(),
+  };
+  DB.groups.push(g);
+  saveLocal();
+  await fbSave('groups', g.id, g);
+  const opt = document.createElement('option');
+  opt.value = g.id; opt.textContent = `${g.name}（0 人）`;
+  document.getElementById('lGrp').appendChild(opt);
+  document.getElementById('lGrp').value = g.id;
+  document.getElementById('lTargetType').value = 'group';
+  onLessonTargetChange();
+  document.getElementById('lInlineGrp').style.display = 'none';
+  document.getElementById('lnGrpName').value = '';
+  document.getElementById('lnGrpNote').value = '';
+  showBan('群組已新增');
+}
+
+function onLessonTargetChange() {
+  const t = document.getElementById('lTargetType').value;
+  document.getElementById('lStuRow').style.display = t === 'student' ? '' : 'none';
+  document.getElementById('lGrpRow').style.display = t === 'group'   ? '' : 'none';
+}
+
+function onLessonTypeChange() {
+  const t = document.getElementById('lType').value;
+  document.getElementById('lFixedRow').style.display = t === 'fixed' ? '' : 'none';
+  document.getElementById('lOnceRow').style.display  = t === 'once'  ? '' : 'none';
+}
+
+// saveLesson is defined above in openModalLesson block
 
 async function deleteLesson(id) {
   if (!confirm('刪除此課堂安排？')) return;
