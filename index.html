@@ -23,7 +23,7 @@
 <!-- ══ SPLASH ══ -->
 <div id="splash" style="position:fixed;inset:0;z-index:9999;background:#1c1408;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
   <div style="font-family:'Noto Serif TC',serif;font-size:4rem;color:#9b2a1a;border:2.5px solid #9b2a1a;width:88px;height:88px;display:flex;align-items:center;justify-content:center">履</div>
-  <div style="font-family:'Noto Serif TC',serif;font-size:.78rem;color:#b8862a;letter-spacing:.32em;margin-top:18px">素履往　無咎</div>
+  <div style="font-family:'Noto Serif TC',serif;font-size:.89rem;color:#b8862a;letter-spacing:.32em;margin-top:18px">素履往　無咎</div>
 </div>
 
 <!-- ══ LOGIN<!-- ══ LOGIN ══ -->
@@ -36,9 +36,9 @@
   <div id="authMode" data-mode="login" style="width:100%;max-width:320px">
     <div style="display:flex;border:1px solid var(--bdr2);margin-bottom:14px">
       <button id="authModeLogin" onclick="switchAuthMode('login')"
-        style="flex:1;padding:8px;font-size:.72rem;letter-spacing:.08em;font-family:var(--KAI);border:none;background:var(--red);color:#fff;cursor:pointer">登入</button>
+        style="flex:1;padding:8px;font-size:.83rem;letter-spacing:.08em;font-family:var(--KAI);border:none;background:var(--red);color:#fff;cursor:pointer">登入</button>
       <button id="authModeReg" onclick="switchAuthMode('register')"
-        style="flex:1;padding:8px;font-size:.72rem;letter-spacing:.08em;font-family:var(--KAI);border:none;background:var(--card);color:var(--txt2);cursor:pointer">建立帳號</button>
+        style="flex:1;padding:8px;font-size:.83rem;letter-spacing:.08em;font-family:var(--KAI);border:none;background:var(--card);color:var(--txt2);cursor:pointer">建立帳號</button>
     </div>
 
     <div id="authRegFields" style="display:none">
@@ -70,7 +70,7 @@
 
     <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
       <div style="flex:1;height:1px;background:var(--bdr)"></div>
-      <span style="font-size:.58rem;color:var(--txt3);letter-spacing:.1em">或</span>
+      <span style="font-size:.72rem;color:var(--txt3);letter-spacing:.1em">或</span>
       <div style="flex:1;height:1px;background:var(--bdr)"></div>
     </div>
 
@@ -109,7 +109,7 @@
     <div id="pg-timetable" class="page">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
         <button onclick="calPrev()" class="btn s sm" style="width:34px;padding:5px">‹</button>
-        <div id="calLabel" style="font-family:var(--KAI);font-size:.9rem;color:var(--gold);letter-spacing:.1em"></div>
+        <div id="calLabel" style="font-family:var(--KAI);font-size:.95rem;color:var(--gold);letter-spacing:.1em"></div>
         <button onclick="calNext()" class="btn s sm" style="width:34px;padding:5px">›</button>
       </div>
       <div class="cg" style="margin-bottom:3px">
@@ -134,12 +134,12 @@
 
     <!-- Student Detail -->
     <div id="pg-detail" class="page">
-      <button onclick="backPage()" style="font-size:.73rem;color:var(--txt3);display:flex;align-items:center;gap:3px;margin-bottom:11px;background:none;border:none;cursor:pointer">‹ 返回</button>
+      <button onclick="backPage()" style="font-size:.84rem;color:var(--txt3);display:flex;align-items:center;gap:3px;margin-bottom:11px;background:none;border:none;cursor:pointer">‹ 返回</button>
       <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
         <div id="dtAv" style="width:50px;height:50px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--KAI);font-size:1.4rem;color:#fff;flex-shrink:0"></div>
         <div>
           <div id="dtName" style="font-family:var(--KAI);font-size:1.05rem;color:var(--txt)"></div>
-          <div id="dtSub"  style="font-size:.68rem;color:var(--txt3);margin-top:2px"></div>
+          <div id="dtSub"  style="font-size:.81rem;color:var(--txt3);margin-top:2px"></div>
         </div>
       </div>
       <div id="dtTabs" class="tabs"></div>
@@ -438,14 +438,14 @@
     <button class="mx" onclick="closeMo('moCredits')">✕</button>
     <div class="mt">增加可上課節</div>
     <div class="card gold" style="margin-bottom:12px">
-      <div style="font-family:var(--KAI);font-size:.9rem;color:var(--txt);margin-bottom:4px" id="credStuName"></div>
-      <div style="font-size:.68rem;color:var(--txt3)" id="credCurrent"></div>
+      <div style="font-family:var(--KAI);font-size:.95rem;color:var(--txt);margin-bottom:4px" id="credStuName"></div>
+      <div style="font-size:.81rem;color:var(--txt3)" id="credCurrent"></div>
     </div>
     <div class="fg">
       <label class="fl">增加課節數 *</label>
       <input class="fi" id="credAmt" type="number" min="1" max="100" placeholder="例：4（代表繳交4堂學費）">
     </div>
-    <div style="font-size:.62rem;color:var(--txt3);margin-bottom:12px;line-height:1.7">
+    <div style="font-size:.75rem;color:var(--txt3);margin-bottom:12px;line-height:1.7">
       學生繳交學費後，老師在此增加對應課節數量。老師在時間表確認上堂後自動扣除。
     </div>
     <button class="btn p" id="btnSaveCred" onclick="saveCredits()" style="margin-top:4px">確認增加</button>
