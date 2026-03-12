@@ -93,7 +93,19 @@
 
   <!-- HEADER -->
   <div id="hdr">
-    <div id="hdrSeal">履</div>
+    <div id="hdrSeal">
+      <svg viewBox="0 0 120 160" width="22" height="28" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink)" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M62 20 C62 20,83 28,85 47 C87 63,75 76,62 76 C49 76,38 67,38 54 C38 41,48 33,58 33 C67 33,72 39,72 47 C72 55,66 59,59 59 C55 59,51 56,51 51 C51 47,54 44,58 44" stroke-width="6"/>
+          <line x1="62" y1="20" x2="61" y2="122" stroke-width="5.5"/>
+          <path d="M61 119 C61 119,76 116,78 104 C80 92,71 85,62 88 C53 91,48 100,52 109 C55 117,65 120,71 116" stroke-width="5"/>
+          <path d="M52 109 C48 114,46 122,50 130 C54 137,63 139,69 135 C76 131,78 122,74 116" stroke-width="4.5"/>
+        </g>
+      </svg>
+    </div>
     <div id="hdrTitle">總覽</div>
     <button id="hdrBtn" class="btn s" style="display:none"></button>
     <div id="hdrAvatar" onclick="goPage('settings')"></div>
@@ -531,7 +543,7 @@ firebase.auth().onAuthStateChanged(async user => {
     CU = user;
     await loadUserProfile();
     document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('app').style.cssText = 'display:flex;flex-direction:column;min-height:100vh;';
+    document.getElementById('app').style.display = 'flex';
     const av = document.getElementById('hdrAvatar');
     if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}">`;
     else av.textContent = (user.displayName || user.email || user.uid[0] || '?')[0].toUpperCase();
