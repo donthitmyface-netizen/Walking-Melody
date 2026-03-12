@@ -101,13 +101,17 @@ body { background: var(--bg); color: var(--txt); }
 [data-theme="hc"]    #hdr { background: rgba(0,0,0,.97); }
 
 #hdrSeal {
-  font-family: var(--KAI);
-  font-size: 1rem;
-  color: var(--red);
-  border: 1.5px solid var(--red);
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+#hdrSeal img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 #hdrTitle {
   font-family: var(--KAI);
@@ -200,6 +204,37 @@ body { background: var(--bg); color: var(--txt); }
   line-height: 1;
 }
 
+
+/* ── LOGIN PAGE ── */
+.ls-seal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ls-seal img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+.ls-title {
+  font-family: var(--KAI);
+  font-size: 1.6rem;
+  color: var(--gold);
+  letter-spacing: .4em;
+  text-indent: .4em;
+}
+.ls-line {
+  width: 120px;
+  height: 1px;
+  background: var(--bdr2);
+}
+.ls-sub {
+  font-size: 0.82rem;
+  color: var(--txt3);
+  letter-spacing: .12em;
+  text-align: center;
+  line-height: 1.8;
+}
 /* ── PAGES ── */
 .page { display: none; padding: 14px 14px 8px; }
 .page.active { display: block; }
