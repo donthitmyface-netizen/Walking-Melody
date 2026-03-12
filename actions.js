@@ -132,23 +132,149 @@ async function saveRecord() {
 
 // ── 教案 ──
 let _planSid = null;
-function openModalPlan(sid) {
-  _planSid = sid;
+let _planGid = null;
+let _paSelected = null; // currently selected suggestion text
+
+function openModalPlan(sid, gid) {
+  _planSid = sid || null;
+  _planGid = gid || null;
   document.getElementById('pDate').value = todayISO();
-  ['pGoal','pPlan','pRecord','pPiece','pHw'].forEach(id => document.getElementById(id).value = '');
+  ['pGoal','pPlan','pRecord','pPiece','pHw','pNext'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('pEval').value = '';
+  document.querySelectorAll('.pa-eval').forEach(b => b.classList.remove('on'));
+
+  // Set context label
+  const ctx = document.getElementById('moPlanContext');
+  if (gid) {
+    const g = DB.groups.find(x => x.id === gid);
+    ctx.textContent = g ? `群組：${g.name}（${(g.members||[]).length} 人）` : '群組課堂';
+    document.getElementById('moPlanTitle').textContent = '群組教案';
+  } else if (sid) {
+    const s = DB.students.find(x => x.id === sid);
+    ctx.textContent = s ? `學生：${s.name}（${s.instrument || '—'}）` : '';
+    document.getElementById('moPlanTitle').textContent = '課堂教案';
+  } else {
+    ctx.textContent = '';
+    document.getElementById('moPlanTitle').textContent = '課堂教案';
+  }
+
+  // Hide suggestion panel
+  document.getElementById('paSuggest').style.display = 'none';
+  _paSelected = null;
+
   openMo('moPlan');
+}
+
+// ── 教案輔助工具 ──
+const PA_TOOLS = {
+  goal: {
+    title: '🎯 教學目標建議',
+    items: [
+      '能流暢背奏指定段落，雙手協調一致',
+      '掌握本曲的速度與節奏，達到穩定拍子',
+      '認識並正確演奏附點、切分、三連音節奏',
+      '改善弓法 / 指法的一致性和清晰度',
+      '提升力度對比（強弱）的表達能力',
+      '學習並應用正確的換把 / 換弓技巧',
+      '能視奏新段落，識別調性和拍子記號',
+      '培養音樂感，注意樂句的起伏和呼吸',
+      '鞏固上週功課，糾正常見錯誤',
+      '準備考級曲目，達到考試要求標準',
+    ]
+  },
+  steps: {
+    title: '📋 上課步驟範本',
+    items: [
+      '1. 音階暖身 5分\n2. 複習上週功課段落\n3. 示範新段落 + 學生跟奏\n4. 分手慢速練習\n5. 合手嘗試\n6. 派發功課',
+      '1. 節奏拍手練習 5分\n2. 分析新樂段的難點\n3. 慢速分段練習\n4. 配合伴奏合奏\n5. 總結及評估\n6. 下次功課說明',
+      '1. 暖身：手指靈活練習 5分\n2. 複習整首曲目從頭到尾\n3. 重點糾正特定小節\n4. 加速至目標速度\n5. 錄音對比進步',
+      '1. 視奏練習 10分（新材料）\n2. 分析技術難點\n3. 針對性技術練習\n4. 音樂表達討論\n5. 功課安排',
+    ]
+  },
+  hw: {
+    title: '📝 功課點子',
+    items: [
+      '每天練習指定段落各 10 次，先左右手分開，再合手',
+      '用節拍器練習，速度先慢後快（建議 ♩=60 開始）',
+      '睡前默背樂譜一次，確認記清楚',
+      '錄音練習片段，自行聆聽找出需要改善的地方',
+      '練習音階（大小調）和琶音各 3 遍',
+      '著重練習第 ___ 至 ___ 小節，每天最少 5 遍',
+      '視奏新頁，先慢速認清音符和節奏',
+      '專注練習力度對比，強弱要明顯分別',
+    ]
+  },
+  warm: {
+    title: '🎵 暖身活動',
+    items: [
+      'C 大調音階及琶音，兩手各 3 遍',
+    '音階練習：全音符→二分音符→四分音符，逐步加速',
+      '手指獨立練習（哈農 / 卡爾·車爾尼 / 施拉姆）',
+      '長弓練習，注意弓壓和發音均勻',
+      '節奏拍手：先用手拍，再用樂器演奏',
+      '即興演奏 2 分鐘，放鬆心情',
+      '視唱昨日功課的主旋律',
+    ]
+  },
+};
+
+function paTool(type) {
+  if (type === 'clear') {
+    document.getElementById('paSuggest').style.display = 'none';
+    _paSelected = null;
+    return;
+  }
+  const tool = PA_TOOLS[type];
+  if (!tool) return;
+
+  document.getElementById('paSuggestTitle').textContent = tool.title;
+  document.getElementById('paSuggestList').innerHTML = tool.items.map((item, i) =>
+    `<div class="pa-sug-item" onclick="paSelect(this,'${i}',\`${item.replace(/`/g,'\\`').replace(/\n/g,'\\n')}\`)">${item.replace(/\n/g,'<br>')}</div>`
+  ).join('');
+
+  document.getElementById('paSuggest').style.display = 'block';
+  _paSelected = null;
+}
+
+function paSelect(el, i, text) {
+  document.querySelectorAll('.pa-sug-item').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+  _paSelected = text.replace(/\\n/g, '\n');
+}
+
+function paInsert(targetId) {
+  if (!_paSelected) { showBan('請先點選一個建議', true); return; }
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const cur = el.value.trim();
+  el.value = cur ? cur + '\n' + _paSelected : _paSelected;
+  el.focus();
+  showBan('已插入建議');
+}
+
+function paSetEval(v) {
+  document.getElementById('pEval').value = v;
+  document.querySelectorAll('.pa-eval').forEach((b, i) => {
+    b.classList.toggle('on', i + 1 === v);
+  });
 }
 
 async function savePlan() {
   setBtnLoading('btnSavePlan', '儲存中…');
   const p = {
-    id: newId(), studentId: _planSid,
-    date:   document.getElementById('pDate').value,
-    goal:   document.getElementById('pGoal').value.trim(),
-    plan:   document.getElementById('pPlan').value.trim(),
-    record: document.getElementById('pRecord').value.trim(),
-    piece:  document.getElementById('pPiece').value.trim(),
-    hw:     document.getElementById('pHw').value.trim(),
+    id: newId(),
+    studentId: _planSid,
+    groupId:   _planGid,
+    date:      document.getElementById('pDate').value,
+    goal:      document.getElementById('pGoal').value.trim(),
+    plan:      document.getElementById('pPlan').value.trim(),
+    record:    document.getElementById('pRecord').value.trim(),
+    piece:     document.getElementById('pPiece').value.trim(),
+    hw:        document.getElementById('pHw').value.trim(),
+    eval:      document.getElementById('pEval').value || null,
+    next:      document.getElementById('pNext').value.trim(),
     createdAt: Date.now(),
   };
   DB.plans.push(p);

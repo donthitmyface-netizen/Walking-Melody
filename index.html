@@ -415,15 +415,91 @@
 
 <!-- Plan -->
 <div id="moPlan" class="ov" onclick="overlayTap(event,'moPlan')">
-  <div class="mo">
+  <div class="mo" style="max-width:500px">
     <button class="mx" onclick="closeMo('moPlan')">✕</button>
-    <div class="mt">課堂教案</div>
+    <div class="mt" id="moPlanTitle">課堂教案</div>
+    <div id="moPlanContext" style="font-size:0.84rem;color:var(--gold2);margin-bottom:10px;min-height:16px"></div>
+
+    <!-- 日期 -->
     <div class="fg"><label class="fl">日期</label><input class="fi" id="pDate" type="date"></div>
-    <div class="fg"><label class="fl">教學目標（上課前填寫）</label><textarea class="fi" id="pGoal" placeholder="今堂目標…"></textarea></div>
-    <div class="fg"><label class="fl">教案內容（上課前填寫）</label><textarea class="fi" id="pPlan" placeholder="教學步驟…"></textarea></div>
-    <div class="fg"><label class="fl">實際記錄（上課後填寫）</label><textarea class="fi" id="pRecord" placeholder="實際進行了…"></textarea></div>
-    <div class="fg"><label class="fl">練習曲目</label><input class="fi" id="pPiece"></div>
-    <div class="fg"><label class="fl">功課</label><textarea class="fi" id="pHw"></textarea></div>
+
+    <!-- ══ 輔助工具列 ══ -->
+    <div class="pa-toolbar">
+      <span class="pa-tb-label">輔助工具：</span>
+      <button class="pa-chip" onclick="paTool('goal')">🎯 目標建議</button>
+      <button class="pa-chip" onclick="paTool('steps')">📋 步驟範本</button>
+      <button class="pa-chip" onclick="paTool('hw')">📝 功課點子</button>
+      <button class="pa-chip" onclick="paTool('warm')">🎵 暖身活動</button>
+      <button class="pa-chip" onclick="paTool('clear')">✕ 清除建議</button>
+    </div>
+
+    <!-- 建議面板 -->
+    <div id="paSuggest" style="display:none" class="pa-suggest">
+      <div id="paSuggestTitle" class="pa-sug-title"></div>
+      <div id="paSuggestList"></div>
+    </div>
+
+    <!-- 教學目標 -->
+    <div class="fg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <label class="fl" style="margin-bottom:0">教學目標</label>
+        <button class="pa-mini" onclick="paInsert('pGoal')">插入建議 ↑</button>
+      </div>
+      <textarea class="fi" id="pGoal" rows="3" placeholder="今堂希望達到的目標…&#10;例：學生能流暢彈奏第一段，認識附點節奏"></textarea>
+    </div>
+
+    <!-- 教案內容 -->
+    <div class="fg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <label class="fl" style="margin-bottom:0">教案 / 上課步驟</label>
+        <button class="pa-mini" onclick="paInsert('pPlan')">插入建議 ↑</button>
+      </div>
+      <textarea class="fi" id="pPlan" rows="5" placeholder="上課步驟及內容…&#10;例：1. 音階暖身 5分&#10;2. 複習上週功課&#10;3. 新段落示範 + 分手練習"></textarea>
+    </div>
+
+    <!-- 練習曲目 -->
+    <div class="fg">
+      <label class="fl">練習曲目</label>
+      <input class="fi" id="pPiece" placeholder="曲名 / 作曲家 / 頁數">
+    </div>
+
+    <!-- 功課 -->
+    <div class="fg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <label class="fl" style="margin-bottom:0">功課</label>
+        <button class="pa-mini" onclick="paInsert('pHw')">插入建議 ↑</button>
+      </div>
+      <textarea class="fi" id="pHw" rows="2" placeholder="例：每天練習第1-8小節，左右手分開各10次"></textarea>
+    </div>
+
+    <!-- ── 分隔線：上課後填 ── -->
+    <div class="pa-divider">✎ 上課後填寫</div>
+
+    <!-- 實際記錄 -->
+    <div class="fg">
+      <label class="fl">實際上課記錄</label>
+      <textarea class="fi" id="pRecord" rows="3" placeholder="實際進行了甚麼、學生表現、需要跟進的地方…"></textarea>
+    </div>
+
+    <!-- 快速評估 -->
+    <div class="fg">
+      <label class="fl" style="margin-bottom:8px">今堂整體評估</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="pa-eval" id="pEval1" onclick="paSetEval(1)">😟 需加油</button>
+        <button class="pa-eval" id="pEval2" onclick="paSetEval(2)">😐 一般</button>
+        <button class="pa-eval" id="pEval3" onclick="paSetEval(3)">🙂 不錯</button>
+        <button class="pa-eval" id="pEval4" onclick="paSetEval(4)">😊 很好</button>
+        <button class="pa-eval" id="pEval5" onclick="paSetEval(5)">🌟 出色</button>
+      </div>
+      <input type="hidden" id="pEval" value="">
+    </div>
+
+    <!-- 下次重點 -->
+    <div class="fg">
+      <label class="fl">下次課堂重點</label>
+      <input class="fi" id="pNext" placeholder="下次要跟進或繼續的內容…">
+    </div>
+
     <button class="btn p" id="btnSavePlan" onclick="savePlan()" style="margin-top:4px">儲存教案</button>
     <button class="btn s" onclick="closeMo('moPlan')" style="margin-top:8px">取消</button>
   </div>

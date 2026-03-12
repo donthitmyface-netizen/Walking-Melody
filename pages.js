@@ -212,7 +212,8 @@ function renderDayPanel(ds) {
               ? `<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="color:var(--red)">刪除</button>`
               : `<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm">單次刪除</button>`}
             <button onclick="openModalLesson(null,'${l.id}')" class="btn s sm">編輯</button>
-            <a href="${gcalUrl}" target="_blank" class="btn s sm" style="text-decoration:none">📅 加入日曆</a>
+            <button onclick="openModalPlan('${l.studentId||''}','${l.groupId||''}')" class="btn s sm" style="color:var(--gold2)">✎ 教案</button>
+            <a href="${gcalUrl}" target="_blank" class="btn s sm" style="text-decoration:none">📅 日曆</a>
           </div>
         </div>
       </div>`;
@@ -291,16 +292,25 @@ function renderTabRecords(s) {
 function renderTabPlans(s) {
   const plans = DB.plans.filter(p => p.studentId === s.id)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const evalEmoji = ['','😟','😐','🙂','😊','🌟'];
   let h = `<button class="btn p sm" onclick="openModalPlan('${s.id}')" style="margin-bottom:11px"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增教案</button>`;
   if (!plans.length) return h + emptyState('案', '尚未有教案記錄');
-  h += plans.map(p => `
+  h += plans.map(p => {
+    const evalV = parseInt(p.eval) || 0;
+    return `
     <div class="pc">
-      <div style="font-size:0.84rem;color:var(--txt3);margin-bottom:6px">${p.date || ''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:0.84rem;color:var(--txt3)">${p.date || ''}</div>
+        ${evalV ? `<div style="font-size:1.1rem" title="整體評估">${evalEmoji[evalV]}</div>` : ''}
+      </div>
       ${p.goal   ? `<div class="psl">教學目標</div><div class="pt">${p.goal}</div>` : ''}
-      ${p.plan   ? `<div class="psl" style="margin-top:6px">教案內容</div><div class="pt">${p.plan}</div>` : ''}
+      ${p.plan   ? `<div class="psl" style="margin-top:6px">教案內容</div><div class="pt" style="white-space:pre-wrap">${p.plan}</div>` : ''}
+      ${p.piece  ? `<div style="font-size:0.86rem;color:var(--txt3);margin-top:5px">🎵 ${p.piece}</div>` : ''}
+      ${p.hw     ? `<div style="font-size:0.86rem;color:var(--txt3);margin-top:4px">📝 功課：${p.hw}</div>` : ''}
       ${p.record ? `<div class="psl" style="margin-top:8px;color:var(--jade)">實際記錄</div><div class="pt">${p.record}</div>` : ''}
-      ${p.hw     ? `<div style="font-size:0.86rem;color:var(--txt3);margin-top:5px">功課：${p.hw}</div>` : ''}
-    </div>`).join('');
+      ${p.next   ? `<div style="font-size:0.86rem;color:var(--gold2);margin-top:6px;padding-top:6px;border-top:1px solid var(--bdr)">➡ 下次：${p.next}</div>` : ''}
+    </div>`;
+  }).join('');
   return h;
 }
 

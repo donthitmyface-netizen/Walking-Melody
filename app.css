@@ -494,6 +494,23 @@ textarea.fi { resize: vertical; min-height: 68px; }
 .psl { font-size: 0.77rem; color: var(--gold2); letter-spacing: .12em; margin-bottom: 3px; text-transform: uppercase; }
 .pt { font-size: 0.96rem; color: var(--txt2); line-height: 1.7; }
 
+/* ── Plan Assist Toolbar ── */
+.pa-toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; padding:8px 10px; background:var(--bg2); border:1px solid var(--bdr); }
+.pa-tb-label { font-size:0.78rem; color:var(--txt3); letter-spacing:.05em; flex-shrink:0; }
+.pa-chip { font-size:0.80rem; color:var(--gold2); background:transparent; border:1px solid var(--bdr2); padding:3px 9px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.pa-chip:hover { border-color:var(--gold2); background:rgba(200,160,58,.08); }
+.pa-mini { font-size:0.75rem; color:var(--gold2); background:transparent; border:none; cursor:pointer; opacity:.7; padding:0; }
+.pa-mini:hover { opacity:1; }
+.pa-suggest { background:var(--bg2); border:1px solid var(--gold2); padding:10px 12px; margin-bottom:12px; }
+.pa-sug-title { font-size:0.80rem; color:var(--gold2); letter-spacing:.08em; margin-bottom:8px; }
+.pa-sug-item { font-size:0.88rem; color:var(--txt2); line-height:1.6; padding:7px 9px; margin-bottom:4px; border:1px solid var(--bdr); cursor:pointer; background:var(--card); transition:all .15s; }
+.pa-sug-item:hover { border-color:var(--gold2); color:var(--txt); }
+.pa-sug-item.sel { border-color:var(--gold); background:rgba(200,160,58,.12); color:var(--txt); }
+.pa-divider { text-align:center; font-size:0.78rem; color:var(--jade); letter-spacing:.12em; margin:14px 0 10px; padding:5px 0; border-top:1px solid var(--bdr); border-bottom:1px solid var(--bdr); }
+.pa-eval { font-size:0.88rem; background:var(--card); border:1px solid var(--bdr); padding:5px 10px; cursor:pointer; transition:all .15s; }
+.pa-eval:hover { border-color:var(--gold2); }
+.pa-eval.on { border-color:var(--gold); background:rgba(200,160,58,.15); }
+
 /* ── INFO ROW ── */
 .row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--bdr); }
 .row:last-child { border-bottom: none; }
