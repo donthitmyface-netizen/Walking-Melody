@@ -171,7 +171,9 @@ function openModalLesson(presetDate = null, editLessonId = null) {
   // Populate instruments for inline student form
   const instEl = document.getElementById('lnStuInst');
   if (instEl && !instEl.options.length) {
-    instEl.innerHTML = (INSTRUMENTS || []).map(i => `<option>${i}</option>`).join('');
+    instEl.innerHTML = Object.entries(INSTRUMENTS).map(([grp, items]) =>
+      `<optgroup label="${grp}">${items.map(i => `<option>${i}</option>`).join('')}</optgroup>`
+    ).join('');
   }
 
   // Populate student select

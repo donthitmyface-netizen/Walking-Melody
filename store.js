@@ -20,7 +20,7 @@ let UI = {
   calMonth: new Date().getMonth(),
   calSelDay: null,
   schFilter: 'all',
-  editSid: null, editGid: null,
+  editSid: null, editGid: null, editLessonId: null,
 };
 
 // ── Privacy toggle (老師專用) — 單一開關隱藏所有隱私 ──

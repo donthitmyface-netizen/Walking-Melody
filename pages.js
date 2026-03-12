@@ -134,7 +134,8 @@ function renderCal() {
     </div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
-  renderDayPanel(UI.calSelDay || today);
+  if (!UI.calSelDay) UI.calSelDay = today;
+  renderDayPanel(UI.calSelDay);
 }
 
 function calPrev() { UI.calMonth--; if (UI.calMonth < 0) { UI.calMonth = 11; UI.calYear--; } renderCal(); }
@@ -217,7 +218,8 @@ function renderDayPanel(ds) {
       </div>`;
     });
   }
-  document.getElementById('calPanel').innerHTML = h;
+  document.getElementById('calPanel').innerHTML = h
+    + `<button class="btn p" onclick="openModalLesson('${ds}')" style="margin-top:10px;width:100%">＋ 新增課堂</button>`;
 }
 
 // ────────────────────────────────────────────
