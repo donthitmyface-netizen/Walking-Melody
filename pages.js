@@ -90,7 +90,7 @@ function buildGcalUrl(l, ds) {
   const name = lessonName(l);
   const title = encodeURIComponent('音樂課：' + name);
   const loc = l.location ? encodeURIComponent(l.location) : '';
-  const details = encodeURIComponent((l.note || '') + (l.fee ? ' HK$' + l.fee : ''));
+  const details = encodeURIComponent(l.note || '');
   if (!l.start || !ds) return 'https://calendar.google.com/';
   const [hh, mm] = l.start.split(':').map(Number);
   const dur = parseInt(l.dur || 60);
