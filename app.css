@@ -79,9 +79,6 @@ body { background: var(--bg); color: var(--txt); }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Safe-area padding so nav bg reaches iPhone home indicator */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: rgba(28,20,8,.94); /* matches nav bg for seamless look */
 }
 
 /* ── HEADER ── */
@@ -173,9 +170,7 @@ body { background: var(--bg); color: var(--txt); }
   overflow: hidden;
 }
 [data-theme="light"] #nav { background: rgba(245,237,224,.94); }
-[data-theme="light"] #app { background: rgba(245,237,224,.94); }
 [data-theme="hc"]    #nav { background: rgba(0,0,0,.97); }
-[data-theme="hc"]    #app { background: rgba(0,0,0,.97); }
 
 .ni {
   flex: 1;
