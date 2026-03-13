@@ -135,9 +135,9 @@ let _planSid = null;
 let _planGid = null;
 let _paSelected = null; // currently selected suggestion text
 
-function openModalPlan(sid, gid) {
-  _planSid = sid || null;
-  _planGid = gid || null;
+function openModalPlan(sid, gid, presetInstrument) {
+  _planSid = (sid && sid !== 'undefined' && sid !== '') ? sid : null;
+  _planGid = (gid && gid !== 'undefined' && gid !== '') ? gid : null;
   document.getElementById('pDate').value = todayISO();
   ['pGoal','pPlan','pRecord','pPiece','pHw','pNext'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -145,14 +145,34 @@ function openModalPlan(sid, gid) {
   document.getElementById('pEval').value = '';
   document.querySelectorAll('.pa-eval').forEach(b => b.classList.remove('on'));
 
+  // ── Instrument selector (for multi-instrument students) ──
+  const instRow = document.getElementById('pInstRow');
+  const instSel = document.getElementById('pInst');
+  const allInst = Object.values(INSTRUMENTS).flat();
+  if (_planSid) {
+    const s = DB.students.find(x => x.id === _planSid);
+    // Find all instruments this student has from their lessons
+    const stuInsts = [...new Set(
+      DB.lessons.filter(l => l.studentId === _planSid && l.instrument).map(l => l.instrument)
+    )];
+    const mainInst = s?.instrument || '';
+    const opts = [...new Set([mainInst, ...stuInsts, ...allInst].filter(Boolean))];
+    instSel.innerHTML = opts.map(i => `<option value="${i}">${i}</option>`).join('');
+    if (presetInstrument) instSel.value = presetInstrument;
+    else if (mainInst) instSel.value = mainInst;
+    instRow.style.display = '';
+  } else {
+    instRow.style.display = 'none';
+  }
+
   // Set context label
   const ctx = document.getElementById('moPlanContext');
-  if (gid) {
-    const g = DB.groups.find(x => x.id === gid);
+  if (_planGid) {
+    const g = DB.groups.find(x => x.id === _planGid);
     ctx.textContent = g ? `群組：${g.name}（${(g.members||[]).length} 人）` : '群組課堂';
     document.getElementById('moPlanTitle').textContent = '群組教案';
-  } else if (sid) {
-    const s = DB.students.find(x => x.id === sid);
+  } else if (_planSid) {
+    const s = DB.students.find(x => x.id === _planSid);
     ctx.textContent = s ? `學生：${s.name}（${s.instrument || '—'}）` : '';
     document.getElementById('moPlanTitle').textContent = '課堂教案';
   } else {
@@ -263,18 +283,20 @@ function paSetEval(v) {
 
 async function savePlan() {
   setBtnLoading('btnSavePlan', '儲存中…');
+  const instEl = document.getElementById('pInst');
   const p = {
     id: newId(),
-    studentId: _planSid,
-    groupId:   _planGid,
-    date:      document.getElementById('pDate').value,
-    goal:      document.getElementById('pGoal').value.trim(),
-    plan:      document.getElementById('pPlan').value.trim(),
-    record:    document.getElementById('pRecord').value.trim(),
-    piece:     document.getElementById('pPiece').value.trim(),
-    hw:        document.getElementById('pHw').value.trim(),
-    eval:      document.getElementById('pEval').value || null,
-    next:      document.getElementById('pNext').value.trim(),
+    studentId:  _planSid,
+    groupId:    _planGid,
+    instrument: (instEl && document.getElementById('pInstRow').style.display !== 'none') ? instEl.value : null,
+    date:    document.getElementById('pDate').value,
+    goal:    document.getElementById('pGoal').value.trim(),
+    plan:    document.getElementById('pPlan').value.trim(),
+    record:  document.getElementById('pRecord').value.trim(),
+    piece:   document.getElementById('pPiece').value.trim(),
+    hw:      document.getElementById('pHw').value.trim(),
+    eval:    document.getElementById('pEval').value || null,
+    next:    document.getElementById('pNext').value.trim(),
     createdAt: Date.now(),
   };
   DB.plans.push(p);
@@ -283,7 +305,18 @@ async function savePlan() {
   closeMo('moPlan');
   setBtnDone('btnSavePlan', '儲存教案');
   if (UI.page === 'detail') renderDetailBody();
+  if (UI.page === 'plans') renderPlansPage();
   showBan('教案已儲存');
+}
+
+async function deletePlan(id) {
+  if (!confirm('確定刪除此教案？')) return;
+  DB.plans = DB.plans.filter(p => p.id !== id);
+  saveLocal();
+  await fbDel('plans', id);
+  if (UI.page === 'detail') renderDetailBody();
+  if (UI.page === 'plans') renderPlansPage();
+  showBan('教案已刪除');
 }
 
 // ── 課堂時間表 ──
@@ -333,6 +366,11 @@ function openModalLesson(presetDate = null, editLessonId = null) {
     document.getElementById('lFeeAmt').value   = editL.fee   || '';
     document.getElementById('lLocation').value = editL.location || '';
     document.getElementById('lNote').value     = editL.note  || '';
+    document.getElementById('lDateFrom').value = editL.dateFrom || '';
+    document.getElementById('lDateTo').value   = editL.dateTo   || '';
+    onLessonStuChange();
+    const instEl = document.getElementById('lInst');
+    if (instEl && editL.instrument) instEl.value = editL.instrument;
   } else {
     // Reset for new lesson
     document.getElementById('lTargetType').value = 'student';
@@ -344,10 +382,13 @@ function openModalLesson(presetDate = null, editLessonId = null) {
     document.getElementById('lFeeAmt').value   = '';
     document.getElementById('lLocation').value = '';
     document.getElementById('lNote').value     = '';
+    document.getElementById('lDateFrom').value = '';
+    document.getElementById('lDateTo').value   = '';
     if (presetDate) {
       document.getElementById('lDate').value = presetDate;
       document.getElementById('lDay').value  = new Date(presetDate + 'T00:00:00').getDay();
     }
+    onLessonStuChange();
   }
 
   openMo('moLesson');
@@ -370,16 +411,20 @@ async function saveLesson() {
   const id = UI.editLessonId || newId();
   const existing = UI.editLessonId ? DB.lessons.find(x => x.id === id) : null;
 
+  const instEl = document.getElementById('lInst');
   const l = {
     id, studentId, groupId, targetType, type,
-    day:      type === 'fixed' ? document.getElementById('lDay').value   : null,
-    date:     type === 'once'  ? document.getElementById('lDate').value  : null,
-    start:    document.getElementById('lStart').value,
-    dur:      document.getElementById('lDur').value,
-    fee:      document.getElementById('lFeeAmt').value,
-    location: document.getElementById('lLocation').value.trim(),
-    note:     document.getElementById('lNote').value.trim(),
-    createdAt: existing?.createdAt || Date.now(),
+    day:        type === 'fixed' ? document.getElementById('lDay').value  : null,
+    date:       type === 'once'  ? document.getElementById('lDate').value : null,
+    dateFrom:   type === 'fixed' ? (document.getElementById('lDateFrom').value || null) : null,
+    dateTo:     type === 'fixed' ? (document.getElementById('lDateTo').value   || null) : null,
+    start:      document.getElementById('lStart').value,
+    dur:        document.getElementById('lDur').value,
+    fee:        document.getElementById('lFeeAmt').value,
+    location:   document.getElementById('lLocation').value.trim(),
+    note:       document.getElementById('lNote').value.trim(),
+    instrument: instEl ? (instEl.value || null) : null,
+    createdAt:  existing?.createdAt || Date.now(),
   };
 
   const idx = DB.lessons.findIndex(x => x.id === id);
@@ -459,6 +504,19 @@ function onLessonTargetChange() {
   const t = document.getElementById('lTargetType').value;
   document.getElementById('lStuRow').style.display = t === 'student' ? '' : 'none';
   document.getElementById('lGrpRow').style.display = t === 'group'   ? '' : 'none';
+  document.getElementById('lInstRow') && (document.getElementById('lInstRow').style.display = t === 'student' ? '' : 'none');
+  onLessonStuChange();
+}
+
+function onLessonStuChange() {
+  const sid = document.getElementById('lStu')?.value;
+  const instEl = document.getElementById('lInst');
+  if (!instEl) return;
+  const s = sid ? DB.students.find(x => x.id === sid) : null;
+  // Build flat instruments list
+  const allInst = Object.values(INSTRUMENTS).flat();
+  instEl.innerHTML = '<option value="">（跟學生資料' + (s && s.instrument ? '：' + s.instrument : '') + '）</option>'
+    + allInst.map(i => `<option value="${i}">${i}</option>`).join('');
 }
 
 function onLessonTypeChange() {
@@ -891,4 +949,57 @@ async function saveCredits() {
 
   if (UI.page === 'detail') renderDetailBody();
   showBan(`已增加 ${amt} 課節`);
+}
+
+// ══════════════════════════════════════════════
+// 聯絡家長
+// ══════════════════════════════════════════════
+let _contactSid = null;
+
+function openParentContact(sid) {
+  _contactSid = sid;
+  const s = DB.students.find(x => x.id === sid);
+  if (!s) return;
+
+  const phone = s.phone ? s.phone.replace(/\s+/g, '') : '';
+  const parent = s.parent || '家長';
+  const stuName = s.name;
+  const inst = s.instrument || '音樂';
+
+  document.getElementById('pcStuName').textContent = stuName;
+  document.getElementById('pcParent').textContent  = parent;
+  document.getElementById('pcPhone').textContent   = phone ? phone : '（未有電話記錄）';
+
+  // Pre-fill message templates
+  const today = todayISO();
+  document.getElementById('pcMsgLeave').value =
+    `你好，${parent}，我是${stuName}的音樂老師。想通知你，${stuName}下次的${inst}課堂將需要請假，如有不便敬請見諒。如需安排補堂請隨時聯絡我，謝謝！`;
+
+  document.getElementById('pcMsgProgress').value =
+    `你好，${parent}，我是${stuName}的音樂老師。想跟你分享${stuName}最近的學習進度。${stuName}在${inst}課堂表現認真，練習亦有明顯進步。建議在家每天練習大約15-30分鐘，如有任何問題歡迎隨時聯絡我，謝謝！`;
+
+  document.getElementById('pcHasPhone').style.display = phone ? '' : 'none';
+  document.getElementById('pcNoPhone').style.display  = phone ? 'none' : '';
+
+  openMo('moParentContact');
+}
+
+function pcSendWhatsApp(msgId) {
+  const s = DB.students.find(x => x.id === _contactSid);
+  if (!s) return;
+  const phone = (s.phone || '').replace(/\s+/g, '');
+  const msg   = document.getElementById(msgId).value;
+  if (!phone) { showBan('未有電話號碼', true); return; }
+  // WhatsApp: international format, HK numbers add 852
+  const intl = phone.startsWith('+') ? phone.slice(1) : '852' + phone;
+  window.open(`https://wa.me/${intl}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function pcSendWeChat(msgId) {
+  const msg = document.getElementById(msgId).value;
+  navigator.clipboard.writeText(msg).then(() => {
+    showBan('訊息已複製，請在微信貼上發送');
+  }).catch(() => {
+    showBan('請手動複製訊息', true);
+  });
 }

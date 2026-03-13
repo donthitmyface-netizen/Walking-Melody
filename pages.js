@@ -123,10 +123,16 @@ function renderCal() {
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dow = new Date(y, m, d).getDay();
-    const hasL = DB.lessons.some(l =>
-      (l.type === 'fixed' && parseInt(l.day) === dow && !onceSkips.has(l.id + '|' + ds)) ||
-      (l.type === 'once'  && l.date === ds)
-    );
+    const hasL = DB.lessons.some(l => {
+      if (l.type === 'fixed') {
+        if (parseInt(l.day) !== dow) return false;
+        if (onceSkips.has(l.id + '|' + ds)) return false;
+        if (l.dateFrom && ds < l.dateFrom) return false;
+        if (l.dateTo   && ds > l.dateTo)   return false;
+        return true;
+      }
+      return l.type === 'once' && l.date === ds;
+    });
     const isToday = ds === today;
     const isSel = ds === UI.calSelDay;
     html += `<div class="cd${isToday ? ' today' : ''}${hasL ? ' has' : ''}${isSel ? ' sel' : ''}" onclick="calDayClick('${ds}')">
@@ -150,10 +156,16 @@ function renderDayPanel(ds) {
   const skipSet = new Set(DB.lessons
     .filter(l => l.type === 'once-skip' && l.date === ds)
     .map(l => l.lessonId));
-  const lessons = DB.lessons.filter(l =>
-    (l.type === 'fixed' && parseInt(l.day) === dow && !skipSet.has(l.id)) ||
-    (l.type === 'once'  && l.date === ds)
-  ).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+  const lessons = DB.lessons.filter(l => {
+    if (l.type === 'fixed') {
+      if (parseInt(l.day) !== dow) return false;
+      if (skipSet.has(l.id)) return false;
+      if (l.dateFrom && ds < l.dateFrom) return false;
+      if (l.dateTo   && ds > l.dateTo)   return false;
+      return true;
+    }
+    return l.type === 'once' && l.date === ds;
+  }).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
 
   const skipped  = new Set((DB.records || []).filter(r => r.date === ds && r.attend === 'absent'  && r.lessonId).map(r => r.lessonId));
   const attended = new Set((DB.records || []).filter(r => r.date === ds && r.attend === 'present' && r.lessonId).map(r => r.lessonId));
@@ -201,7 +213,9 @@ function renderDayPanel(ds) {
             ${isSkip ? ' <span style="font-size:0.80rem;color:var(--red)">請假</span>' : ''}
             ${isDone ? ` <span style="font-size:0.80rem;color:var(--jade)">${isAuto ? '已上堂' : '✓已上堂'}</span>` : ''}
           </div>
-          <div style="font-size:0.84rem;color:var(--txt3)">${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${credLeft!==null&&!isPrivacyHidden()?' · 剩 '+credLeft+' 節':''}</div>
+          <div style="font-size:0.84rem;color:var(--txt3)">
+          ${l.instrument ? `<span style="color:var(--gold2)">♩ ${l.instrument}</span> · ` : ''}${l.dur||60} 分 · ${l.type==='fixed'?'固定每週':'單次'}${l.dateFrom||l.dateTo ? ` · ${l.dateFrom||''}${l.dateTo?' 至 '+l.dateTo:''}` : ''}${credLeft!==null&&!isPrivacyHidden()?' · 剩 '+credLeft+' 節':''}
+        </div>
           ${locHtml}
           <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
             ${!isDone && !isSkip ? `<button onclick="confirmAttend('${l.id}','${ds}')" class="btn s sm">✓確認上堂</button>` : ''}
@@ -212,7 +226,8 @@ function renderDayPanel(ds) {
               ? `<button onclick="deleteLesson('${l.id}')" class="btn s sm" style="color:var(--red)">刪除</button>`
               : `<button onclick="skipOneLesson('${l.id}','${ds}')" class="btn s sm">單次刪除</button>`}
             <button onclick="openModalLesson(null,'${l.id}')" class="btn s sm">編輯</button>
-            <button onclick="openModalPlan('${l.studentId||''}','${l.groupId||''}')" class="btn s sm" style="color:var(--gold2)">✎ 教案</button>
+            <button onclick="openModalPlan('${l.studentId||''}','${l.groupId||''}','${l.instrument||''}')" class="btn s sm" style="color:var(--gold2)">✎ 教案</button>
+            ${l.studentId ? `<button onclick="openParentContact('${l.studentId}')" class="btn s sm" style="color:var(--jade)">📞 聯絡家長</button>` : ''}
             <a href="${gcalUrl}" target="_blank" class="btn s sm" style="text-decoration:none">📅 日曆</a>
           </div>
         </div>
@@ -222,6 +237,161 @@ function renderDayPanel(ds) {
   document.getElementById('calPanel').innerHTML = h
     + `<button class="btn p" onclick="openModalLesson('${ds}')" style="margin-top:10px;width:100%">＋ 新增課堂</button>`;
 }
+
+// ────────────────────────────────────────────
+// PLANS PAGE (教案查閱)
+// ────────────────────────────────────────────
+let _planFilter = 'all'; // 'all' | studentId | 'groups'
+
+function renderPlansPage() {
+  const evalEmoji = ['','😟','😐','🙂','😊','🌟'];
+  const plans = [...(DB.plans || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  // ── Search bar ──
+  const qEl = document.getElementById('planQ');
+  const q = qEl ? qEl.value.toLowerCase() : '';
+
+  // ── Filter chips: All | Groups | each student ──
+  let chips = `<div class="chips" style="margin-bottom:10px;flex-wrap:wrap">
+    <div class="ch${_planFilter==='all'?' on':''}" onclick="_planFilter='all';renderPlansPage()">全部</div>
+    <div class="ch${_planFilter==='groups'?' on':''}" onclick="_planFilter='groups';renderPlansPage()">👥 群組</div>`;
+  DB.students.forEach(s => {
+    chips += `<div class="ch${_planFilter===s.id?' on':''}" onclick="_planFilter='${s.id}';renderPlansPage()">${s.name}</div>`;
+  });
+  chips += '</div>';
+
+  // ── Filter ──
+  let filtered = plans;
+  if (_planFilter === 'groups') {
+    filtered = plans.filter(p => !!p.groupId);
+  } else if (_planFilter !== 'all') {
+    filtered = plans.filter(p => p.studentId === _planFilter);
+  }
+  if (q) {
+    filtered = filtered.filter(p =>
+      (p.goal||'').toLowerCase().includes(q) ||
+      (p.plan||'').toLowerCase().includes(q) ||
+      (p.piece||'').toLowerCase().includes(q) ||
+      (p.record||'').toLowerCase().includes(q) ||
+      (p.hw||'').toLowerCase().includes(q) ||
+      (p.next||'').toLowerCase().includes(q)
+    );
+  }
+
+  // ── Build grouped view: per student+instrument or per group ──
+  // Group key: groupId | studentId+instrument (instrument from plan, not student default)
+  const getKey = p => p.groupId ? ('g:' + p.groupId) : ('s:' + p.studentId + ':' + (p.instrument || ''));
+  const getName = p => {
+    if (p.groupId) {
+      const g = DB.groups.find(x => x.id === p.groupId);
+      return g ? '👥 ' + g.name : '👥 群組';
+    }
+    const s = DB.students.find(x => x.id === p.studentId);
+    if (!s) return '—';
+    const inst = p.instrument || s.instrument || '';
+    return s.name + (inst ? ' · ' + inst : '');
+  };
+
+  // Group plans by key, preserving date-sorted order within each group
+  const groupMap = new Map();
+  filtered.forEach(plan => {
+    const k = getKey(plan);
+    if (!groupMap.has(k)) groupMap.set(k, []);
+    groupMap.get(k).push(plan);
+  });
+
+  let content = '';
+  if (!filtered.length) {
+    content = emptyState('案', '尚未有教案記錄');
+  } else if (_planFilter === 'all' || _planFilter === 'groups') {
+    // All view: flat list grouped by entity
+    groupMap.forEach((groupPlans, key) => {
+      const latest = groupPlans[0]; // already sorted desc
+      const displayName = getName(latest);
+      const sid = latest.studentId || '';
+      const gid = latest.groupId || '';
+      content += `<div style="margin-bottom:4px;padding:6px 10px;background:var(--bg2);border:1px solid var(--bdr2);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:0.90rem;color:var(--gold2);font-family:var(--KAI)">${displayName}</div>
+        <button onclick="openModalPlan('${sid}','${gid}')" class="btn p sm">＋ 教案</button>
+      </div>`;
+      groupPlans.forEach((plan, i) => {
+        const evalV = parseInt(plan.eval) || 0;
+        // Carry-forward: check gap from previous plan for same entity
+        let carryHtml = '';
+        if (i > 0) {
+          const prev = new Date(groupPlans[i-1].date + 'T00:00:00');
+          const curr = new Date(plan.date + 'T00:00:00');
+          const diffDays = Math.round((prev - curr) / 86400000);
+          if (diffDays > 13) {
+            carryHtml = `<div class="plan-carry">↑ 上方教案沿用 ${diffDays} 天（${groupPlans[i-1].date} 至 ${plan.date}）</div>`;
+          }
+        }
+        content += carryHtml + renderPlanCard(plan, evalEmoji, displayName, false);
+      });
+      content += `<div style="height:8px"></div>`;
+    });
+  } else {
+    // Single student/group view — show plans chronologically with carry-forward
+    filtered.forEach((plan, i) => {
+      const displayName = getName(plan);
+      let carryHtml = '';
+      if (i > 0) {
+        const prev = new Date(filtered[i-1].date + 'T00:00:00');
+        const curr = new Date(plan.date + 'T00:00:00');
+        const diffDays = Math.round((prev - curr) / 86400000);
+        if (diffDays > 13) {
+          carryHtml = `<div class="plan-carry">↑ 此教案沿用 ${diffDays} 天（${filtered[i-1].date} → ${plan.date}）</div>`;
+        }
+      }
+      const evalV = parseInt(plan.eval) || 0;
+      content += carryHtml + renderPlanCard(plan, evalEmoji, displayName, true);
+    });
+  }
+
+  const totalLabel = `<div style="font-size:0.80rem;color:var(--txt3);margin-bottom:10px">${filtered.length} 份教案${q ? '（搜尋結果）' : ''}</div>`;
+
+  const h = `
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <button class="btn p sm" onclick="openModalPlan()" style="flex-shrink:0">＋ 新增教案</button>
+      <input class="fi" id="planQ" placeholder="搜尋教案內容…" oninput="renderPlansPage()"
+        style="flex:1;margin:0;height:34px;font-size:0.88rem" value="${q}">
+    </div>
+    ${chips}
+    ${totalLabel}
+    ${content}`;
+
+  document.getElementById('pg-plans').querySelector('.dc').innerHTML = h;
+}
+
+function renderPlanCard(plan, evalEmoji, displayName, showName) {
+  const evalV = parseInt(plan.eval) || 0;
+  const sid = plan.studentId || '';
+  const gid = plan.groupId || '';
+  const inst = plan.instrument || '';
+  return `<div class="pc" style="margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div>
+        ${showName && displayName ? `<div style="font-size:0.82rem;color:var(--gold2);margin-bottom:2px">${displayName}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:0.81rem;color:var(--txt3)">${plan.date || ''}</span>
+          ${inst ? `<span style="font-size:0.75rem;color:var(--gold2);border:1px solid var(--gold2);padding:0 5px">♩ ${inst}</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${evalV ? `<span style="font-size:1.05rem" title="整體評估">${evalEmoji[evalV]}</span>` : ''}
+        <button onclick="openModalPlan('${sid}','${gid}','${inst}')" class="btn p sm" style="font-size:0.75rem">＋新教案</button>
+        <button onclick="deletePlan('${plan.id}')" style="font-size:0.78rem;color:var(--txt3);background:none;border:none;cursor:pointer;padding:2px 4px">✕</button>
+      </div>
+    </div>
+    ${plan.goal   ? `<div class="psl">教學目標</div><div class="pt">${plan.goal}</div>` : ''}
+    ${plan.plan   ? `<div class="psl" style="margin-top:6px">教案內容</div><div class="pt" style="white-space:pre-wrap">${plan.plan}</div>` : ''}
+    ${plan.piece  ? `<div style="font-size:0.85rem;color:var(--txt3);margin-top:4px">🎵 ${plan.piece}</div>` : ''}
+    ${plan.hw     ? `<div style="font-size:0.85rem;color:var(--txt3);margin-top:3px">📝 功課：${plan.hw}</div>` : ''}
+    ${plan.record ? `<div class="psl" style="margin-top:8px;color:var(--jade)">實際記錄</div><div class="pt">${plan.record}</div>` : ''}
+    ${plan.next   ? `<div style="font-size:0.85rem;color:var(--gold2);margin-top:6px;padding-top:5px;border-top:1px solid var(--bdr)">➡ 下次：${plan.next}</div>` : ''}
+  </div>`;
+}
+
 
 // ────────────────────────────────────────────
 // STUDENTS
@@ -342,6 +512,16 @@ function renderTabProfile(s) {
     infoRow('電話', s.phone),
     infoRow('電郵', s.email),
   ]);
+
+  // Parent contact buttons
+  if (s.phone) {
+    h += `<div style="display:flex;gap:8px;margin-bottom:10px;margin-top:-4px">
+      <button class="btn p sm" style="flex:1;background:#25D366;border-color:#25D366" onclick="openParentContact('${s.id}')">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>WhatsApp 家長
+      </button>
+      <button class="btn s sm" style="flex:1" onclick="openParentContact('${s.id}')">💬 微信 / 其他</button>
+    </div>`;
+  }
 
   if (s.defaultFee || s.payMethod) {
     const _hideAmt = isPrivacyHidden();
