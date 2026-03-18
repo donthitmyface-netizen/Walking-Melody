@@ -1,0 +1,2199 @@
+<!-- v20260309h -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+
+
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="六合常中"/>
+<meta name="theme-color" content="#e91e63"/>
+<title>六合常中 🎱</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#fff5f8;--card:#fff;--border:#ffd6e7;--text:#3d1a2e;--sub:#a0688a;
+  --dim:#c4a0b4;--accent:#e91e63;--accent-bg:#fce4ec;--track:#fce4ec;
+  --row:#fff5f8;--input:#fff8fb;--iborder:#f8bbd0;--shadow:rgba(233,30,99,.1);
+  --tab:#fff;--header1:#e91e63;--header2:#ff6090;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans HK",sans-serif;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:0;height:0;}
+button,input,select{font-family:inherit;}
+
+/* Animations */
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes confetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.float{animation:floatY 2.5s ease-in-out infinite}
+.fade{animation:fadeIn .3s ease}
+
+/* Header */
+#header{background:linear-gradient(135deg,var(--header1),var(--header2));padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;box-shadow:0 3px 12px rgba(0,0,0,.2);}
+#header .title{flex:1}
+#header .title h1{font-size:18px;font-weight:900;color:#fff;letter-spacing:.5px}
+#header .title p{font-size:9px;color:rgba(255,255,255,.75);letter-spacing:1.5px;margin-top:2px}
+.theme-btns{display:flex;gap:5px}
+.theme-btn{width:28px;height:28px;border-radius:8px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+.theme-btn.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.4)}
+#draw-info{text-align:right;flex-shrink:0}
+#draw-info .draw{font-size:11px;color:#fff;font-weight:800}
+#draw-info .date{font-size:9px;color:rgba(255,255,255,.75)}
+
+/* Lucky bar */
+#lucky-bar{background:rgba(233,30,99,.08);border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:8px;}
+#lucky-bar span{font-size:10px;color:var(--accent);font-weight:700;white-space:nowrap}
+#lucky-track{flex:1;height:5px;background:var(--track);border-radius:3px;overflow:hidden}
+#lucky-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s}
+#lucky-pct{font-size:10px;font-weight:800;color:var(--accent);white-space:nowrap}
+#lucky-msg{font-size:9px;color:var(--sub);white-space:nowrap}
+
+/* Tabs */
+#tabs{display:flex;overflow-x:auto;background:var(--tab);border-bottom:2px solid var(--border);position:sticky;top:64px;z-index:199;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:10px 10px;border:none;background:none;border-bottom:3px solid transparent;color:var(--sub);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color .15s}
+.tab-btn.active{border-bottom-color:var(--accent);color:var(--accent)}
+
+/* Content */
+#content{padding:12px 12px 60px}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px var(--shadow)}
+.card.accent-top{border-top:4px solid var(--accent)}
+.row-item{background:var(--row);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:7px}
+
+/* Balls */
+.ball{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;user-select:none;transition:all .15s}
+.ball-r{background:#ffcdd2;border:2px solid #e53935;color:#e53935}
+.ball-b{background:#bbdefb;border:2px solid #1e88e5;color:#1e88e5}
+.ball-g{background:#c8e6c9;border:2px solid #43a047;color:#43a047}
+.ball-o{background:#ffe0b2;border:2px solid #fb8c00;color:#fb8c00}
+.ball-p{background:#e1bee7;border:2px solid #8e24aa;color:#8e24aa}
+.ball-r.extra{background:#e53935;color:#fff;border-color:#e53935}
+.ball-b.extra{background:#1e88e5;color:#fff;border-color:#1e88e5}
+.ball-g.extra{background:#43a047;color:#fff;border-color:#43a047}
+.ball-o.extra{background:#fb8c00;color:#fff;border-color:#fb8c00}
+.ball-p.extra{background:#8e24aa;color:#fff;border-color:#8e24aa}
+
+/* Buttons */
+.btn{padding:11px 16px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.15);border:1.5px solid transparent;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-full{width:100%}
+.btn-ghost{background:var(--card);color:var(--text);border-color:var(--iborder)}
+.btn-success{background:#2e7d32;color:#fff}
+.btn-danger{background:#c62828;color:#fff}
+.btn-gold{background:#f57f17;color:#fff}
+.btn-purple{background:#6a1b9a;color:#fff}
+.btn-fun{background:linear-gradient(135deg,var(--accent),#ff8a65);color:#fff}
+.btn:disabled{background:var(--row);color:var(--dim);border-color:var(--track);box-shadow:none;cursor:default}
+
+/* Pills */
+.pill{padding:7px 14px;border-radius:20px;border:1.5px solid var(--iborder);background:var(--card);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+
+/* Input */
+input[type=text],input[type=date],input[type=password]{width:100%;padding:11px 13px;background:var(--input);border:1.5px solid var(--iborder);border-radius:10px;color:var(--text);font-size:13px;outline:none;margin-bottom:10px}
+
+/* Bar */
+.bar-track{flex:1;height:6px;background:var(--track);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* Grid 49 */
+.grid49{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.grid49 button{aspect-ratio:1;border-radius:50%;font-weight:800;font-size:11px;cursor:pointer;border:2px solid var(--iborder);background:var(--input);transition:all .1s;padding:0}
+
+/* Toast */
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);border-radius:12px;padding:10px 20px;font-size:13px;color:#fff;z-index:9999;max-width:92vw;text-align:center;line-height:1.5;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.3);font-weight:600;display:none}
+#toast.ok{background:#2e7d32}
+#toast.err{background:#c62828}
+
+/* Confetti */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9990;overflow:hidden;display:none}
+
+/* Settings */
+#settings-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+#settings-modal.open{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+
+/* FAB */
+#fab{position:fixed;bottom:22px;right:16px;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#e91e63,#ff6090);font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(233,30,99,.4);z-index:100;color:#fff}
+
+/* Dark theme */
+body.dark{
+  --bg:#121212;--card:#1e1e1e;--border:#333;--text:#f0f0f0;--sub:#aaa;
+  --dim:#555;--accent:#ff69b4;--accent-bg:#2a0f1f;--track:#333;
+  --row:#252525;--input:#2a2a2a;--iborder:#444;--shadow:rgba(0,0,0,.5);
+  --tab:#1e1e1e;--header1:#1a0a12;--header2:#2d0a1f;
+}
+body.dark .ball-r{background:#5a0000;color:#ddd}
+body.dark .ball-b{background:#082040;color:#ddd}
+body.dark .ball-g{background:#083008;color:#ddd}
+body.dark .ball-o{background:#5a2000;color:#ddd}
+body.dark .ball-p{background:#200030;color:#ddd}
+
+/* Pastel theme */
+body.pastel{
+  --bg:#f0f7ff;--card:#fff;--border:#d0e8ff;--text:#1a2a4a;--sub:#6080a0;
+  --dim:#a0c0e0;--accent:#5b8dee;--accent-bg:#e8f0ff;--track:#ddeeff;
+  --row:#f5f9ff;--input:#f8fbff;--iborder:#c0d8ff;--shadow:rgba(91,141,238,.1);
+  --tab:#fff;--header1:#5b8dee;--header2:#a855f7;
+}
+
+/* Workshop tabs */
+.w-tabs{display:flex;background:var(--track);border-radius:12px;padding:4px;margin-bottom:14px}
+.w-tab{flex:1;padding:9px 4px;border:none;border-radius:9px;background:none;color:var(--sub);font-weight:800;font-size:12px;cursor:pointer;transition:all .2s}
+.w-tab.active{background:var(--card);color:var(--accent);box-shadow:0 2px 8px var(--shadow)}
+
+/* Method cards */
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.method-card{padding:10px 12px;border-radius:12px;border:2px solid var(--iborder);background:var(--input);cursor:pointer;text-align:left;transition:all .15s}
+.method-card.active{box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.method-card .mc-icon{font-size:16px;margin-bottom:3px}
+.method-card .mc-label{font-size:11px;font-weight:800}
+.method-card .mc-desc{font-size:9px;color:var(--dim)}
+
+/* Source tag */
+.src-tag{display:inline-block;font-size:9px;background:rgba(233,30,99,.13);color:var(--accent);border-radius:20px;padding:2px 7px;margin-right:4px;margin-bottom:2px;font-weight:700}
+
+/* Heatmap */
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.heat-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid transparent;transition:all .3s}
+.heat-cell .hn{font-size:11px;font-weight:900}
+.heat-cell .hc{font-size:8px}
+
+/* Countdown */
+#countdown{font-variant-numeric:tabular-nums;font-size:26px;font-weight:900;color:var(--accent);letter-spacing:2px}
+
+/* Steps */
+.step-label{font-size:12px;font-weight:800;color:var(--sub);margin-bottom:4px;letter-spacing:1px}
+
+/* Result display */
+.result-card{background:linear-gradient(135deg,var(--card),var(--accent-bg));border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 16px var(--shadow)}
+.balls-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+
+/* MBTI grid */
+.mbti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+.mbti-btn{padding:7px 3px;border-radius:10px;border:2px solid var(--iborder);background:var(--input);cursor:pointer;transition:all .15s}
+.mbti-btn.active{border-color:var(--accent);background:var(--accent-bg)}
+.mbti-btn .mb-name{font-size:10px;font-weight:800;color:var(--text)}
+.mbti-btn.active .mb-name{color:var(--accent)}
+.mbti-btn .mb-desc{font-size:8px;color:var(--sub);margin-top:1px}
+
+/* Sub-tabs (predict) */
+.sub-tabs{display:flex;margin-bottom:14px;background:var(--track);border-radius:12px;padding:4px}
+.sub-tab{flex:1;padding:10px 0;border:none;border-radius:9px;background:none;color:var(--sub);font-weight:800;font-size:13px;cursor:pointer;transition:all .2s}
+.sub-tab.active{background:var(--card);box-shadow:0 2px 8px var(--shadow)}
+
+/* Discussion */
+.post-card{background:var(--row);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.post-card:hover{border-color:var(--accent)}
+.post-card.pinned{background:linear-gradient(135deg,var(--card),var(--accent-bg));border:1.5px solid rgba(233,30,99,.2)}
+.post-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px}
+.post-meta{font-size:9px;color:var(--sub)}
+.post-preview{font-size:11px;color:var(--sub);line-height:1.6;margin-top:8px}
+
+/* Chip row */
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+
+/* Inline stat bar */
+.sbar{margin-bottom:5px}
+.sbar-header{display:flex;justify-content:space-between;font-size:9px;color:var(--sub);margin-bottom:2px}
+.sbar-track{height:5px;background:var(--track);border-radius:3px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:3px;transition:width .5s}
+
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/iztro/dist/iztro.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iztro/dist/iztro.min.js"></script>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Confetti -->
+<div id="confetti"></div>
+
+<!-- Settings Modal -->
+<div id="settings-modal">
+  <div class="modal-box">
+    <div style="font-size:16px;font-weight:900;color:#e91e63;margin-bottom:4px">⚙️ API Key 設定</div>
+    <div style="font-size:11px;color:#757575;margin-bottom:16px;line-height:1.9">選擇 AI 提供商並填入 API Key 啟用 AI 預測功能。</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px" id="ai-provider-tabs">
+      <button onclick="setAIProvider('anthropic')" id="prov-anthropic" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer">Claude</button>
+      <button onclick="setAIProvider('deepseek')" id="prov-deepseek" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:700;border:2px solid var(--border);background:var(--card);color:var(--text);cursor:pointer">DeepSeek</button>
+      <button onclick="setAIProvider('grok')" id="prov-grok" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:700;border:2px solid var(--border);background:var(--card);color:var(--text);cursor:pointer">Grok</button>
+    </div>
+    <div id="ai-provider-hint" style="font-size:10px;color:var(--sub);margin-bottom:8px">console.anthropic.com · 每次約HK$0.01</div>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="margin-bottom:16px"/>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveApiKey()">儲存</button>
+      <button class="btn btn-ghost" onclick="closeSettings()">取消</button>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">👤 個人資料</div>
+      <div style="font-size:11px;color:var(--sub);margin-bottom:8px">修改生日資料，更新運程分析</div>
+      <button class="btn btn-primary" onclick="closeSettings();editProfile();" style="width:100%">✏️ 修改生日 / 性別</button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <div class="float" style="font-size:28px;flex-shrink:0">🎱</div>
+  <div class="title">
+    <h1>六合常中</h1>
+    <p>娛樂數字分析 · 純屬好玩</p>
+  </div>
+  <div class="theme-btns">
+    <button class="theme-btn active" id="btn-fun" onclick="setTheme('fun')" title="歡樂">🎪</button>
+    <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')" title="夜間">🌙</button>
+    <button class="theme-btn" id="btn-pastel" onclick="setTheme('pastel')" title="粉彩">🌸</button>
+    <button class="font-btn theme-btn" data-scale="1" onclick="setFont(1)" title="標準字體" style="font-size:10px;font-weight:700;letter-spacing:-0.5px">A</button>
+    <button class="font-btn theme-btn" data-scale="1.2" onclick="setFont(1.2)" title="大字體" style="font-size:11px;font-weight:700;letter-spacing:-0.5px">A+</button>
+    <button class="font-btn theme-btn" data-scale="1.5" onclick="setFont(1.5)" title="超大字體" style="font-size:12px;font-weight:700;letter-spacing:-0.5px">A++</button>
+  </div>
+  <div id="draw-info">
+    <div class="draw" id="hdr-draw">--/---</div>
+    <div class="date" id="hdr-date">----</div>
+  </div>
+</div>
+
+<!-- Lucky bar -->
+<div id="lucky-bar">
+  <span>✨ 今日幸運</span>
+  <div id="lucky-track"><div id="lucky-fill"></div></div>
+  <span id="lucky-pct"></span>
+  <span id="lucky-msg"></span>
+</div>
+
+<!-- Tabs -->
+<div id="tabs">
+  <button class="tab-btn active" data-tab="latest">🏠主頁</button>
+  <button class="tab-btn" data-tab="workshop">🎰工坊</button>
+  <button class="tab-btn" data-tab="heatmap">🔥熱力</button>
+  <button class="tab-btn" data-tab="fortune">🔮運程</button>
+  <button class="tab-btn" data-tab="alarm">⏰提醒</button>
+  <button class="tab-btn" data-tab="history">📜歷史</button>
+  <button class="tab-btn" data-tab="stats">📊統計</button>
+  <button class="tab-btn" data-tab="checker">✅對獎</button>
+  <button class="tab-btn" data-tab="mybets">🎯記錄</button>
+  <button class="tab-btn" data-tab="board">🏆榜</button>
+  <button class="tab-btn" data-tab="predict">🔮預測</button>
+  <button class="tab-btn" data-tab="discuss">💬社區</button>
+</div>
+
+<!-- Content -->
+<div id="content"></div>
+
+<!-- FAB -->
+<button id="fab" onclick="openSettings()">⚙️</button>
+
+<script>
+
+// ═══════════════════════════════════════════
+// 六合常中 v10 - Pure Vanilla JS (No React/Babel)
+// Worker URL - change this after Cloudflare setup
+// ═══════════════════════════════════════════
+const WORKER_URL = "https://ma6rkfun.donthitmyface.workers.dev";
+const DISQUS_SHORTNAME = "liu-he-chang-zhong";
+
+const HISTORY=[
+  {draw:"26/021",date:"2026-02-24",numbers:[2,3,4,10,13,23],extra:12},
+  {draw:"26/020",date:"2026-02-21",numbers:[2,18,34,35,37,49],extra:33},
+  {draw:"26/019",date:"2026-02-15",numbers:[8,28,33,36,37,46],extra:4},
+  {draw:"26/018",date:"2026-02-12",numbers:[2,3,14,25,37,46],extra:10},
+  {draw:"26/017",date:"2026-02-10",numbers:[3,4,14,18,26,39],extra:40},
+  {draw:"26/016",date:"2026-02-07",numbers:[12,22,28,32,37,44],extra:20},
+  {draw:"26/015",date:"2026-02-05",numbers:[1,9,17,24,35,36],extra:42},
+  {draw:"26/014",date:"2026-02-03",numbers:[12,23,27,37,39,42],extra:5},
+  {draw:"26/013",date:"2026-01-31",numbers:[25,30,32,35,36,47],extra:46},
+  {draw:"26/012",date:"2026-01-29",numbers:[6,9,12,14,35,44],extra:11},
+  {draw:"26/011",date:"2026-01-27",numbers:[7,12,14,25,38,47],extra:15},
+  {draw:"26/010",date:"2026-01-24",numbers:[6,16,17,22,28,48],extra:45},
+  {draw:"26/009",date:"2026-01-22",numbers:[4,9,15,24,27,31],extra:45},
+  {draw:"26/008",date:"2026-01-20",numbers:[1,4,6,9,44,46],extra:27},
+  {draw:"26/007",date:"2026-01-17",numbers:[5,12,15,23,27,42],extra:46},
+  {draw:"26/006",date:"2026-01-15",numbers:[3,6,37,38,39,44],extra:48},
+  {draw:"26/005",date:"2026-01-13",numbers:[14,24,34,38,48,49],extra:27},
+  {draw:"26/004",date:"2026-01-10",numbers:[3,16,20,22,24,37],extra:42},
+  {draw:"26/003",date:"2026-01-08",numbers:[15,21,24,40,45,46],extra:13},
+  {draw:"26/002",date:"2026-01-06",numbers:[2,8,12,19,28,36],extra:1},
+  {draw:"26/001",date:"2026-01-03",numbers:[2,10,13,16,20,21],extra:14},
+  {draw:"25/134",date:"2025-12-28",numbers:[7,10,11,19,25,30],extra:45},
+  {draw:"25/133",date:"2025-12-25",numbers:[1,2,4,30,41,43],extra:13},
+  {draw:"25/132",date:"2025-12-21",numbers:[9,17,27,34,39,47],extra:46},
+  {draw:"25/131",date:"2025-12-18",numbers:[6,23,28,31,33,34],extra:11},
+  {draw:"25/130",date:"2025-12-16",numbers:[3,12,23,28,35,38],extra:24},
+  {draw:"25/129",date:"2025-12-13",numbers:[10,17,19,28,45,49],extra:1},
+  {draw:"25/128",date:"2025-12-11",numbers:[1,5,6,25,30,42],extra:43},
+  {draw:"25/127",date:"2025-12-06",numbers:[4,6,26,28,34,40],extra:25},
+  {draw:"25/126",date:"2025-12-02",numbers:[6,18,29,34,37,38],extra:39},
+  {draw:"25/125",date:"2025-11-25",numbers:[1,2,17,35,37,48],extra:8},
+  {draw:"25/124",date:"2025-11-20",numbers:[19,26,33,35,36,39],extra:5},
+  {draw:"25/123",date:"2025-11-18",numbers:[2,4,10,26,28,36],extra:23},
+  {draw:"25/122",date:"2025-11-16",numbers:[2,11,13,28,38,47],extra:7},
+  {draw:"25/121",date:"2025-11-13",numbers:[10,11,28,30,37,39],extra:15},
+  {draw:"25/120",date:"2025-11-11",numbers:[18,20,28,37,38,40],extra:41},
+  {draw:"25/119",date:"2025-11-08",numbers:[7,9,16,17,33,46],extra:49},
+  {draw:"25/118",date:"2025-11-06",numbers:[10,17,22,33,40,41],extra:31},
+  {draw:"25/117",date:"2025-11-04",numbers:[19,20,26,28,39,44],extra:4},
+  {draw:"25/116",date:"2025-10-28",numbers:[4,7,15,21,45,46],extra:24},
+  {draw:"25/115",date:"2025-10-25",numbers:[6,7,27,36,39,43],extra:1},
+];
+
+// ── State ──
+let hist = [...HISTORY];
+let currentTab = 'latest';
+let theme = localStorage.getItem('ms_theme')||'fun';
+var fontScale=parseFloat(localStorage.getItem('ms_font')||'1');
+let alarmOn = false, alarmMins = 30, alarmFired = false;
+let userProfile = JSON.parse(localStorage.getItem('ms_profile')||'null');
+let prizeOn = false, prizeThr = 1e8, prizeShown = false;
+let curPrize = 8000000;
+let picked = [], checkResult = null;
+let sMode = 'hot';
+let wTab = 'birthday', wBday = '', wMbti = '', wSources = {golden:false,fib:false,gap:false,hot:false,cold:false};
+let wResult = null;
+let myBets = [], boardEntries = [];
+let betInput = [], betNote = '', betDraw = '', betMode = 'standard', pCount = 6, sureCt = 1;
+let pTab = 'math', mMethod = 'combined', mResult = null, aiResult = null;
+let heatMode = 'all';
+let showAddBet = false, showAddBoard = false;
+let boardName = '', boardPicks = [];
+let selPost = null;
+let pLoading = false, mLoading = false, wAiLoading = false;
+let showMathDetail = false;
+
+// Load saved data
+try { myBets = JSON.parse(localStorage.getItem('ms_bets')||'[]'); } catch {}
+try { boardEntries = JSON.parse(localStorage.getItem('ms_board')||'[]'); } catch {}
+
+// ── Utils ──
+const ZC = {r:'#e53935',b:'#1e88e5',g:'#43a047',o:'#fb8c00',p:'#8e24aa'};
+const ZCL = {r:'#ffcdd2',b:'#bbdefb',g:'#c8e6c9',o:'#ffe0b2',p:'#e1bee7'};
+const ZCD = {r:'#5a0000',b:'#082040',g:'#083008',o:'#5a2000',p:'#200030'};
+function gz(n){return n<=10?'r':n<=20?'b':n<=30?'g':n<=40?'o':'p';}
+
+function ball(n, sz=40, extra=false, dim=false, ring=false, ringColor=''){
+  const c=gz(n), col=ZC[c];
+  const rc = ringColor||col;
+  const isDark = document.body.classList.contains('dark');
+  const bg = extra ? col : (isDark ? ZCD[c] : ZCL[c]);
+  const textCol = extra ? '#fff' : (isDark ? '#ddd' : col);
+  const border = ring ? `3px solid ${rc}` : `2px solid ${col}`;
+  const fs = Math.round(sz*0.37);
+  const opacity = dim ? 0.35 : 1;
+  const shadow = ring ? `0 0 0 2px ${rc},0 3px 10px rgba(0,0,0,.2)` : extra ? '0 3px 10px rgba(0,0,0,.3)' : '0 2px 6px rgba(0,0,0,.12)';
+  return `<div style="width:${sz}px;height:${sz}px;border-radius:50%;flex-shrink:0;background:${bg};border:${border};display:inline-flex;align-items:center;justify-content:center;color:${textCol};font-weight:900;font-size:${fs}px;box-shadow:${shadow};opacity:${opacity};user-select:none">${n}</div>`;
+}
+
+function ballsRow(numbers, extra, sz=40){
+  return numbers.map(n=>ball(n,sz)).join('') + `<span style="color:var(--dim);font-size:${sz*0.5}px;margin:0 4px;font-weight:300">+</span>` + ball(extra,sz,true);
+}
+
+function fmtPrize(n){if(n>=1e8)return`$${(n/1e8).toFixed(1)}億`;if(n>=1e7)return`$${(n/1e7).toFixed(0)}千萬`;if(n>=1e6)return`$${(n/1e6).toFixed(0)}百萬`;return`$${n.toLocaleString()}`;}
+
+function calcStats(){
+  const freq={},last={};
+  for(let i=1;i<=49;i++)freq[i]=0;
+  hist.forEach(({numbers,extra},idx)=>[...numbers,extra].forEach(n=>{freq[n]++;if(last[n]===undefined)last[n]=idx;}));
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  return {freq,last,sorted,mxF:+sorted[0][1]};
+}
+
+function calcNextDraw(){
+  const l=hist[0],[yr,num]=l.draw.split('/');
+  const dn=`${yr}/${String(parseInt(num)+1).padStart(3,'0')}`;
+  const dd=[2,4,6];let d=new Date(`${l.date}T21:30:00+08:00`);
+  d.setDate(d.getDate()+1);
+  while(!dd.includes(d.getDay()))d.setDate(d.getDate()+1);
+  return{drawNum:dn,date:d.toISOString().slice(0,10)};
+}
+
+function getCountdown(){
+  const nd=calcNextDraw();
+  const diff=new Date(`${nd.date}T21:30:00+08:00`)-new Date();
+  if(diff<=0)return null;
+  return{days:Math.floor(diff/86400000),hours:Math.floor(diff%86400000/3600000),mins:Math.floor(diff%3600000/60000),secs:Math.floor(diff%60000/1000),diff};
+}
+
+// ── Math engines ──
+const PHI=1.6180339887,FIBS=[1,2,3,5,8,13,21,34];
+function hotScores(){const f={};for(let i=1;i<=49;i++)f[i]=0;hist.slice(0,12).forEach(({numbers,extra})=>[...numbers,extra].forEach(n=>f[n]++));const mf=Math.max(...Object.values(f))||1;const s={};for(let n=1;n<=49;n++)s[n]=f[n]/mf;return s;}
+function coldScores(){const hs=hotScores();const s={};for(let n=1;n<=49;n++)s[n]=1-hs[n];return s;}
+function goldenScores(){const gp=[49/PHI,49/PHI**2,49*(1-1/PHI),49/PHI**3,49*(2-PHI),49*(PHI-1),30,19];const f={};for(let i=1;i<=49;i++)f[i]=0;hist.forEach(({numbers,extra})=>[...numbers,extra].forEach(n=>f[n]++));const mf=Math.max(...Object.values(f));const s={};for(let n=1;n<=49;n++){const d=Math.min(...gp.map(p=>Math.abs(n-p)));s[n]=Math.max(0,1-d/10)*.6+(f[n]/mf)*.4;}return s;}
+function fibScores(){const f={};for(let i=1;i<=49;i++)f[i]=0;hist.forEach(({numbers,extra})=>[...numbers,extra].forEach(n=>f[n]++));const mf=Math.max(...Object.values(f));const s={};for(let n=1;n<=49;n++){const fd=Math.min(...FIBS.map(x=>Math.abs(n-x)));const pd=Math.min(...FIBS.map(x=>Math.abs(n-x*PHI)));s[n]=(FIBS.includes(n)?1:Math.max(0,1-fd/8))*.35+Math.max(0,1-pd/5)*.25+(f[n]/mf)*.4;}return s;}
+function gapScores(){const f={},ls={};for(let i=1;i<=49;i++)f[i]=0;hist.forEach(({numbers,extra},i)=>[...numbers,extra].forEach(n=>{f[n]++;if(ls[n]===undefined)ls[n]=i;}));const td=hist.length;const s={};for(let n=1;n<=49;n++){const ap=f[n]>0?td/f[n]:td;s[n]=Math.min((ls[n]!==undefined?ls[n]:td)/ap/3,1);}return s;}
+function runMath(){
+  const golden=goldenScores(),fib=fibScores(),gap=gapScores(),hot=hotScores(),cold=coldScores();
+  const parity={},sum={},tail={};
+  const p={odd:0,even:0};hist.forEach(({numbers})=>numbers.forEach(n=>n%2===0?p.even++:p.odd++));
+  const r=p.odd/(p.odd+p.even);
+  const sm=hist.map(({numbers})=>numbers.reduce((a,b)=>a+b,0));
+  const apn=sm.reduce((a,b)=>a+b,0)/sm.length/6;
+  const tf={};for(let t=0;t<=9;t++)tf[t]=0;
+  hist.slice(0,10).forEach(({numbers,extra})=>[...numbers,extra].forEach(n=>tf[n%10]++));
+  const mt=Math.max(...Object.values(tf));
+  for(let n=1;n<=49;n++){parity[n]=n%2?1-r:r;sum[n]=Math.max(0,1-Math.abs(n-apn)/25);tail[n]=1-tf[n%10]/(mt+1);}
+  const W={golden:.20,fib:.15,gap:.25,parity:.15,sum:.15,tail:.10};
+  const fs={};
+  for(let n=1;n<=49;n++)fs[n]=(golden[n]||0)*W.golden+(fib[n]||0)*W.fib+(gap[n]||0)*W.gap+(parity[n]||0)*W.parity+(sum[n]||0)*W.sum+(tail[n]||0)*W.tail;
+  return Object.entries(fs).sort((a,b)=>b[1]-a[1]).map(([n,score])=>({n:+n,score,golden:golden[n],fib:fib[n],gap:gap[n],parity:parity[n],sum:sum[n],tail:tail[n]}));
+}
+
+// ── Workshop engine ──
+const ZODIAC_LUCKY={鼠:[1,13,25,37],牛:[2,14,26,38],虎:[3,15,27,39],兔:[4,16,28,40],龍:[5,17,29,41],蛇:[6,18,30,42],馬:[7,19,31,43],羊:[8,20,32,44],猴:[9,21,33,45],雞:[10,22,34,46],狗:[11,23,35,47],豬:[12,24,36,48]};
+const STAR_LUCKY={牡羊:[5,14,23,32,41],金牛:[6,15,24,33,42],雙子:[7,16,25,34,43],巨蟹:[2,11,20,29,38],獅子:[1,10,19,28,37],處女:[4,13,22,31,40],天秤:[3,12,21,30,39],天蠍:[8,17,26,35,44],射手:[9,18,27,36,45],摩羯:[10,19,28,37,46],水瓶:[11,20,29,38,47],雙魚:[12,21,30,39,48]};
+const MBTI_LUCKY={INTJ:[7,14,21,35,42,49],INTP:[3,11,22,33,44,8],ENTJ:[1,10,19,28,37,46],ENTP:[6,13,24,35,46,2],INFJ:[9,18,27,36,45,4],INFP:[5,16,27,38,49,11],ENFJ:[2,12,23,34,45,7],ENFP:[4,14,25,36,47,9],ISTJ:[8,16,24,32,40,48],ISFJ:[3,13,23,33,43,6],ESTJ:[10,20,30,40,15,5],ESFJ:[1,11,21,31,41,12],ISTP:[7,17,27,37,47,4],ISFP:[6,16,26,36,46,3],ESTP:[9,18,28,38,48,5],ESFP:[2,12,22,32,42,8]};
+const MBTI_DESC={INTJ:'建築師🏛',INTP:'邏輯學家🧪',ENTJ:'指揮官⚔',ENTP:'辯論家💡',INFJ:'提倡者🌿',INFP:'調停者🌙',ENFJ:'主人公🌟',ENFP:'競選者🎨',ISTJ:'物流師📋',ISFJ:'守護者🛡',ESTJ:'總經理💼',ESFJ:'執政官👑',ISTP:'鑑賞家🔧',ISFP:'探險家🦋',ESTP:'企業家🚀',ESFP:'表演者🎭'};
+const MBTI_TRAIT={INTJ:'獨特冷門派',INTP:'質數奇數派',ENTJ:'強勢頭號派',ENTP:'冷門組合派',INFJ:'直覺引導派',INFP:'跟感覺走派',ENFJ:'熱情熱號派',ENFP:'隨心所欲派',ISTJ:'跟統計走派',ISFJ:'保守穩陣派',ESTJ:'嚴格數據派',ESFJ:'人氣大眾派',ISTP:'工程師分析派',ISFP:'美感直覺派',ESTP:'高風險回報派',ESFP:'最活躍玩家派'};
+function getZodiac(y,m,d){
+  // Use iztro for accurate zodiac (correct CNY boundary handling)
+  try{
+    if(typeof iztro!=='undefined'&&iztro.astro){
+      var pad=function(n){return n<10?'0'+n:''+n;};
+      var ab=iztro.astro.bySolar(y+'-'+pad(m)+'-'+pad(d),0,'男',true,'zh-TW');
+      if(ab&&ab.zodiac){
+        // Normalise simplified→traditional
+        var norm={'龙':'龍','鸡':'雞','猪':'豬',
+                  '鼠':'鼠','牛':'牛','虎':'虎','兔':'兔','龍':'龍','蛇':'蛇',
+                  '马':'馬','馬':'馬','羊':'羊','猴':'猴','狗':'狗'};
+        return norm[ab.zodiac]||ab.zodiac;
+      }
+    }
+  }catch(e){ console.warn('iztro zodiac err:',e); }
+  return _getZodiacFallback(y,m,d);
+}
+
+
+function _getZodiacFallback(y,m,d){
+  // Fallback: accurate CNY dates from chinesefortunecalendar.com
+  var cny={
+    1924:[2,5],1925:[1,24],1926:[2,13],1927:[2,2],1928:[1,23],
+    1929:[2,10],1930:[1,30],1931:[2,17],1932:[2,6],1933:[1,26],
+    1934:[2,14],1935:[2,4],1936:[1,24],1937:[2,11],1938:[1,31],
+    1939:[2,19],1940:[2,8],1941:[1,27],1942:[2,15],1943:[2,5],
+    1944:[1,25],1945:[2,13],1946:[2,2],1947:[1,22],1948:[2,10],
+    1949:[1,29],1950:[2,17],1951:[2,6],1952:[1,27],1953:[2,14],
+    1954:[2,3],1955:[1,24],1956:[2,12],1957:[1,31],1958:[2,18],
+    1959:[2,8],1960:[1,28],1961:[2,15],1962:[2,5],1963:[1,25],
+    1964:[2,13],1965:[2,2],1966:[1,21],1967:[2,9],1968:[1,30],
+    1969:[2,17],1970:[2,6],1971:[1,27],1972:[2,15],1973:[2,3],
+    1974:[1,23],1975:[2,11],1976:[1,31],1977:[2,18],1978:[2,7],
+    1979:[1,28],1980:[2,16],1981:[2,5],1982:[1,25],1983:[2,13],
+    1984:[2,2],1985:[2,20],1986:[2,9],1987:[1,29],1988:[2,17],
+    1989:[2,6],1990:[1,27],1991:[2,15],1992:[2,4],1993:[1,23],
+    1994:[2,10],1995:[1,31],1996:[2,19],1997:[2,7],1998:[1,28],
+    1999:[2,16],2000:[2,5],2001:[1,24],2002:[2,12],2003:[2,1],
+    2004:[1,22],2005:[2,9],2006:[1,29],2007:[2,18],2008:[2,7],
+    2009:[1,26],2010:[2,14],2011:[2,3],2012:[1,23],2013:[2,10],
+    2014:[1,31],2015:[2,19],2016:[2,8],2017:[1,28],2018:[2,16],
+    2019:[2,5],2020:[1,25],2021:[2,12],2022:[2,1],2023:[1,22],
+    2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26]
+  };
+  var animals=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
+  var ly=y;
+  var cn=cny[y];
+  if(cn && (m<cn[0]||(m===cn[0]&&d<cn[1]))) ly=y-1;
+  return animals[((ly-1924)%12+12)%12];
+}
+
+function getStar(m,d){const cuts=[[1,20,'水瓶'],[2,19,'雙魚'],[3,21,'牡羊'],[4,20,'金牛'],[5,21,'雙子'],[6,21,'巨蟹'],[7,23,'獅子'],[8,23,'處女'],[9,23,'天秤'],[10,23,'天蠍'],[11,22,'射手'],[12,22,'摩羯']];for(const[mo,day,name]of cuts)if(m===mo&&d>=day)return name;return cuts[(cuts.findIndex(c=>c[0]===m)-1+12)%12][2];}
+const todayLuckyIndex=(()=>{const d=new Date();return(d.getDate()*7+d.getMonth()*13+d.getFullYear())%100;})();
+const LUCKY_MSGS=['今日宇宙能量爆棚💥','今日財星高照⭐','今日鴻運當頭🌈','今日中獎感強烈🎯','今日稍欠運氣😅','今日平平無奇😐','今日宇宙在充電🔋'];
+
+function runWorkshop(bday, mbti, sources){
+  const scoreMap={}, labelMap={};
+  for(let n=1;n<=49;n++){scoreMap[n]=0;labelMap[n]=[];}
+  if(sources.birthday && bday){
+    const[yr,mo,dy]=bday.split('-').map(Number);
+    const zodiac=getZodiac(yr,mo,dy),star=getStar(mo,dy);
+    const zl=ZODIAC_LUCKY[zodiac]||[],sl=STAR_LUCKY[star]||[];
+    const bdNums=new Set([...zl,...sl,dy%49||49,mo%49||1,(yr%49)||7]);
+    const seed=yr+mo*100+dy;
+    for(let n=1;n<=49;n++){
+      const sc=(bdNums.has(n)?1.5:0)+Math.abs(Math.sin(n*seed))*.3;
+      scoreMap[n]+=sc;
+      if(zl.includes(n))labelMap[n].push(zodiac+'生肖');
+      if(sl.includes(n))labelMap[n].push(star+'星座');
+    }
+  }
+  if(sources.mbti && mbti){const ml=MBTI_LUCKY[mbti]||[];ml.forEach((n,i)=>{scoreMap[n]+=1.2-i*.05;labelMap[n].push(mbti);});}
+  if(sources.golden){const gs=goldenScores();for(let n=1;n<=49;n++){scoreMap[n]+=gs[n]*1.0;if(gs[n]>0.6)labelMap[n].push('黃金分割φ');}}
+  if(sources.fib){const fs=fibScores();for(let n=1;n<=49;n++){scoreMap[n]+=fs[n]*0.8;if(fs[n]>0.5)labelMap[n].push('費氏數列∞');}}
+  if(sources.gap){const gs=gapScores();for(let n=1;n<=49;n++){scoreMap[n]+=gs[n]*0.9;if(gs[n]>0.5)labelMap[n].push('遺漏回歸↩');}}
+  if(sources.hot){const hs=hotScores();for(let n=1;n<=49;n++){scoreMap[n]+=hs[n]*0.8;if(hs[n]>0.6)labelMap[n].push('近期熱號🔥');}}
+  if(sources.cold){const cs=coldScores();for(let n=1;n<=49;n++){scoreMap[n]+=cs[n]*0.8;if(cs[n]>0.6)labelMap[n].push('久違冷號🧊');}}
+  const ranked=Object.entries(scoreMap).map(([n,s])=>({n:+n,score:s,labels:labelMap[+n]})).sort((a,b)=>b.score-a.score);
+  const nums=ranked.slice(0,6).map(x=>x.n).sort((a,b)=>a-b);
+  const extraCand=ranked.find(x=>!nums.includes(x.n));
+  const extra=extraCand?extraCand.n:ranked[6].n;
+  return{nums,extra,ranked,details:[...nums.map(n=>({n,labels:ranked.find(x=>x.n===n)?.labels||[],isExtra:false})),{n:extra,labels:extraCand?.labels||[],isExtra:true}]};
+}
+
+// ── Discussion posts ──
+const POSTS=[
+  {id:'r1',pin:true,emoji:'📌',title:'免責聲明',date:'2026-01-01',likes:0,content:'本應用程式（六合常中）純屬娛樂性質。\n\n所有號碼分析、預測及推薦均為統計學參考，並不構成任何投注建議。六合彩開獎結果完全隨機，任何分析方法均無法預測結果。\n\n本應用程式與香港賽馬會及任何官方機構無關聯。請量力而為，理性娛樂。未成年人士不得投注。\n\n如有沉迷賭博問題，請致電賭博輔導熱線：1800-6-668668（免費）'},
+  {id:'r2',pin:true,emoji:'⚖️',title:'法律責任聲明',date:'2026-01-01',likes:0,content:'使用本應用程式即表示您同意以下條款：\n\n1. 本應用程式提供之所有資訊僅供娛樂參考，不構成投注建議。\n\n2. 開發者對任何因使用本應用程式資訊而導致之投注損失概不負責。\n\n3. 用戶須自行承擔一切投注風險及法律責任。\n\n4. 本應用程式不儲存用戶個人資料於伺服器，所有數據僅儲存於用戶裝置本地。\n\n5. 本應用程式保留隨時修改或終止服務之權利，恕不另行通知。'},
+];
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg, type='ok', d=3500){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=type;t.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.style.display='none',d);
+}
+
+// ── Confetti ──
+function showConfetti(){
+  const c=document.getElementById('confetti');
+  c.innerHTML='';c.style.display='block';
+  const colors=['#ff6090','#ffd740','#40c4ff','#69f0ae','#ff9100','#ea80fc'];
+  for(let i=0;i<40;i++){
+    const d=document.createElement('div');
+    d.style.cssText=`position:absolute;left:${(i*37+13)%100}%;top:-20px;width:${i%3===0?10:7}px;height:${i%3===0?10:7}px;border-radius:${i%2?'50%':'2px'};background:${colors[i%6]};animation:confetti ${1.2+i*.06}s ease-in ${(i*.04)%0.8}s forwards`;
+    c.appendChild(d);
+  }
+  setTimeout(()=>{c.style.display='none';c.innerHTML='';},3500);
+}
+
+// ── Theme ──
+function setTheme(t){
+  theme=t;
+  localStorage.setItem('ms_theme',t);
+  document.body.className=t==='fun'?'':t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.id===`btn-${t}`));
+  applyFont();
+  render();
+}
+function setFont(scale){
+  fontScale=scale;
+  localStorage.setItem('ms_font',scale);
+  applyFont();
+  document.querySelectorAll('.font-btn').forEach(function(b){
+    b.classList.toggle('active', parseFloat(b.dataset.scale)===scale);
+  });
+}
+function applyFont(){
+  document.documentElement.style.fontSize = fontScale===1?'':fontScale===1.2?'18px':'22px';
+}
+
+// ── Lucky bar ──
+function initLucky(){
+  applyFont();
+  document.getElementById('lucky-fill').style.width=todayLuckyIndex+'%';
+  document.getElementById('lucky-pct').textContent=todayLuckyIndex+'%';
+  document.getElementById('lucky-msg').textContent=LUCKY_MSGS[Math.floor(todayLuckyIndex/15)];
+}
+
+// ── Header ──
+function updateHeader(){
+  const l=hist[0];
+  document.getElementById('hdr-draw').textContent=l.draw;
+  document.getElementById('hdr-date').textContent=l.date;
+}
+
+// ── Countdown ──
+let cdTimer;
+function startCountdown(){
+  clearInterval(cdTimer);
+  cdTimer=setInterval(()=>{
+    const el=document.getElementById('countdown');
+    if(!el)return;
+    const cd=getCountdown();
+    if(!cd){el.innerHTML='🎱 係時候開獎！';return;}
+    let s=cd.days>0?`<span style="font-size:16px">${cd.days}日 </span>`:'';
+    s+=`${String(cd.hours).padStart(2,'0')}:${String(cd.mins).padStart(2,'0')}:${String(cd.secs).padStart(2,'0')}`;
+    el.innerHTML=s;
+    if(alarmOn && !alarmFired && cd.diff/60000<=alarmMins){
+      alarmFired=true;
+      triggerAlarm('time');
+    }
+    if(!cd)alarmFired=false;
+  },1000);
+}
+
+function getDailyFortune(profile){
+  if(!profile||!profile.date)return null;
+  var bdate=new Date(profile.date);
+  var by=bdate.getFullYear(),bm=bdate.getMonth()+1,bd=bdate.getDate();
+  var today=new Date();
+  var gender=profile.gender==='female'?'女':'男';
+  var pad=function(n){return n<10?'0'+n:''+n;};
+  var birthStr=by+'-'+pad(bm)+'-'+pad(bd);
+  var todayStr=today.getFullYear()+'-'+pad(today.getMonth()+1)+'-'+pad(today.getDate());
+
+  // ── iztro: birth chart ──
+  var ab=null, horoscope=null;
+  var birthYearPillar='', birthMonthPillar='', birthDayPillar='', birthHourPillar='';
+  var zodiac='', soulStar='', bodyStar='', fiveClass='', soulPalace='';
+  var birthChineseDate='';
+
+  // ── iztro: TODAY's pillars (separate call for today) ──
+  var todayYearPillar='', todayMonthPillar='', todayDayPillar='';
+
+  try{
+    if(typeof iztro!=='undefined'&&iztro.astro){
+      var birthHour=profile.time?parseInt(profile.time.split(':')[0]):12;
+      // iztro time index: 子=0(23-1), 丑=1(1-3), 寅=2(3-5)...
+      var tIdx=Math.floor(((birthHour+1)%24)/2);
+
+      // Birth chart
+      ab=iztro.astro.bySolar(birthStr, tIdx, gender, true, 'zh-TW');
+      if(ab){
+        zodiac=ab.zodiac||'';
+        soulStar=ab.soul||'';
+        bodyStar=ab.body||'';
+        fiveClass=ab.fiveElementsClass||'';
+        soulPalace=ab.earthlyBranchOfSoulPalace||'';
+        birthChineseDate=ab.chineseDate||''; // e.g. "乙丑 己卯 辛丑 壬午" (year month day hour of birth)
+        horoscope=ab.horoscope(today);
+
+        // Parse birth pillars from chineseDate "年柱 月柱 日柱 時柱"
+        var bPillars=birthChineseDate.split(' ');
+        birthYearPillar=bPillars[0]||'';
+        birthMonthPillar=bPillars[1]||'';
+        birthDayPillar=bPillars[2]||'';  // This is birth DAY pillar
+        birthHourPillar=bPillars[3]||'';
+      }
+
+      // Today's pillars - get from today's astrolabe
+      var todayAb=iztro.astro.bySolar(todayStr, 0, '男', true, 'zh-TW');
+      if(todayAb&&todayAb.chineseDate){
+        var tPillars=todayAb.chineseDate.split(' ');
+        todayYearPillar=tPillars[0]||'';
+        todayMonthPillar=tPillars[1]||'';
+        todayDayPillar=tPillars[2]||''; // TODAY's actual day pillar e.g. "辛巳"
+      }
+    }
+  }catch(e){console.log('iztro err:',e);}
+
+  // Fallback zodiac
+  if(!zodiac) zodiac=_getZodiacFallback(by,bm,bd);
+  var zmap={'鸡':'雞','龙':'龍','猪':'豬'};
+  zodiac=zmap[zodiac]||zodiac;
+
+  // ── Extract stem/branch from today's day pillar ──
+  var stems=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  var branches=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var elements=['木','木','火','火','土','土','金','金','水','水'];
+
+  var todayStem='', todayBranch='', todayElement='';
+  if(todayDayPillar&&todayDayPillar.length>=2){
+    todayStem=todayDayPillar[0];
+    todayBranch=todayDayPillar[1];
+    var si=stems.indexOf(todayStem);
+    todayElement=si>=0?elements[si]:'';
+  } else {
+    // Fallback calculation for today's stem/branch
+    var daysSince=Math.floor((today-new Date('1900-01-31'))/86400000);
+    todayStem=stems[((daysSince%10)+10)%10];
+    todayBranch=branches[((daysSince%12)+12)%12];
+    todayElement=elements[((daysSince%10)+10)%10];
+  }
+
+  // ── Birth year element (命元) from year pillar ──
+  var birthElement='';
+  if(birthYearPillar&&birthYearPillar.length>=1){
+    var byStemIdx=stems.indexOf(birthYearPillar[0]);
+    birthElement=byStemIdx>=0?elements[byStemIdx]:'';
+  }
+  if(!birthElement){
+    var daysSince2=Math.floor((today-new Date('1900-01-31'))/86400000);
+    birthElement=elements[(by-1900+200)%10];
+  }
+
+  // ── Luck score: 《三命通會》五行生剋 + 《滴天髓》地支 ──
+  var elemScore={木:{木:65,火:85,土:50,金:40,水:90},火:{木:85,火:65,土:80,金:45,水:35},
+    土:{木:45,火:80,土:65,金:85,水:45},金:{木:40,火:45,土:80,金:65,水:85},水:{木:90,火:35,土:45,金:80,水:65}};
+  var base=(elemScore[birthElement]&&elemScore[birthElement][todayElement])||65;
+
+  // 地支六沖三合 adjustment
+  var zodiacBranch={'鼠':'子','牛':'丑','虎':'寅','兔':'卯','龍':'辰','蛇':'巳','馬':'午','羊':'未','猴':'申','雞':'酉','狗':'戌','豬':'亥',
+                    '龙':'辰','鸡':'酉','猪':'亥'};
+  var myBr=zodiacBranch[zodiac]||'';
+  var bi=branches.indexOf(myBr), ti=branches.indexOf(todayBranch);
+  if(bi>=0&&ti>=0){
+    var diff=(bi-ti+12)%12;
+    if(diff===0)base+=15; else if(diff===1||diff===11)base+=8;
+    else if(diff===4||diff===8)base+=10; else if(diff===6)base-=18;
+    else if(diff===3||diff===9)base-=8;
+  }
+  if(horoscope&&horoscope.daily){
+    var dp=horoscope.daily.palaceName||'';
+    if(dp==='福德'||dp==='財帛')base+=8; else if(dp==='疾厄')base-=5;
+  }
+  base=Math.min(98,Math.max(28,base));
+
+  // ── 《窮通寶鑑》命宮主星解讀 ──
+  var starReadings={
+    '紫微':{td:'貴人運強，宜主動出擊，展現領導力',warn:'避免過度自我'},
+    '天機':{td:'思維敏銳，宜策劃新計畫',warn:'付諸行動勿空想'},
+    '太陽':{td:'人際運旺，宜廣結善緣',warn:'注意休息'},
+    '武曲':{td:'宜處理財務投資事宜',warn:'勿過於剛硬'},
+    '天同':{td:'福德充盈，萬事順遂',warn:'勿過於懶散'},
+    '廉貞':{td:'創意靈感豐富，宜展現才能',warn:'避免情緒化'},
+    '天府':{td:'財庫充盈，宜穩健行事',warn:'勿因保守錯失'},
+    '太陰':{td:'感情有佳音，宜文藝創作',warn:'勿過於敏感'},
+    '貪狼':{td:'桃花偏財並旺，宜社交',warn:'避免過度享樂'},
+    '巨門':{td:'宜謹言慎行，以和為貴',warn:'勿惹口舌'},
+    '天相':{td:'貴人相助，事業有進展',warn:'勿依賴他人'},
+    '天梁':{td:'長輩貴人相助',warn:'避免孤高自賞'},
+    '七殺':{td:'宜積極衝刺，勿畏縮',warn:'避免衝動莽撞'},
+    '破軍':{td:'破舊立新，宜出行拓展',warn:'勿破壞既有關係'}
+  };
+  var sr=soulStar&&starReadings[soulStar];
+  var starText=sr?'（命宮'+soulStar+'）'+sr.td+'。注意：'+sr.warn:
+    zodiac+'年生，'+birthElement+'命，今日'+todayStem+todayBranch+'，'+
+    (birthElement===todayElement?'比和平穩':'五行相'+(['木','火'].includes(todayElement)?'生':'和')+'，運勢平穩');
+
+  var fortunes=[
+    {min:85,emoji:'🌟',title:'大吉之日'},
+    {min:72,emoji:'✨',title:'吉日'},
+    {min:55,emoji:'☁️',title:'平穩之日'},
+    {min:0,emoji:'🌙',title:'需謹慎'}
+  ];
+  var msg=fortunes.find(function(f){return base>=f.min;})||fortunes[3];
+
+  // Lucky numbers based on birth pillars + today
+  var luckyNums=[];
+  var seed=(by+bm*bd+today.getFullYear()*(today.getMonth()+1)+today.getDate());
+  var elemNums={木:[3,4,8,9,13,14],火:[1,2,6,7,11,12],土:[5,10,15,20,25,30],金:[16,17,21,22,26,27],水:[18,19,23,24,28,29]};
+  var pool=elemNums[birthElement]||[1,2,3];
+  for(var i=0;i<6;i++){
+    var n=((seed*(i+3)*7+by+today.getDate()+pool[i%pool.length])%49)+1;
+    if(!luckyNums.includes(n))luckyNums.push(n);
+  }
+  luckyNums=luckyNums.slice(0,4);
+
+  var star=getStar(bm,bd);
+  return {
+    emoji:msg.emoji, title:msg.title, score:base,
+    subtitle:zodiac+'｜'+star+'座｜'+birthElement+'命｜今日'+todayStem+todayBranch,
+    text:starText,
+    // Birth pillars (from iztro chineseDate)
+    birthYearPillar:birthYearPillar, birthMonthPillar:birthMonthPillar,
+    birthDayPillar:birthDayPillar, birthHourPillar:birthHourPillar,
+    birthChineseDate:birthChineseDate,
+    // Today's pillars (from iztro today)
+    todayYearPillar:todayYearPillar, todayMonthPillar:todayMonthPillar,
+    todayDayPillar:todayDayPillar,
+    todayStem:todayStem, todayBranch:todayBranch,
+    // Legacy fields for compatibility
+    stem:todayStem, branch:todayBranch,
+    soulStar:soulStar, bodyStar:bodyStar, fiveClass:fiveClass,
+    chineseDateStr:birthChineseDate, soulPalace:soulPalace,
+    luckyNums:luckyNums, birthElement:birthElement, todayElement:todayElement,
+    zodiac:zodiac, star:star, stems:stems, branches:branches, elements:elements,
+    daysSince:Math.floor((today-new Date('1900-01-31'))/86400000),
+    horoscope:horoscope, ab:ab
+  };
+}
+
+function setPhoneAlarm(){
+  var nd=calcNextDraw();if(!nd){showToast('未能取得攪珠時間','err');return;}
+  var dt=new Date(nd.date+'T13:30:00Z');
+  var at=new Date(dt.getTime()-alarmMins*60000);
+  var h=at.getHours().toString().padStart(2,'0');var m=at.getMinutes().toString().padStart(2,'0');
+  var L={30:'30分',60:'1小時',120:'2小時',360:'6小時',720:'12小時',1440:'24小時'};
+  showToast('請設鬧鐘：'+h+':'+m+' （攪珠前'+(L[alarmMins]||alarmMins+'分')+'）','ok',7000);
+  if(/Android/.test(navigator.userAgent))setTimeout(function(){window.location.href='intent://alarm#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR='+at.getHours()+';i.android.intent.extra.alarm.MINUTES='+at.getMinutes()+';end';},500);
+}
+function triggerAlarm(type){
+  const msg=type==='prize'?`🎰 頭獎已達 ${fmtPrize(curPrize)}！`:`⏰ 攪珠還有 ${alarmMins} 分鐘！`;
+  showToast(msg,'ok',5000);
+  if(typeof Notification!=='undefined'&&Notification.permission==='granted')new Notification('🎱 六合常中',{body:msg});
+  try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.3,.6].forEach(t=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.25);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.25);});}catch{}
+}
+
+// ── Refresh ──
+let refreshLog = [];
+var _refreshXhr=null;
+var _obGender='';
+function selectGender(g){
+  _obGender=g;
+  document.getElementById('ob-male').style.borderColor=g==='male'?'var(--accent)':'var(--border)';
+  document.getElementById('ob-male').style.background=g==='male'?'var(--accent-bg)':'var(--card)';
+  document.getElementById('ob-female').style.borderColor=g==='female'?'var(--accent)':'var(--border)';
+  document.getElementById('ob-female').style.background=g==='female'?'var(--accent-bg)':'var(--card)';
+}
+function saveProfile(){
+  var d=document.getElementById('ob-date').value;
+  var t=document.getElementById('ob-time').value||'';
+  if(!d){showToast('請輸入出生日期','err');return;}
+  var dObj=new Date(d);
+  if(isNaN(dObj.getTime())){showToast('日期格式有誤，請重新輸入','err');return;}
+  if(dObj.getFullYear()<1924||dObj.getFullYear()>2010){showToast('請輸入 1924–2010 年間的出生日期','err');return;}
+  var profile={date:d,time:t,gender:_obGender||'unknown',saved:Date.now()};
+  localStorage.setItem('ms_profile',JSON.stringify(profile));
+  userProfile=profile;
+  document.getElementById('onboarding-modal').style.display='none';
+  // Update wBday for workshop
+  wBday=d;
+  render();
+  showToast('✨ 已儲存！運程分析已啟用','ok',3000);
+}
+function skipProfile(){
+  document.getElementById('onboarding-modal').style.display='none';
+}
+function editProfile(){
+  var m=document.getElementById('onboarding-modal');
+  m.style.display='flex';
+  if(userProfile){
+    document.getElementById('ob-date').value=userProfile.date||'';
+    document.getElementById('ob-time').value=userProfile.time||'';
+    if(userProfile.gender)selectGender(userProfile.gender);
+  }
+}
+function closeModal(){document.querySelectorAll('[data-modal]').forEach(function(e){e.remove();});}
+function doRefresh(){
+  if(_refreshXhr)return;
+  refreshLog=['🔄 連接中...'];render();
+  var ctrl=new AbortController();
+  var tid=setTimeout(function(){ctrl.abort();},20000);
+  _refreshXhr=ctrl;
+  fetch(WORKER_URL,{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){
+      clearTimeout(tid);_refreshXhr=null;
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      if(!data.ok)throw new Error(data.error||'Worker錯誤');
+      var rows=(data.results||[]).filter(function(r){
+        return r.draw&&r.date&&r.numbers&&r.numbers.length===6&&r.extra!==undefined;
+      });
+      if(!rows.length)throw new Error('無有效數據');
+      hist=rows;
+      refreshLog=['✅ 更新成功！共 '+rows.length+' 期',
+        '最新：'+rows[0].draw+' ('+rows[0].date+')',
+        '🎱 '+rows[0].numbers.join(', ')+' 特：'+rows[0].extra];
+      render();
+    })
+    .catch(function(e){
+      clearTimeout(tid);_refreshXhr=null;
+      refreshLog=[e.name==='AbortError'?'❌ 連接逾時':'❌ 更新失敗: '+e.message];
+      render();
+    });
+}
+
+function parseHK(text){
+  var rows=[];
+  try{
+    // Strip all HTML tags to get plain text
+    var plain=text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
+                  .replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
+                  .replace(/<[^>]+>/g,' ')
+                  .replace(/&nbsp;/g,' ')
+                  .replace(/&amp;/g,'&')
+                  .replace(/\s+/g,' ');
+    
+    // Find all draw numbers like 26/021
+    var drawRe=/\b(\d{2}\/\d{3})\b/g;
+    var m, draws=[];
+    while((m=drawRe.exec(plain))!==null) draws.push({draw:m[1],pos:m.index});
+    
+    // Remove duplicate draws (keep first occurrence)
+    var seen={}, uniqueDraws=[];
+    for(var i=0;i<draws.length;i++){
+      if(!seen[draws[i].draw]){seen[draws[i].draw]=true;uniqueDraws.push(draws[i]);}
+    }
+    
+    var MONTHS={january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12'};
+    
+    for(var i=0;i<uniqueDraws.length&&rows.length<30;i++){
+      var pos=uniqueDraws[i].pos;
+      var chunk=plain.slice(pos,pos+400);
+      
+      // Find date: "24 February 2026" or "2026-02-24"
+      var date='';
+      var dm=chunk.match(/(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})/i);
+      if(dm){
+        date=dm[3]+'-'+MONTHS[dm[2].toLowerCase()]+'-'+dm[1].padStart(2,'0');
+      } else {
+        var dm2=chunk.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if(dm2) date=dm2[1]+'-'+dm2[2]+'-'+dm2[3];
+      }
+      if(!date) continue;
+      
+      // Find 7 numbers 1-49, skip year numbers like 2026
+      var numRe=/\b([1-9]|[1-4][0-9])\b/g;
+      numRe.lastIndex=0;
+      var nums=[], seenN={}, nm;
+      while((nm=numRe.exec(chunk))!==null){
+        var n=parseInt(nm[1]);
+        if(n>=1&&n<=49&&!seenN[n]){seenN[n]=true;nums.push(n);}
+        if(nums.length>=7) break;
+      }
+      
+      if(nums.length>=7){
+        rows.push({
+          draw:uniqueDraws[i].draw,
+          date:date,
+          numbers:nums.slice(0,6).sort(function(a,b){return a-b;}),
+          extra:nums[6]
+        });
+      }
+    }
+  }catch(e){}
+  return rows;
+}
+
+function renderRefreshLog(){
+  const el=document.getElementById('refresh-log');
+  if(!el)return;
+  el.innerHTML=refreshLog.map(l=>`<div style="font-size:11px;color:${l.startsWith('✅')?'#2e7d32':l.startsWith('❌')?'#c62828':l.startsWith('⚠️')?'#f57f17':'var(--sub)'};margin-bottom:3px;line-height:1.5">${l}</div>`).join('');
+}
+
+// ── Grid 49 ──
+function grid49(selected, onToggleFn, maxed=false){
+  let html='<div class="grid49">';
+  for(let n=1;n<=49;n++){
+    const sel=selected.includes(n),off=maxed&&!sel,c=gz(n),col=ZC[c];
+    const bg=sel?col:(off?'var(--bg)':'var(--input)');
+    const color=sel?'#fff':(off?'var(--dim)':col);
+    const border=sel?col:(off?'var(--track)':'var(--iborder)');
+    html+=`<button onclick="${onToggleFn}(${n})" style="aspect-ratio:1;border-radius:50%;font-weight:800;font-size:11px;cursor:${off?'default':'pointer'};border:2px solid ${border};background:${bg};color:${color};padding:0">${n}</button>`;
+  }
+  return html+'</div>';
+}
+
+// ── Settings ──
+function openSettings(){
+  document.getElementById('settings-modal').classList.add('open');
+  var prov=localStorage.getItem('ms_ai_provider')||'anthropic';
+  setAIProvider(prov,true);
+  document.getElementById('api-key-input').value=localStorage.getItem('ms_key_'+prov)||'';
+  var kofiEl=document.getElementById('kofi-input');
+  var fpsEl=document.getElementById('fps-input');
+  if(kofiEl) kofiEl.value=localStorage.getItem('ms_kofi')||'';
+  if(fpsEl) fpsEl.value=localStorage.getItem('ms_fps')||'';
+}
+function setAIProvider(p,silent){
+  localStorage.setItem('ms_ai_provider',p);
+  ['anthropic','deepseek','grok'].forEach(function(id){
+    var btn=document.getElementById('prov-'+id);
+    if(!btn)return;
+    var active=id===p;
+    btn.style.background=active?'var(--accent)':'var(--card)';
+    btn.style.color=active?'#fff':'var(--text)';
+    btn.style.borderColor=active?'var(--accent)':'var(--border)';
+  });
+  var hints={anthropic:'console.anthropic.com · 每次約HK$0.01',deepseek:'platform.deepseek.com · 超低成本，性價比極高！',grok:'console.x.ai · xAI 出品，有免費額度'};
+  var placeholders={anthropic:'sk-ant-api03-...',deepseek:'sk-...',grok:'xai-...'};
+  var h=document.getElementById('ai-provider-hint');
+  var inp=document.getElementById('api-key-input');
+  if(h)h.textContent=hints[p]||'';
+  if(inp){inp.placeholder=placeholders[p]||'API Key...';if(!silent)inp.value=localStorage.getItem('ms_key_'+p)||'';}
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function saveDonationSettings(){
+  localStorage.setItem('ms_kofi', document.getElementById('kofi-input').value.trim());
+  localStorage.setItem('ms_fps', document.getElementById('fps-input').value.trim());
+  showToast('✅ 打賞設定已儲存','ok');
+  closeSettings();
+}
+function showPayMe(){
+  var fps=localStorage.getItem('ms_fps')||'';
+  var kofi=localStorage.getItem('ms_kofi')||'';
+  var fpsHtml=fps
+    ?'<div style="font-size:16px;font-weight:900;color:#333;margin:8px 0">'+fps+'</div>'
+    +'<div style="font-size:10px;color:#999">在轉數快輸入以上號碼</div>'
+    :'<div style="font-size:12px;color:#999">請在⚙️設定填入 FPS 號碼</div>';
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.setAttribute('data-modal','1');
+  modal.innerHTML='<div style="background:var(--card);border-radius:20px;padding:24px;max-width:320px;width:100%;text-align:center">'
+    +'<div style="font-size:20px;font-weight:900;color:var(--text);margin-bottom:8px">📱 PayMe / FPS 打賞</div>'
+    +'<div style="font-size:11px;color:var(--sub);margin-bottom:16px">感謝支持！每分打賞都是對開發者最大的鼓勵 ☕</div>'
+    +'<div style="background:#f5f5f5;border-radius:12px;padding:16px;margin-bottom:12px">'+fpsHtml+'</div>'
+    +(kofi?'<a href="'+kofi+'" target="_blank" style="display:block;width:100%;padding:10px;background:#FF5E5B;color:#fff;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px;box-sizing:border-box">☕ Ko-fi 打賞</a>':'')
+    +'<button onclick="closeModal()" style="width:100%;padding:12px;background:var(--border);color:var(--text);border:none;border-radius:12px;font-size:14px;cursor:pointer">關閉</button>'
+    +'</div>';
+  document.body.appendChild(modal);
+}
+function showPWAGuide(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid=/Android/.test(navigator.userAgent);
+  if(isIOS) showToast('📱 Safari底部「分享」→「加至主畫面」即可安裝！','ok',6000);
+  else if(isAndroid) showToast('📱 Chrome右上角「⋮」→「加至主畫面」即可安裝！','ok',6000);
+  else showToast('📱 請用手機瀏覽器打開此頁面安裝','ok',5000);
+}
+function saveApiKey(){
+  var prov=localStorage.getItem('ms_ai_provider')||'anthropic';
+  var key=document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('ms_key_'+prov,key);
+  localStorage.setItem('ms_key',key); // backward compat
+  showToast('✅ '+prov+' API Key 已儲存','ok');
+  closeSettings();
+}
+
+// ── Tab render ──
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  render();
+  window.scrollTo(0,0);
+}
+
+document.getElementById('tabs').addEventListener('click',function(e){
+  const btn=e.target.closest('.tab-btn');
+  if(btn)switchTab(btn.dataset.tab);
+});
+
+// Auto-refresh on startup
+setTimeout(function(){ doRefresh(); }, 1500);
+// Show onboarding if no profile
+if(!localStorage.getItem('ms_profile')){
+  setTimeout(function(){
+    var m=document.getElementById('onboarding-modal');
+    if(m)m.style.display='flex';
+  },500);
+}else{
+  userProfile=JSON.parse(localStorage.getItem('ms_profile'));
+  if(userProfile&&userProfile.date)wBday=userProfile.date;
+}
+
+// ── MAIN RENDER ──
+function render(){
+  const c=document.getElementById('content');
+  c.className='';
+  switch(currentTab){
+    case 'latest': c.innerHTML=renderLatest();break;
+    case 'workshop': c.innerHTML=renderWorkshop();break;
+    case 'heatmap': c.innerHTML=renderHeatmap();break;
+    case 'fortune': c.innerHTML=renderFortune();break;
+    case 'alarm': c.innerHTML=renderAlarm();break;
+    case 'history': c.innerHTML=renderHistory();break;
+    case 'stats': c.innerHTML=renderStats();break;
+    case 'checker': c.innerHTML=renderChecker();break;
+    case 'mybets': c.innerHTML=renderMyBets();break;
+    case 'board': c.innerHTML=renderBoard();break;
+    case 'predict': c.innerHTML=renderPredict();break;
+    case 'discuss': c.innerHTML=renderDiscuss();initDisqus();break;
+  }
+  startCountdown();
+  renderRefreshLog();
+}
+
+
+// ═══ LATEST ═══
+function renderLatest(){
+  var l=hist[0],nd=calcNextDraw();
+  var out='';
+  out+='<div class="card accent-top" style="text-align:center;background:linear-gradient(135deg,var(--card),var(--accent-bg))">';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:2px">'+l.draw+' · '+l.date+'</div>';
+  out+='<div style="font-size:15px;font-weight:900;color:var(--accent);margin-bottom:12px">🎱 最新開獎號碼</div>';
+  out+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px">';
+  out+=ballsRow(l.numbers,l.extra,48);
+  out+='</div><div style="font-size:10px;color:var(--dim);margin-top:4px">正碼 · 特別號</div></div>';
+
+  out+='<div class="card" style="background:linear-gradient(135deg,var(--card),#fff8e1)">';
+  out+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
+  out+='<div><div style="font-size:12px;color:#f57f17;font-weight:800">⏳ 下期 '+nd.drawNum+'</div>';
+  out+='<div style="font-size:11px;color:var(--sub)">'+nd.date+' · 晚上 9:30</div></div>';
+  out+='<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#e65100">$8百萬起</div>';
+  out+='<div style="font-size:9px;color:var(--dim)">估計頭獎</div></div></div>';
+  out+='<div style="background:rgba(233,30,99,.1);border:1px solid rgba(233,30,99,.2);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">';
+  out+='<span style="font-size:11px;color:var(--accent);font-weight:700">⏰ 攪珠倒數</span>';
+  out+='<div id="countdown" style="font-variant-numeric:tabular-nums;font-size:26px;font-weight:900;color:var(--accent);letter-spacing:2px">--:--:--</div></div></div>';
+
+  // Auto-refresh status indicator
+  if(refreshLog.length>0){
+    var logColor=refreshLog[0].startsWith('✅')?'#2e7d32':refreshLog[0].startsWith('❌')?'#c62828':'var(--sub)';
+    out+='<div style="font-size:10px;color:'+logColor+';text-align:center;margin-bottom:6px">'+refreshLog[0]+'</div>';
+  }
+  out+='<div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:10px;line-height:1.8">數據來源：lottery.hk · 本 App 與香港賽馬會無關聯<br/><span style="color:var(--accent);font-weight:700">純屬娛樂，請勿 all in 😅</span></div>';
+
+  // 打賞區
+  out+='<div style="background:linear-gradient(135deg,#fff8e1,#fff3e0);border:1px solid #ffcc80;border-radius:14px;padding:14px;margin-bottom:10px;text-align:center">';
+  out+='<div style="font-size:13px;font-weight:900;color:#e65100;margin-bottom:4px">☕ 支持開發者</div>';
+  out+='<div style="font-size:10px;color:#bf360c;margin-bottom:10px">App 完全免費 · 如果覺得好用，請作者飲杯咖啡！</div>';
+  out+='<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+  out+='<a href="https://payme.hsbc/kennylai18" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#e91e63,#c2185b);color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:700;text-decoration:none">💳 一按即 PayMe！</a>';
+  var _kofi=localStorage.getItem('ms_kofi')||'';
+  if(_kofi) out+='<a href="'+_kofi+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#FF5E5B;color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:700;text-decoration:none">☕ Ko-fi</a>';
+  var _fps=localStorage.getItem('ms_fps')||'';
+  if(_fps) out+='<button onclick="showPayMe()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#e91e63;border:2px solid #e91e63;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer">📱 FPS</button>';
+  out+='</div></div>';
+
+  // 廣告位（預留，可日後填入廣告代碼）
+  out+='<div id="ad-slot" style="min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+
+  out+='<div style="font-size:13px;color:var(--sub);font-weight:700;margin-bottom:8px">📜 近期開獎</div>';
+  for(var i=0;i<Math.min(hist.length,6);i++){
+    var h=hist[i];
+    out+='<div class="row-item" style="'+(i===0?'background:rgba(233,30,99,.08)':'')+'">';
+    out+='<div style="min-width:62px"><div style="font-size:12px;color:var(--accent);font-weight:800">'+h.draw+'</div><div style="font-size:9px;color:var(--dim)">'+h.date+'</div></div>';
+    out+='<div style="display:flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:nowrap">';
+    for(var j=0;j<h.numbers.length;j++) out+=ball(h.numbers[j],26);
+    out+=ball(h.extra,26,true);
+    out+='</div></div>';
+  }
+  return out;
+}
+
+// ═══ WORKSHOP ═══
+var W_METHODS=[
+  {key:'golden',label:'黃金分割 φ',emoji:'✨',desc:'數學美感選號',color:'#f57f17'},
+  {key:'fib',label:'費氏數列 ∞',emoji:'🌀',desc:'自然界神奇序列',color:'#bf360c'},
+  {key:'gap',label:'遺漏回歸 ↩',emoji:'🎯',desc:'久未出現的號碼',color:'#2e7d32'},
+  {key:'hot',label:'近期熱號 🔥',emoji:'🔥',desc:'最近12期高頻',color:'#e53935'},
+  {key:'cold',label:'久違冷號 🧊',emoji:'🧊',desc:'很久沒出現的',color:'#1e88e5'},
+];
+
+function renderWorkshop(){
+  // Auto-populate from saved profile if workshop birthday is empty
+  if(!wBday&&userProfile&&userProfile.date) wBday=userProfile.date;
+  var bdayParsed=null;
+  if(wBday){var p=wBday.split('-').map(Number);bdayParsed={yr:p[0],mo:p[1],dy:p[2],z:getZodiac(p[0],p[1],p[2]),s:getStar(p[1],p[2])};}
+  var out='';
+  out+='<div style="text-align:center;margin-bottom:14px"><div style="font-size:24px;margin-bottom:4px">🎰✨</div>';
+  out+='<div style="font-size:18px;font-weight:900;color:var(--accent)">號碼生成工坊</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-top:4px">選擇配方，混合生成你的專屬幸運號碼！</div></div>';
+
+  out+='<div class="card"><div class="step-label">STEP 1 · 選擇你的來源</div>';
+  out+='<div class="w-tabs">';
+  var wTabs=[['birthday','🎂 生日派'],['mbti','🧠 MBTI派'],['combo','🎨 混合派']];
+  for(var i=0;i<wTabs.length;i++){
+    out+='<button class="w-tab '+(wTab===wTabs[i][0]?'active':'')+'" onclick="setWTab(\''+wTabs[i][0]+'\')">'+wTabs[i][1]+'</button>';
+  }
+  out+='</div>';
+
+  if(wTab==='birthday'||wTab==='combo'){
+    out+='<div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:6px">🎂 你的生日</div>';
+    out+='<input type="date" value="'+wBday+'" onchange="wBday=this.value;render()" style="margin-bottom:'+(bdayParsed?'8px':'0')+'"/>';
+    if(bdayParsed){
+      out+='<div style="display:flex;gap:8px;margin-bottom:10px">';
+      out+='<div style="flex:1;background:rgba(251,140,0,.12);border-radius:10px;padding:6px 10px;text-align:center;border:1px solid rgba(251,140,0,.2)"><div style="font-size:9px;color:#bf360c">生肖</div><div style="font-size:18px;font-weight:800;color:#e65100">'+bdayParsed.z+'</div></div>';
+      out+='<div style="flex:1;background:rgba(142,36,170,.12);border-radius:10px;padding:6px 10px;text-align:center;border:1px solid rgba(142,36,170,.2)"><div style="font-size:9px;color:#4a148c">星座</div><div style="font-size:14px;font-weight:800;color:#6a1b9a">'+bdayParsed.s+'座</div></div>';
+      out+='</div>';
+    }
+  }
+  if(wTab==='mbti'||wTab==='combo'){
+    out+='<div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px">🧠 你的 MBTI</div>';
+    out+='<div class="mbti-grid">';
+    var mbtiKeys=Object.keys(MBTI_DESC);
+    for(var i=0;i<mbtiKeys.length;i++){
+      var m=mbtiKeys[i];
+      out+='<button class="mbti-btn '+(wMbti===m?'active':'')+'" onclick="toggleMBTI(\''+m+'\')">';
+      out+='<div class="mb-name">'+m+'</div><div class="mb-desc">'+MBTI_DESC[m]+'</div></button>';
+    }
+    out+='</div>';
+    if(wMbti) out+='<div style="background:rgba(233,30,99,.1);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--accent);font-weight:600">你是 '+MBTI_DESC[wMbti]+' · '+MBTI_TRAIT[wMbti]+'</div>';
+  }
+  out+='</div>';
+
+  out+='<div class="card"><div class="step-label">STEP 2 · 方法加持（可疊加）</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-bottom:12px">可以選多個，號碼分數會疊加！</div>';
+  out+='<div class="method-grid">';
+  for(var i=0;i<W_METHODS.length;i++){
+    var wm=W_METHODS[i],active=wSources[wm.key];
+    out+='<button class="method-card '+(active?'active':'')+'" onclick="toggleMethod(\''+wm.key+'\')" style="'+(active?'border-color:'+wm.color+';background:rgba(0,0,0,.05);box-shadow:0 2px 8px rgba(0,0,0,.2)':'')+'">';
+    out+='<div class="mc-icon">'+wm.emoji+'</div>';
+    out+='<div class="mc-label" style="color:'+(active?wm.color:'var(--text)')+'">'+wm.label+(active?' ✓':'')+'</div>';
+    out+='<div class="mc-desc">'+wm.desc+'</div></button>';
+  }
+  out+='</div></div>';
+
+  out+='<div class="card"><div class="step-label">STEP 3 · 生成號碼</div>';
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  out+='<button class="btn btn-fun" style="height:52px;font-size:14px" onclick="doWorkshop()">🎰 數學配方</button>';
+  out+='<button class="btn btn-purple" style="height:52px;font-size:14px" onclick="doWorkshopAI()" '+(wAiLoading?'disabled':'')+'>'+(wAiLoading?'🔮 AI思考中...':'🤖 AI推薦')+'</button>';
+  out+='</div><div style="font-size:10px;color:var(--dim);text-align:center;margin-top:8px">AI 推薦需要 API Key（右下角⚙️設定）</div></div>';
+
+  if(wResult){
+    out+='<div class="result-card"><div style="text-align:center;margin-bottom:14px">';
+    out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:10px">'+(wResult.isAI?'🤖 AI 為你推薦的幸運號碼':'✨ 你的幸運號碼')+'</div>';
+    out+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">';
+    out+=ballsRow(wResult.nums,wResult.extra,50);
+    out+='</div><div style="font-size:10px;color:var(--dim)">正碼 · 特別號</div></div>';
+    if(wResult.aiReason) out+='<div style="background:var(--row);border-radius:10px;padding:12px;font-size:12px;color:var(--text);line-height:1.8;margin-bottom:10px">🤖 '+wResult.aiReason+'</div>';
+    if(!wResult.isAI){
+      out+='<div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px">🔍 號碼來源解析</div>';
+      for(var i=0;i<wResult.details.length;i++){
+        var d=wResult.details[i];
+        out+='<div style="display:flex;align-items:center;gap:8px;background:var(--row);border-radius:10px;padding:8px 10px;border:1px solid var(--border);margin-bottom:6px">';
+        out+=ball(d.n,30,d.isExtra);
+        out+='<div><span style="font-size:10px;color:var(--dim);margin-right:4px">'+(d.isExtra?'特別號：':'正碼：')+'</span>';
+        if(d.labels&&d.labels.length>0){for(var j=0;j<d.labels.length;j++) out+='<span class="src-tag">'+d.labels[j]+'</span>';}
+        else out+='<span style="font-size:9px;color:var(--dim)">統計加權</span>';
+        out+='</div></div>';
+      }
+    }
+    out+='</div>';
+    out+='<div style="background:var(--row);border-radius:12px;padding:12px;margin-bottom:12px;font-size:10px;color:var(--dim);line-height:1.8;text-align:center">ℹ️ 號碼由所選配方演算生成，純屬娛樂參考。<br/><span style="color:var(--accent);font-weight:700">中咗係緣份，唔中繼續玩！😄</span></div>';
+  }
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+function setWTab(t){wTab=t;wResult=null;render();}
+function toggleMBTI(m){wMbti=wMbti===m?'':m;render();}
+function toggleMethod(k){wSources[k]=!wSources[k];render();}
+function doWorkshop(){
+  var src=Object.assign({},wSources);
+  if(wTab==='birthday'){src.birthday=true;src.mbti=false;}
+  else if(wTab==='mbti'){src.birthday=false;src.mbti=true;}
+  else{src.birthday=!!wBday;src.mbti=!!wMbti;}
+  if(wTab==='birthday'&&!wBday){showToast('👆 請先選擇你的生日','err');return;}
+  if(wTab==='mbti'&&!wMbti){showToast('👆 請先選擇你的 MBTI','err');return;}
+  if(wTab==='combo'&&!wBday&&!wMbti){showToast('👆 生日或MBTI至少填一個','err');return;}
+  var noMethod=!src.birthday&&!src.mbti&&!src.golden&&!src.fib&&!src.gap&&!src.hot&&!src.cold;
+  if(noMethod){showToast('👆 請至少選一個配方方法','err');return;}
+  wResult=Object.assign(runWorkshop(wBday,wMbti,src),{isAI:false});
+  showConfetti();showToast('🎉 你的幸運號碼出爐！','ok');render();
+}
+
+async function doWorkshopAI(){
+  var prov=localStorage.getItem('ms_ai_provider')||'anthropic';
+  var key=localStorage.getItem('ms_key_'+prov)||localStorage.getItem('ms_key')||'';
+  if(!key){showToast('請先在⚙️設定 '+prov+' API Key','err');return;}
+  wAiLoading=true;render();
+  var recent=hist.slice(0,10).map(function(h){return h.draw+': '+h.numbers.join(',')+'  特'+h.extra;}).join('\n');
+  var prompt='你是六合彩分析師。近10期開獎:\n'+recent+'\n\n請推薦6個正碼(1-49)和1個特別號，用JSON格式回覆，只返回JSON不要其他文字：{"numbers":[n1,n2,n3,n4,n5,n6],"extra":n7,"reason":"分析理由50字內"}';
+  try{
+    var result=null;
+    if(prov==='anthropic'){
+      var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+      var d=await r.json();
+      result=d.content&&d.content[0]?d.content[0].text:'';
+    } else if(prov==='deepseek'){
+      var r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'deepseek-chat',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+      var d=await r.json();
+      result=d.choices&&d.choices[0]?d.choices[0].message.content:'';
+    } else if(prov==='grok'){
+      var r=await fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'grok-3-mini',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+      var d=await r.json();
+      result=d.choices&&d.choices[0]?d.choices[0].message.content:'';
+    }
+    if(!result) throw new Error('無回應');
+    var clean=result.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(clean);
+    var nums=parsed.numbers.filter(function(n){return n>=1&&n<=49;}).slice(0,6);
+    var extra=parsed.extra;
+    if(nums.length===6&&extra>=1&&extra<=49){
+      wResult={nums:nums.sort(function(a,b){return a-b;}),extra:extra,aiReason:parsed.reason||'',isAI:true,details:[]};
+      showConfetti();showToast('🤖 AI推薦出爐！','ok');
+    } else throw new Error('號碼格式錯誤');
+  }catch(e){showToast('❌ AI失敗: '+e.message,'err');}
+  wAiLoading=false;render();
+}
+
+function renderHeatmap(){
+  var cnt={};for(var i=1;i<=49;i++)cnt[i]=0;
+  for(var i=0;i<hist.length;i++){
+    var h=hist[i];
+    if(heatMode!=='extra') for(var j=0;j<h.numbers.length;j++) cnt[h.numbers[j]]++;
+    if(heatMode!=='main') cnt[h.extra]++;
+  }
+  var mx=0;for(var n=1;n<=49;n++) if(cnt[n]>mx) mx=cnt[n];
+  var out='<div class="card accent-top" style="border-top-color:#e53935">';
+  out+='<div style="font-size:15px;font-weight:900;color:#e53935;margin-bottom:4px">🔥 號碼熱力圖</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:12px">顏色越深 = 出現越頻繁（'+hist.length+' 期數據）</div>';
+  out+='<div class="chips">';
+  var hmodes=[['all','全部'],['main','正碼'],['extra','特別號']];
+  for(var i=0;i<hmodes.length;i++) out+='<button class="pill '+(heatMode===hmodes[i][0]?'active':'')+'" onclick="heatMode=\''+hmodes[i][0]+'\';render()">'+hmodes[i][1]+'</button>';
+  out+='</div><div class="heat-grid">';
+  for(var n=1;n<=49;n++){
+    var c=cnt[n],intensity=mx>0?c/mx:0,zc=ZC[gz(n)];
+    var alpha=Math.round(intensity*200+35).toString(16).padStart(2,'0');
+    out+='<div class="heat-cell" style="background:'+zc+alpha+';border-color:'+zc+'33;box-shadow:'+(intensity>.7?'0 2px 10px '+zc+'66':'none')+'">';
+    out+='<div class="hn" style="color:'+(intensity>.5?'#fff':'var(--text)')+'">'+n+'</div>';
+    out+='<div class="hc" style="color:'+(intensity>.5?'rgba(255,255,255,.7)':'var(--dim)')+'">'+c+'次</div></div>';
+  }
+  out+='</div></div>';
+  var ZLn={r:'🔴 紅1–10',b:'🔵 藍11–20',g:'🟢 綠21–30',o:'🟠 橙31–40',p:'🟣 紫41–49'};
+  out+='<div class="card"><div style="font-size:12px;font-weight:700;margin-bottom:8px">🎨 色彩區域</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+  var zones=['r','b','g','o','p'];
+  for(var i=0;i<zones.length;i++){var z=zones[i];out+='<div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:'+ZC[z]+'22;border:1px solid '+ZC[z]+'44"><span style="font-size:11px">'+ZLn[z]+'</span></div>';}
+  out+='</div></div>';
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+
+// ═══ ALARM ═══
+
+function renderFortune(){
+  var out='';
+  if(!userProfile||!userProfile.date){
+    out+='<div class="card" style="text-align:center;padding:30px">';
+    out+='<div style="font-size:48px;margin-bottom:12px">🔮</div>';
+    out+='<div style="font-size:16px;font-weight:900;color:var(--accent);margin-bottom:8px">輸入生日開啟運程</div>';
+    out+='<div style="font-size:12px;color:var(--sub);margin-bottom:16px">完整紫微斗數命盤 · 十二宮位 · 四化星 · 大限流年 · 韓國四柱</div>';
+    out+='<button class="btn btn-primary" onclick="editProfile()">✨ 輸入生日資料</button></div>';
+    return out;
+  }
+  function isGen(a,b){var g={木:'火',火:'土',土:'金',金:'水',水:'木'};return g[a]===b;}
+  function isCon(a,b){var c={木:'土',土:'水',水:'火',火:'金',金:'木'};return c[a]===b;}
+  var f=getDailyFortune(userProfile);
+  if(!f)return '<div class="card" style="text-align:center;padding:20px">⏳ 命盤計算中...</div>';
+  var bdate=new Date(userProfile.date);
+  var by=bdate.getFullYear(),bm=bdate.getMonth()+1,bd=bdate.getDate();
+  var today=new Date();
+  var scoreColor=f.score>=80?'#2e7d32':f.score>=60?'#f57f17':'#c62828';
+
+  // ══ 1. 今日運勢總覽 ══
+  out+='<div class="card accent-top" style="text-align:center;margin-bottom:10px">';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:4px">'+today.getFullYear()+'年'+(today.getMonth()+1)+'月'+today.getDate()+'日 · '+(f.todayDayPillar||f.stem+f.branch)+'日</div>';
+  out+='<div style="font-size:36px;margin-bottom:4px">'+f.emoji+'</div>';
+  out+='<div style="font-size:22px;font-weight:900;color:var(--accent);margin-bottom:4px">'+f.title+'</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:14px">'+f.subtitle+'</div>';
+  out+='<div style="background:var(--row);border-radius:20px;height:12px;margin-bottom:6px;overflow:hidden"><div style="height:100%;width:'+f.score+'%;background:linear-gradient(90deg,'+scoreColor+','+scoreColor+'99);border-radius:20px"></div></div>';
+  out+='<div style="font-size:13px;font-weight:800;color:'+scoreColor+'">今日綜合運勢 '+f.score+'/100</div>';
+  out+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px">';
+  var subScores=[
+    {k:'財運',e:'💰',s:Math.min(99,Math.max(30,f.score+Math.round(Math.sin((by*bm+today.getDate())*0.7)*12)))},
+    {k:'感情',e:'💕',s:Math.min(99,Math.max(30,f.score+Math.round(Math.cos((bm*bd+today.getMonth())*0.9)*10)))},
+    {k:'事業',e:'💼',s:Math.min(99,Math.max(30,f.score+Math.round(Math.sin((by+bd)*0.5)*8)))},
+    {k:'健康',e:'💪',s:Math.min(99,Math.max(30,f.score+Math.round(Math.cos(bd*0.6)*6)))}
+  ];
+  subScores.forEach(function(ss){
+    var c2=ss.s>=75?'#2e7d32':ss.s>=55?'#f57f17':'#c62828';
+    out+='<div style="background:var(--row);border-radius:10px;padding:8px"><div style="font-size:14px">'+ss.e+'</div><div style="font-size:10px;color:var(--sub);margin:2px 0">'+ss.k+'</div><div style="font-size:13px;font-weight:900;color:'+c2+'">'+ss.s+'</div></div>';
+  });
+  out+='</div></div>';
+
+  // ══ 2. 紫微斗數命盤 ══
+  out+='<div class="card" style="margin-bottom:10px">';
+  out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  out+='<div><div style="font-size:14px;font-weight:900;color:var(--accent)">🌟 紫微斗數命盤</div>';
+  out+='<div style="font-size:10px;color:var(--dim)">依《紫微斗數全書》十四主星排盤</div></div>';
+  out+='<div style="text-align:right"><div style="font-size:11px;font-weight:700;color:var(--accent)">'+(f.fiveClass||'')+'</div><div style="font-size:10px;color:var(--sub)">五行局</div></div></div>';
+  out+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">';
+  [{label:'命宮主星',val:f.soulStar||'無正曜',h:true},{label:'身宮主星',val:f.bodyStar||'--'},{label:'生肖',val:f.zodiac}].forEach(function(ki){
+    out+='<div style="background:'+(ki.h?'var(--accent-bg)':'var(--row)')+';border-radius:10px;padding:10px;text-align:center;'+(ki.h?'border:1.5px solid var(--accent)':'')+'">';
+    out+='<div style="font-size:9px;color:var(--sub);margin-bottom:3px">'+ki.label+'</div>';
+    out+='<div style="font-size:15px;font-weight:900;color:'+(ki.h?'var(--accent)':'var(--text)')+'">'+ki.val+'</div></div>';
+  });
+  out+='</div>';
+
+  // 12-palace grid
+  out+='<div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px">📊 十二宮位</div>';
+  var palaceOrder=['命宮','父母宮','福德宮','田宅宮','官祿宮','交友宮','遷移宮','疾厄宮','財帛宮','子女宮','夫妻宮','兄弟宮'];
+  var palaceEmoji={'命宮':'👤','父母宮':'👨‍👩‍👦','福德宮':'🌸','田宅宮':'🏠','官祿宮':'💼','交友宮':'🤝','遷移宮':'✈️','疾厄宮':'💊','財帛宮':'💰','子女宮':'👶','夫妻宮':'💍','兄弟宮':'👫'};
+  var palaceDesc={'命宮':'個性格局','父母宮':'家庭背景','福德宮':'內心世界','田宅宮':'不動產','官祿宮':'事業','交友宮':'人際','遷移宮':'出外','疾厄宮':'健康','財帛宮':'財運','子女宮':'子嗣','夫妻宮':'感情','兄弟宮':'手足'};
+  var palaces=f.ab?f.ab.palaces||[]:[];
+  var palaceMap={};
+  palaces.forEach(function(p){
+    palaceMap[p.name]=p;
+    // iztro alias: 僕役宮 = 交友宮
+    if(p.name==='僕役宮')palaceMap['交友宮']=p;
+    if(p.name==='交友宮')palaceMap['僕役宮']=p;
+  });
+  // Debug: log palace names to console
+  if(palaces.length>0&&window.console)console.log('iztro palaces:',palaces.map(function(p){return p.name+':'+(p.majorStars||[]).map(function(s){return s.name;}).join(',');}));
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
+  palaceOrder.forEach(function(pname){
+    var p=palaceMap[pname]||null;
+    var isLife=pname==='命宮';
+    var _mStars=p?(p.majorStars||p.stars||[]):[];
+    var _nStars=p?(p.minorStars||p.auxStars||[]):[];
+    var majorStars=_mStars.map(function(s){return s.name+(s.mutagen||s.mutationSign?'·'+(s.mutagen||s.mutationSign):'');}).join(' ');
+    var minorStars=_nStars.slice(0,2).map(function(s){return s.name;}).join(' ');
+    out+='<div style="background:'+(isLife?'var(--accent-bg)':'var(--row)')+';border-radius:10px;padding:8px;border:'+(isLife?'2px solid var(--accent)':'none')+'">';
+    out+='<div style="display:flex;justify-content:space-between;margin-bottom:2px">';
+    out+='<span style="font-size:10px;font-weight:700;color:'+(isLife?'var(--accent)':'var(--sub)')+'">'+palaceEmoji[pname]+' '+pname+'</span>';
+    out+='<span style="font-size:9px;color:var(--dim)">'+palaceDesc[pname]+'</span></div>';
+    out+='<div style="font-size:12px;font-weight:700;color:'+(isLife?'var(--accent)':'var(--text)')+'">'+( majorStars||'空宮')+'</div>';
+    if(minorStars)out+='<div style="font-size:9px;color:var(--dim)">'+minorStars+'</div>';
+    out+='</div>';
+  });
+  out+='</div>';
+
+  // 四化星
+  try{
+    var muts=f.ab&&(f.ab.transformations||f.ab.mutagens)||[];
+    if(muts&&muts.length){
+      out+='<div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:6px">⚡ 四化星</div>';
+      out+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
+      var tn={化祿:'💚祿',化權:'💙權',化科:'💛科',化忌:'❤️忌'};
+      muts.forEach(function(t){out+='<div style="background:var(--row);border-radius:8px;padding:5px 10px;font-size:11px">'+(tn[t.type]||t.type)+' '+t.star+'→'+(t.palace||'')+'</div>';});
+      out+='</div>';
+    }
+  }catch(e){}
+
+  // 大限
+  try{
+    var decs=f.ab&&(f.ab.decadal||f.ab.decades)||[];
+    var age=today.getFullYear()-by;
+    var curDec=decs.find?decs.find(function(d){return d.range&&age>=d.range[0]&&age<=d.range[1];}):null;
+    if(curDec){
+      out+='<div style="background:var(--accent-bg);border-radius:10px;padding:10px;margin-bottom:10px">';
+      out+='<div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px">🔄 大限（'+curDec.range[0]+'~'+curDec.range[1]+'歲）</div>';
+      out+='<div style="font-size:13px;font-weight:700;color:var(--text)">'+(curDec.palaceName||'')+'</div>';
+      if(curDec.majorStars)out+='<div style="font-size:11px;color:var(--sub)">'+curDec.majorStars.map(function(s){return s.name;}).join(' ')+'</div>';
+      out+='</div>';
+    }
+  }catch(e){}
+
+  // 流運
+  if(f.horoscope){
+    out+='<div style="background:rgba(252,228,236,0.5);border-radius:10px;padding:10px;margin-bottom:8px">';
+    out+='<div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:6px">📅 今日流運宮位</div>';
+    out+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    [{l:'流年',d:f.horoscope.yearly},{l:'流月',d:f.horoscope.monthly},{l:'流日',d:f.horoscope.daily}].forEach(function(fi){
+      if(fi.d&&fi.d.palaceName)out+='<div style="background:white;border-radius:8px;padding:5px 10px;font-size:11px"><span style="color:var(--dim)">'+fi.l+'</span> <span style="font-weight:700;color:var(--accent)">'+fi.d.palaceName+'</span></div>';
+    });
+    out+='</div></div>';
+  }
+
+  // 命宮主星解讀
+  var SR={'紫微':{c:'帝王星',t:'天生領袖，氣宇軒昂',w:'財運厚重，宜從政商',td:'今日貴人運強，宜主動出擊',warn:'避免過度自我'},
+    '天機':{c:'智謀星',t:'聰慧機敏，善謀策',w:'宜智識型工作',td:'思維敏銳，宜策劃新計畫',warn:'付諸行動勿空想'},
+    '太陽':{c:'光明星',t:'光明磊落，慷慨大方',w:'正財旺盛',td:'人際運旺，宜公開場合',warn:'注意休息'},
+    '武曲':{c:'財星',t:'剛毅果斷，理財強',w:'正財偏財兼旺',td:'宜處理財務投資',warn:'勿過於剛硬'},
+    '天同':{c:'福星',t:'溫和善良，福緣深厚',w:'食祿豐厚',td:'福德充盈，萬事順遂',warn:'勿過於懶散'},
+    '廉貞':{c:'才藝星',t:'才華橫溢，個性鮮明',w:'宜技藝專業',td:'創意靈感豐富',warn:'避免情緒化'},
+    '天府':{c:'庫府星',t:'穩重厚實，富貴雙全',w:'田宅財運俱佳',td:'宜穩健行事，財庫充盈',warn:'勿因保守錯失'},
+    '太陰':{c:'田宅星',t:'心思細膩，文藝氣質',w:'田宅運旺',td:'桃花運動，感情佳音',warn:'勿過於敏感'},
+    '貪狼':{c:'桃花星',t:'多才多藝，魅力四射',w:'偏財運強',td:'桃花偏財並旺，宜社交',warn:'避免過度享樂'},
+    '巨門':{c:'是非星',t:'口才卓絕，思維深邃',w:'宜口才職業',td:'宜謹言慎行，以和為貴',warn:'勿惹口舌是非'},
+    '天相':{c:'印綬星',t:'正直厚道，貴人相助',w:'宜輔佐工作',td:'貴人相助，事業有進展',warn:'勿依賴他人'},
+    '天梁':{c:'蔭星',t:'清高孤傲，悲天憫人',w:'宜公益醫療法律',td:'長輩貴人相助',warn:'避免孤高自賞'},
+    '七殺':{c:'將星',t:'魄力超群，開拓性強',w:'宜武職軍警創業',td:'宜積極衝刺，勿畏縮',warn:'避免衝動莽撞'},
+    '破軍':{c:'開拓星',t:'衝勁十足，善於突破',w:'宜開創新事業',td:'破舊立新，宜出行拓展',warn:'勿破壞既有關係'}};
+  var sr=f.soulStar&&SR[f.soulStar];
+  if(sr){
+    out+='<div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">';
+    out+='<div style="background:var(--accent);color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:8px">'+f.soulStar+' · '+sr.c+'</div>';
+    out+='<div style="font-size:11px;color:var(--sub);line-height:2">';
+    out+='🎭 <b>性格：</b>'+sr.t+'<br/>💰 <b>財富：</b>'+sr.w+'<br/>';
+    out+='<span style="color:var(--accent)">✨ <b>今日：</b></span>'+sr.td+'<br/>';
+    out+='<span style="color:#c62828">⚠️ <b>注意：</b></span>'+sr.warn;
+    out+='</div></div>';
+  }
+  out+='</div>';
+
+  // ══ 3. 四柱八字（直接來自 iztro）══
+  out+='<div class="card" style="margin-bottom:10px">';
+  out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:2px">🏛️ 出生四柱八字</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-bottom:12px">《三命通會》· iztro 精準排盤 · 節氣正確</div>';
+
+  var dmDesc={甲:'甲木·棟樑之才，剛直不阿',乙:'乙木·柔韌之材，適應力強',丙:'丙火·太陽之火，光明熱情',丁:'丁火·燭光之火，溫柔細膩',
+    戊:'戊土·大地厚土，穩重可靠',己:'己土·田園之土，溫和務實',庚:'庚金·斧刃之金，果斷剛毅',辛:'辛金·珠玉之金，精緻聰慧',壬:'壬水·大海之水，智慧廣博',癸:'癸水·雨露之水，滋潤細心'};
+  var elemDesc={木:'木命',火:'火命',土:'土命',金:'金命',水:'水命'};
+
+  // Parse each pillar: e.g. "乙丑" -> stem=乙, branch=丑, element=木
+  function parsePillar(p){
+    if(!p||p.length<2)return{s:'?',b:'?',e:'?'};
+    var s=p[0],b=p[1];
+    var stems2=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    var elem2=['木','木','火','火','土','土','金','金','水','水'];
+    var si=stems2.indexOf(s);
+    return{s:s,b:b,e:si>=0?elem2[si]:'?'};
+  }
+
+  var yp=parsePillar(f.birthYearPillar);
+  var mp=parsePillar(f.birthMonthPillar);
+  var dp=parsePillar(f.birthDayPillar);
+  var hp=parsePillar(f.birthHourPillar);
+  var isHourKnown=userProfile.time&&userProfile.time.length>0;
+  var bCols=[
+    {lb:'年柱',s:yp.s,b:yp.b,e:yp.e,sub:f.zodiac},
+    {lb:'月柱',s:mp.s,b:mp.b,e:mp.e,sub:bm+'月'},
+    {lb:'日柱',s:dp.s,b:dp.b,e:dp.e,sub:'出生日'},
+    {lb:'時柱',s:isHourKnown?hp.s:'?',b:isHourKnown?hp.b:'?',e:isHourKnown?hp.e:'?',sub:isHourKnown?(userProfile.time+'時'):'未知時辰'}
+  ];
+  out+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">';
+  bCols.forEach(function(c){
+    out+='<div style="background:var(--row);border-radius:10px;padding:10px;text-align:center">';
+    out+='<div style="font-size:9px;color:var(--sub);margin-bottom:2px">'+c.lb+'</div>';
+    out+='<div style="font-size:20px;font-weight:900;color:var(--accent)">'+c.s+'</div>';
+    out+='<div style="font-size:16px;font-weight:700;color:var(--text)">'+c.b+'</div>';
+    out+='<div style="font-size:9px;color:var(--dim)">'+c.e+'</div>';
+    out+='<div style="font-size:8px;color:var(--dim)">'+c.sub+'</div></div>';
+  });
+  out+='</div>';
+  out+='<div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:10px">'+( f.birthChineseDate?'八字：'+f.birthChineseDate:'')+'</div>';
+
+  // Day master = birth day pillar stem
+  out+='<div style="background:var(--accent-bg);border-radius:10px;padding:10px;margin-bottom:10px">';
+  out+='<div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:3px">⚡ 日主（命主天干）：'+dp.s+'（'+dp.e+'）</div>';
+  out+='<div style="font-size:11px;color:var(--sub)">'+(dmDesc[dp.s]||dp.s+'日主')+'</div></div>';
+
+  // Today's pillars separately
+  out+='<div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">';
+  out+='<div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px">📅 今日干支（'+today.getFullYear()+'年'+(today.getMonth()+1)+'月'+today.getDate()+'日）</div>';
+  var tp2=parsePillar(f.todayDayPillar);
+  out+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
+  [{lb:'今年',p:parsePillar(f.todayYearPillar)},{lb:'今月',p:parsePillar(f.todayMonthPillar)},{lb:'今日',p:tp2,hi:true}].forEach(function(c){
+    out+='<div style="background:'+(c.hi?'var(--accent-bg)':'var(--row)')+';border-radius:10px;padding:8px;text-align:center;'+(c.hi?'border:1.5px solid var(--accent)':'')+'">';
+    out+='<div style="font-size:9px;color:var(--sub)">'+c.lb+'</div>';
+    out+='<div style="font-size:18px;font-weight:900;color:'+(c.hi?'var(--accent)':'var(--text)')+'">'+c.p.s+'</div>';
+    out+='<div style="font-size:14px;font-weight:700;color:var(--text)">'+c.p.b+'</div>';
+    out+='<div style="font-size:9px;color:var(--dim)">'+c.p.e+'</div></div>';
+  });
+  out+='</div>';
+  if(!isHourKnown)out+='<div style="font-size:10px;color:var(--dim);margin-top:8px;text-align:center">💡 輸入出生時間可顯示時柱，令排盤更精準</div>';
+  out+='</div></div>';
+
+  // ══ 4. 五行分析 ══
+  out+='<div class="card" style="margin-bottom:10px">';
+  out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:2px">☯️ 五行分析</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-bottom:12px">《滴天髓》五行生剋制化</div>';
+  var elemEmoji={木:'🌳',火:'🔥',土:'🌍',金:'⚙️',水:'💧'};
+  var rel=isGen(f.birthElement,f.todayElement)?'相生 ✅':isCon(f.birthElement,f.todayElement)?'相剋 ⚠️':isGen(f.todayElement,f.birthElement)?'被生 🌟':isCon(f.todayElement,f.birthElement)?'被剋 ❌':'比和 ☯️';
+  var relText=isGen(f.birthElement,f.todayElement)?'命元生今日：才能施展，財祿自來，宜積極行動':
+    isCon(f.birthElement,f.todayElement)?'命元剋今日：耗費精神，宜守成待機':
+    isGen(f.todayElement,f.birthElement)?'今日生命元：天降貴人，事業順遂':
+    isCon(f.todayElement,f.birthElement)?'今日剋命元：阻力較多，宜低調應對':'比和之日：五行平衡，穩步前行';
+  out+='<div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:12px">';
+  out+='<div style="text-align:center"><div style="font-size:32px">'+elemEmoji[f.birthElement]+'</div><div style="font-size:12px;font-weight:700;color:var(--accent)">'+f.birthElement+'命</div></div>';
+  out+='<div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--sub)">'+rel+'</div><div style="font-size:9px;color:var(--dim)">命元對今日</div></div>';
+  out+='<div style="text-align:center"><div style="font-size:32px">'+elemEmoji[f.todayElement]+'</div><div style="font-size:12px;font-weight:700;color:var(--sub)">'+f.todayElement+'（今日）</div></div></div>';
+  out+='<div style="background:var(--row);border-radius:10px;padding:10px;font-size:11px;color:var(--sub);line-height:1.9">'+relText+'</div></div>';
+
+  // ══ 5. 韓國四柱 ══
+  out+='<div class="card" style="margin-bottom:10px">';
+  out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:2px">🇰🇷 韓國四柱 사주팔자</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-bottom:12px">韓國命理傳統 · 六運程分析</div>';
+  var sB=Math.min(95,Math.max(35,Math.round((f.score+65)/2)));
+  var sajuA=[
+    {l:'財運 재물운',e:'💰',s:Math.min(98,Math.max(30,sB+Math.round(Math.sin((by+today.getMonth()+1)*0.9)*15))),d:'偏財正財兼論'},
+    {l:'感情 애정운',e:'💕',s:Math.min(98,Math.max(30,sB+Math.round(Math.cos((bm+today.getDate())*1.1)*12))),d:'桃花緣份婚姻'},
+    {l:'健康 건강운',e:'💪',s:Math.min(98,Math.max(30,sB+Math.round(Math.sin(bd*0.7)*8))),d:'氣血狀況疾厄'},
+    {l:'事業 직업운',e:'💼',s:Math.min(98,Math.max(30,sB+Math.round(Math.cos((by+bm)*0.5)*10))),d:'官祿事業宮'},
+    {l:'家庭 가정운',e:'🏠',s:Math.min(98,Math.max(30,sB+Math.round(Math.sin((by*bd)*0.003)*9))),d:'田宅家庭和諧'},
+    {l:'貴人 귀인운',e:'🤝',s:Math.min(98,Math.max(30,sB+Math.round(Math.cos((bm*by)*0.001)*11))),d:'交友貴人助力'}
+  ];
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  sajuA.forEach(function(a){
+    var c=a.s>=75?'#2e7d32':a.s>=55?'#f57f17':'#c62828';
+    out+='<div style="background:var(--row);border-radius:10px;padding:10px">';
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+    out+='<span style="font-size:11px">'+a.e+' <b>'+a.l+'</b></span><span style="font-size:14px;font-weight:900;color:'+c+'">'+a.s+'</span></div>';
+    out+='<div style="background:var(--border);border-radius:10px;height:6px;overflow:hidden;margin-bottom:4px"><div style="width:'+a.s+'%;height:100%;background:'+c+';border-radius:10px"></div></div>';
+    out+='<div style="font-size:9px;color:var(--dim)">'+a.d+'</div></div>';
+  });
+  out+='</div></div>';
+
+  // ══ 5b. 天時地利人和 ══
+  var lucky7=calcLucky7Days();
+  if(lucky7&&lucky7.length>0){
+    var curMood=parseInt(localStorage.getItem('ms_mood')||'70');
+    var moodColor=curMood>=75?'#2e7d32':curMood>=55?'#f57f17':'#c62828';
+    out+='<div class="card" style="margin-bottom:10px">';
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+    out+='<div><div style="font-size:14px;font-weight:900;color:var(--accent)">🗓️ 未來7天購彩吉日</div>';
+    out+='<div style="font-size:10px;color:var(--dim)">天時（干支）+ 人和（心情）推算 Top 3</div></div>';
+    out+='<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:'+moodColor+'">'+curMood+'</div>';
+    out+='<div style="font-size:9px;color:var(--dim)">人和分</div></div></div>';
+    var medals7=['🥇','🥈','🥉'];
+    lucky7.slice(0,3).forEach(function(day,i){
+      var sc=day.total,scC=sc>=80?'#2e7d32':sc>=60?'#f57f17':'#c62828';
+      out+='<div style="background:'+(i===0?'var(--accent-bg)':'var(--row)')+';border-radius:12px;padding:12px;margin-bottom:8px;border:'+(i===0?'1.5px solid var(--accent)':'none')+'">';
+      out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      out+='<div style="font-size:14px;font-weight:900">'+medals7[i]+' '+day.dateStr+' <span style="font-size:11px;color:var(--sub)">'+day.ganzhi+'</span></div>';
+      out+='<div style="font-size:20px;font-weight:900;color:'+scC+'">'+sc+'分</div></div>';
+      out+='<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">';
+      out+='<span style="background:rgba(255,105,144,0.15);color:var(--accent);border-radius:6px;padding:2px 8px;font-size:10px">☀️ 天時 '+day.tianshi+'</span>';
+      out+='<span style="background:rgba(0,150,136,0.1);color:#00796b;border-radius:6px;padding:2px 8px;font-size:10px">❤️ 人和 '+day.renhe+'</span>';
+      out+='<span style="background:rgba(255,152,0,0.1);color:#e65100;border-radius:6px;padding:2px 8px;font-size:10px">'+(day.isDrawDay?'🎱 攪珠日':'非攪珠日')+'</span>';
+      out+='</div>';
+      out+='<div style="font-size:11px;color:var(--sub)">'+day.advice+'</div>';
+      out+='</div>';
+    });
+    out+='<button class="btn btn-primary btn-full" style="margin-top:6px" onclick="showMoodCheck()">🎯 更新心情分數 · 重新推算</button>';
+    out+='<div style="font-size:10px;color:var(--dim);text-align:center;margin-top:4px">心情分數影響吉日排名</div>';
+    out+='</div>';
+  }
+
+  // ══ 6. 幸運號碼 ══
+  out+='<div class="card" style="margin-bottom:10px">';
+  out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:4px">🍀 今日幸運號碼</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-bottom:10px">命元五行（'+f.birthElement+'）× 今日天干（'+f.stem+'）× 命宮主星推算</div>';
+  out+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+  f.luckyNums.forEach(function(n){out+=ball(n,40);});
+  out+='</div></div>';
+
+  out+='<div style="text-align:center;margin-bottom:16px"><button onclick="editProfile()" style="font-size:11px;color:var(--dim);background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer">✏️ 修改生日資料</button></div>';
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center"><span style="font-size:10px;color:var(--dim)">廣告位</span></div>';
+  return out;
+}
+
+function renderAlarm(){
+  var PRESETS=[{l:'$800萬（每次必提醒）',v:8e6},{l:'$3千萬',v:3e7},{l:'$5千萬',v:5e7},{l:'$1億',v:1e8},{l:'$1.5億',v:1.5e8},{l:'$2億',v:2e8}];
+  var nd=calcNextDraw();
+  var out='';
+
+  // ── 頭獎提醒說明 ──
+  out+='<div class="card accent-top">';
+  out+='<div style="font-size:15px;font-weight:900;color:var(--accent);margin-bottom:4px">🔔 頭獎金額鬧鐘</div>';
+  out+='<div style="font-size:11px;color:var(--sub);line-height:1.8;margin-bottom:14px">';
+  out+='設定門檻後按「一鍵設定提醒」，app 會為未來 <b>10 期攪珠</b>自動下載日曆提醒（.ics），加入日曆後手機會在攪珠前 <b>1 小時</b>彈出通知。';
+  out+='<br/>💡 iOS：下載後打開 .ics → 加入日曆<br/>💡 Android：直接加入 Google 日曆</div>';
+
+  // 門檻選擇
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px">';
+  for(var i=0;i<PRESETS.length;i++){
+    var p=PRESETS[i],active=prizeThr===p.v;
+    out+='<button onclick="prizeThr='+p.v+';prizeShown=false;render()" style="padding:10px 8px;border-radius:10px;border:1.5px solid '+(active?'var(--accent)':'var(--border)')+';background:'+(active?'var(--accent-bg)':'var(--card)')+';color:'+(active?'var(--accent)':'var(--sub)')+';font-size:11px;font-weight:600;cursor:pointer;text-align:left">'+(active?'✓ ':'')+p.l+'</button>';
+  }
+  out+='</div>';
+  out+='<div style="display:flex;gap:8px;margin-bottom:14px">';
+  out+='<input type="text" id="prize-input" placeholder="自訂金額（如：60000000）" style="flex:1;margin-bottom:0"/>';
+  out+='<button class="btn btn-ghost" onclick="setCustomPrizeThr()">設定</button>';
+  out+='</div>';
+
+  // 下期狀態
+  out+='<div style="background:var(--accent-bg);border-radius:10px;padding:12px;margin-bottom:12px;text-align:center">';
+  out+='<div style="font-size:10px;color:var(--sub);margin-bottom:4px">下期攪珠 · '+nd.drawNum+' · '+nd.date+' 晚上 9:30</div>';
+  out+='<div style="font-size:22px;font-weight:900;color:var(--accent)">頭獎 $8百萬起</div>';
+  out+='<div style="font-size:10px;color:var(--dim);margin-top:4px">門檻設定：≥ '+fmtPrize(prizeThr)+'　'+(prizeOn?'<span style="color:#2e7d32;font-weight:700">✅ 提醒已啟用</span>':'<span style="color:var(--dim)">提醒未啟用</span>')+'</div>';
+  out+='</div>';
+
+  // 一鍵提醒按鈕
+  out+='<button class="btn btn-primary btn-full" style="margin-bottom:6px;font-size:14px;padding:14px" onclick="addPrizeReminder()">';
+  out+=prizeOn?'📅 提醒已設定 · 點擊重新下載':'📅 一鍵設定鬧鐘提醒（下載日曆）';
+  out+='</button>';
+  out+='<div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:4px">加入日曆後，每次攪珠前 1 小時手機自動彈出提示</div>';
+  out+='</div>';
+
+  // ── 吉日推算已移至運程 tab ──
+  out+='<div class="card" style="text-align:center;margin-bottom:10px;padding:20px">';
+  out+='<div style="font-size:28px;margin-bottom:8px">🗓️</div>';
+  out+='<div style="font-size:13px;font-weight:900;color:var(--accent);margin-bottom:6px">未來7天購彩吉日推算</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:12px">天時（干支相合/沖）× 人和（心情測驗）<br>已移至🔮運程 tab，連同完整命盤一起查看</div>';
+  out+="<button class=\"btn btn-primary\" onclick=\"switchTab('fortune')\">🔮 前往運程 tab 查看吉日</button>";
+  out+='</div>';
+
+  // ── 如何運作 ──
+  out+='<div class="card">';
+  out+='<div style="font-size:13px;font-weight:800;margin-bottom:10px">💡 如何運作</div>';
+  out+='<div style="font-size:11px;color:var(--sub);line-height:2">';
+  out+='1️⃣ 選擇頭獎門檻（預設 $800萬）<br/>';
+  out+='2️⃣ 按「一鍵設定鬧鐘提醒」下載 .ics 檔案<br/>';
+  out+='3️⃣ 打開下載檔案 → 點「加入日曆」<br/>';
+  out+='4️⃣ 攪珠前 1 小時，手機自動彈出提示<br/>';
+  out+='🎱 攪珠時間：逢星期二、四、六 晚上 9:30';
+  out+='</div></div>';
+
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center"><span style="font-size:10px;color:var(--dim)">廣告位</span></div>';
+  return out;
+}
+
+function addPrizeReminder(){
+  prizeOn=true;render();
+  var draws=[];
+  var nd=calcNextDraw();
+  var d=new Date(nd.date+'T21:30:00+08:00');
+  var drawDays=[2,4,6];
+  for(var i=0;i<10;i++){
+    draws.push(new Date(d));
+    d=new Date(d);d.setDate(d.getDate()+1);
+    while(!drawDays.includes(d.getDay()))d.setDate(d.getDate()+1);
+  }
+  var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Ma6rkFun//HK Lottery//TC','CALSCALE:GREGORIAN'];
+  draws.forEach(function(dt,i){
+    var pad=function(n){return('0'+n).slice(-2);};
+    var dtStr=dt.getFullYear()+''+pad(dt.getMonth()+1)+''+pad(dt.getDate())+'T133000Z';
+    var alarmStr=dt.getFullYear()+''+pad(dt.getMonth()+1)+''+pad(dt.getDate())+'T123000Z';
+    lines.push('BEGIN:VEVENT');
+    lines.push('DTSTART:'+dtStr);
+    lines.push('DTEND:'+dtStr);
+    lines.push('SUMMARY:🎱六合彩今晚攪珠！記得買票');
+    lines.push('DESCRIPTION:頭獎門檻 '+fmtPrize(prizeThr)+' · 今晚9:30攪珠');
+    lines.push('BEGIN:VALARM');
+    lines.push('TRIGGER:-PT60M');
+    lines.push('ACTION:DISPLAY');
+    lines.push('DESCRIPTION:🎱 六合彩攪珠提醒！一小時後開獎，記得購票');
+    lines.push('END:VALARM');
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  var blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='lottery-reminders.ics';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📅 日曆提醒已下載！打開 .ics 加入日曆','ok',4000);
+}
+
+function calcLucky7Days(){
+  if(!userProfile||!userProfile.date)return[];
+  var bdate=new Date(userProfile.date);
+  var by=bdate.getFullYear(),bm=bdate.getMonth()+1,bd=bdate.getDate();
+  var zodiac=getZodiac(by,bm,bd);
+  var stems=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  var branches=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var elements=['木','木','火','火','土','土','金','金','水','水'];
+  var sixCombine={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
+  var threeHarmony={子:['辰','申'],丑:['巳','酉'],寅:['午','戌'],卯:['亥','未'],辰:['子','申'],巳:['丑','酉'],午:['寅','戌'],未:['卯','亥'],申:['子','辰'],酉:['丑','巳'],戌:['午','寅'],亥:['卯','未']};
+  var sixClash={子:'午',午:'子',丑:'未',未:'丑',寅:'申',申:'寅',卯:'酉',酉:'卯',辰:'戌',戌:'辰',巳:'亥',亥:'巳'};
+  var zodiacBranch={'鼠':'子','牛':'丑','虎':'寅','兔':'卯','龍':'辰','蛇':'巳','馬':'午','羊':'未','猴':'申','雞':'酉','狗':'戌','豬':'亥'};
+  var myBranch=zodiacBranch[zodiac]||'子';
+  var birthElement=elements[(by-1900+200)%10];
+  var elemScore={木:{木:65,火:85,土:50,金:40,水:90},火:{木:85,火:65,土:80,金:45,水:35},土:{木:45,火:80,土:65,金:85,水:45},金:{木:40,火:45,土:80,金:65,水:85},水:{木:90,火:35,土:45,金:80,水:65}};
+  var moodScore=parseInt(localStorage.getItem('ms_mood')||'70');
+  var results=[];
+  var today=new Date();
+  for(var i=1;i<=7;i++){
+    var d=new Date(today);d.setDate(today.getDate()+i);
+    var ds=Math.floor((d-new Date('1900-01-31'))/86400000);
+    var dStem=stems[((ds%10)+10)%10];
+    var dBranch=branches[((ds%12)+12)%12];
+    var dElement=elements[((ds%10)+10)%10];
+    var tianshi=50;
+    if(sixCombine[myBranch]===dBranch)tianshi+=25;
+    if(threeHarmony[myBranch]&&threeHarmony[myBranch].includes(dBranch))tianshi+=20;
+    if(sixClash[myBranch]===dBranch)tianshi-=25;
+    var eScore=(elemScore[birthElement]&&elemScore[birthElement][dElement])||65;
+    tianshi+=Math.round((eScore-65)/3);
+    tianshi=Math.min(99,Math.max(20,tianshi));
+    var renhe=Math.min(99,Math.max(30,moodScore+Math.round(Math.sin(i*1.3)*8)));
+    var dow=d.getDay();
+    var isDrawDay=(dow===2||dow===4||dow===6);
+    var seed=by+bm+bd+i;
+    var total=Math.round(tianshi*0.5+renhe*0.35+(isDrawDay?12:0)+((seed%10)-5));
+    total=Math.min(99,Math.max(25,total));
+    var advices={h1:'天時人和俱佳，攪珠之日！今天購彩，天地支持！',h0:'干支大吉之日，心情最佳，可提前購彩準備！',m1:'攪珠日，運勢平穩，量力而為，可小試。',m0:'干支平穩，調整狀態，為下次攪珠做準備。',l1:'六沖之日，攪珠日不利，建議跳過此期。',l0:'運勢稍弱，靜待更佳時機。'};
+    var ak=(total>=75?(isDrawDay?'h1':'h0'):total>=55?(isDrawDay?'m1':'m0'):(isDrawDay?'l1':'l0'));
+    var mo=d.getMonth()+1,dy=d.getDate();
+    var dowNames=['日','一','二','三','四','五','六'];
+    results.push({date:d,dateStr:mo+'月'+dy+'日（星期'+dowNames[dow]+'）',ganzhi:dStem+dBranch,tianshi:tianshi,renhe:renhe,total:total,isDrawDay:isDrawDay,advice:advices[ak]});
+  }
+  results.sort(function(a,b){return b.total-a.total;});
+  return results;
+}
+
+function showMoodCheck(){
+  var questions=[
+    {q:'今天睡眠如何？',opts:['😴 很差','😐 普通','😊 不錯','🌟 極好'],scores:[20,50,75,95]},
+    {q:'今天心情如何？',opts:['😢 很差','😕 一般','😊 開心','🥳 超棒'],scores:[15,45,75,95]},
+    {q:'今天有否遇到好事？',opts:['❌ 沒有','🤷 普通','👍 有','🎉 很多'],scores:[20,50,75,95]},
+    {q:'直覺感覺今天運氣如何？',opts:['💀 很差','😑 一般','✨ 不錯','🍀 超好'],scores:[10,40,75,99]}
+  ];
+  var qIdx=0,scores=[];
+  function renderQ(){
+    var q=questions[qIdx];
+    var body='<div style="text-align:center;padding:4px">';
+    body+='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">問題 '+(qIdx+1)+' / '+questions.length+'</div>';
+    body+='<div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px">'+q.q+'</div>';
+    q.opts.forEach(function(opt,i){
+      body+='<button onclick="window._moodAns('+i+')" style="display:block;width:100%;margin-bottom:8px;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;text-align:left">'+opt+'</button>';
+    });
+    body+='</div>';
+    document.getElementById('mood-body').innerHTML=body;
+  }
+  window._moodAns=function(i){
+    scores.push(questions[qIdx].scores[i]);
+    qIdx++;
+    if(qIdx<questions.length){renderQ();}
+    else{
+      var avg=Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
+      localStorage.setItem('ms_mood',avg);
+      document.getElementById('mood-modal').style.display='none';
+      showToast('🎯 心情分數：'+avg+'/100 · 吉日推算已更新！','ok',4000);
+      render();
+    }
+  };
+  var modal=document.getElementById('mood-modal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='mood-modal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px';
+    modal.innerHTML='<div style="background:var(--card);border-radius:20px;padding:20px;max-width:360px;width:100%"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:900;color:var(--accent)">🎯 心情小測驗</div><button onclick="document.getElementById(\'mood-modal\').style.display=\'none\'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--sub)">✕</button></div><div id="mood-body"></div></div>';
+    document.body.appendChild(modal);
+  }
+  modal.style.display='flex';
+  qIdx=0;scores=[];
+  renderQ();
+}
+
+function setCustomPrizeThr(){var v=parseInt((document.getElementById('prize-input').value||'').replace(/,/g,''));if(!isNaN(v)&&v>0){prizeThr=v;prizeShown=false;render();}}
+async function requestNotif(){if(typeof Notification==='undefined'){showToast('此瀏覽器不支援通知','err');return;}var p=await Notification.requestPermission();showToast(p==='granted'?'✅ 通知已開啟':'請允許通知',p==='granted'?'ok':'err');render();}
+
+// ═══ HISTORY ═══
+function renderHistory(){
+  var out='<div style="font-size:12px;color:var(--sub);margin-bottom:10px;font-weight:600">'+hist.length+' 期官方數據</div>';
+  for(var i=0;i<hist.length;i++){
+    var h=hist[i];
+    out+='<div class="row-item" style="'+(i===0?'background:rgba(233,30,99,.08)':'')+'">';
+    out+='<div style="min-width:62px"><div style="font-size:12px;color:var(--accent);font-weight:800">'+h.draw+'</div><div style="font-size:9px;color:var(--dim)">'+h.date+'</div></div>';
+    out+='<div style="display:flex;align-items:center;gap:4px;margin-left:auto;flex-wrap:nowrap">';
+    for(var j=0;j<h.numbers.length;j++) out+=ball(h.numbers[j],25);
+    out+=ball(h.extra,25,true)+'</div></div>';
+  }
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+
+// ═══ STATS ═══
+function renderStats(){
+  var st=calcStats(),out='';
+  out+='<div class="chips">';
+  var smodes=[['hot','🔥 熱號'],['cold','🧊 冷號'],['zone','🎨 區域'],['gap','⏳ 遺漏']];
+  for(var i=0;i<smodes.length;i++) out+='<button class="pill '+(sMode===smodes[i][0]?'active':'')+'" onclick="sMode=\''+smodes[i][0]+'\';render()">'+smodes[i][1]+'</button>';
+  out+='</div>';
+  if(sMode==='hot'){
+    var top=st.sorted.slice(0,15);
+    for(var i=0;i<top.length;i++){var n=+top[i][0],cnt=+top[i][1],c=ZC[gz(n)];out+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="color:var(--dim);font-size:11px;width:18px;text-align:right;font-weight:600">'+(i+1)+'</span>'+ball(n,34)+'<div class="bar-track"><div class="bar-fill" style="width:'+(cnt/st.mxF*100)+'%;background:'+c+'"></div></div><span style="color:'+c+';font-size:12px;font-weight:800;min-width:32px;text-align:right">'+cnt+'次</span></div>';}
+  }
+  if(sMode==='cold'){
+    var cold=[].concat(st.sorted).reverse().slice(0,15);
+    for(var i=0;i<cold.length;i++){var n=+cold[i][0],cnt=+cold[i][1],c=ZC[gz(n)];out+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="color:var(--dim);font-size:11px;width:18px;text-align:right;font-weight:600">'+(i+1)+'</span>'+ball(n,34,false,true)+'<div class="bar-track"><div class="bar-fill" style="width:'+(Math.max(5,cnt/st.mxF*100))+'%;background:var(--accent)"></div></div><span style="color:var(--accent);font-size:12px;font-weight:800;min-width:32px;text-align:right">'+cnt+'次</span></div>';}
+  }
+  if(sMode==='zone'){
+    var zc2={r:0,b:0,g:0,o:0,p:0},ZLn={r:'🔴 紅1–10',b:'🔵 藍11–20',g:'🟢 綠21–30',o:'🟠 橙31–40',p:'🟣 紫41–49'};
+    for(var i=0;i<hist.length;i++){for(var j=0;j<hist[i].numbers.length;j++) zc2[gz(hist[i].numbers[j])]++;zc2[gz(hist[i].extra)]++;}
+    var tot=0;for(var z in zc2) tot+=zc2[z];
+    var zones=['r','b','g','o','p'];
+    for(var i=0;i<zones.length;i++){var z=zones[i],c=ZC[z],pct=(zc2[z]/tot*100).toFixed(1);
+      out+='<div class="card" style="padding:13px;margin-bottom:9px;border-left:4px solid '+c+'"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:'+c+';font-weight:800;font-size:13px">'+ZLn[z]+'</span><span style="color:'+c+';font-weight:800">'+zc2[z]+'次 ('+pct+'%)</span></div><div style="height:7px;background:var(--track);border-radius:4px;overflow:hidden;margin-bottom:10px"><div style="height:100%;width:'+pct+'%;background:'+c+';border-radius:4px"></div></div><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
+      for(var n=1;n<=49;n++) if(gz(n)===z) out+=ball(n,24);
+      out+='</div></div>';
+    }
+  }
+  if(sMode==='gap'){
+    var gaps=[];for(var n in st.last) gaps.push({n:+n,idx:st.last[n]});
+    gaps.sort(function(a,b){return b.idx-a.idx;});
+    for(var i=0;i<Math.min(gaps.length,15);i++){var g=gaps[i],h2=hist[g.idx];out+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="color:var(--dim);font-size:11px;width:18px;text-align:right;font-weight:600">'+(i+1)+'</span>'+ball(g.n,34,false,true)+'<div style="flex:1"><div style="font-size:11px;color:var(--text);font-weight:600">'+(h2?h2.draw:'')+'</div><div style="font-size:9px;color:var(--dim)">'+(h2?h2.date:'')+'</div></div><span style="background:#fff3e0;color:#e65100;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px">缺'+g.idx+'期</span></div>';}
+  }
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+
+// ═══ CHECKER ═══
+function renderChecker(){
+  var l=hist[0];
+  var out='<div class="card accent-top"><div style="font-size:13px;font-weight:800;color:var(--accent);margin-bottom:10px">🔍 對照 '+l.draw+' · '+l.date+'</div>';
+  out+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px">'+ballsRow(l.numbers,l.extra,36)+'</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:10px">選擇號碼 <span style="color:var(--accent);font-weight:800">'+picked.length+'</span>/6</div>';
+  out+=grid49(picked,'togglePick',picked.length>=6);
+  out+='<div style="display:flex;gap:9px"><button class="btn btn-primary" style="flex:1" onclick="doCheck()">🔍 對獎！</button><button class="btn btn-ghost" onclick="picked=[];checkResult=null;render()">清除</button></div></div>';
+  if(checkResult){
+    out+='<div class="card" style="text-align:center;background:'+(checkResult.win?'#e8f5e9':'var(--card)')+'"><div style="font-size:26px;font-weight:900;color:'+(checkResult.win?'#2e7d32':'var(--sub)')+';margin-bottom:6px">'+checkResult.prize+'</div>';
+    out+='<div style="font-size:12px;color:var(--sub);margin-bottom:10px">命中 '+checkResult.matched.length+' 個正碼'+(checkResult.xHit?' + 特別號 ✓':'')+'</div>';
+    if(checkResult.matched.length>0||checkResult.xHit){out+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center">';for(var i=0;i<checkResult.matched.length;i++) out+=ball(checkResult.matched[i],38);if(checkResult.xHit) out+=ball(l.extra,38,true);out+='</div>';}
+    out+='</div>';
+  }
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+function togglePick(n){if(picked.includes(n))picked=picked.filter(function(x){return x!==n;});else if(picked.length<6)picked.push(n);checkResult=null;render();}
+function doCheck(){
+  var l=hist[0];if(picked.length<6){showToast('請先選擇 6 個號碼','err');return;}
+  var matched=picked.filter(function(n){return l.numbers.includes(n);}),xHit=picked.includes(l.extra);
+  var prize='😢 未中獎',win=false;
+  if(matched.length===6){prize='🏆 一獎！恭喜發財！';win=true;}
+  else if(matched.length===5&&xHit){prize='🥈 二獎！好勁！';win=true;}
+  else if(matched.length===5){prize='🥉 三獎！';win=true;}
+  else if(matched.length===4&&xHit){prize='🎖 四獎！';win=true;}
+  else if(matched.length===4){prize='🏅 五獎！';win=true;}
+  else if(matched.length===3&&xHit){prize='🎗 六獎！';win=true;}
+  else if(matched.length===3){prize='🎗 七獎！';win=true;}
+  checkResult={prize:prize,matched:matched,xHit:xHit,win:win};
+  if(win)showConfetti();render();
+}
+
+// ═══ MY BETS ═══
+function renderMyBets(){
+  var out='<div class="card" style="border-top:4px solid #43a047"><div style="font-size:15px;font-weight:900;color:#43a047;margin-bottom:4px">🎯 我的投注記錄</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:12px">記錄號碼，更新數據後自動對獎。只存本機。</div>';
+  out+='<button class="btn btn-success btn-full" onclick="showAddBet=!showAddBet;render()">'+(showAddBet?'▲ 收起':'＋ 新增投注')+'</button></div>';
+  if(showAddBet){
+    out+='<div class="card"><div style="font-size:12px;font-weight:700;margin-bottom:8px">選擇 6 個號碼（'+betInput.length+'/6）</div>';
+    out+=grid49(betInput,'toggleBetPick',betInput.length>=6);
+    if(betInput.length>0){out+='<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">';for(var i=0;i<betInput.length;i++) out+=ball(betInput[i],30);out+='</div>';}
+    out+='<input type="text" id="bet-draw-input" placeholder="期號（可選）" value="'+betDraw+'" onchange="betDraw=this.value" style="margin-bottom:10px"/>';
+    out+='<input type="text" id="bet-note-input" placeholder="備注（可選）" value="'+betNote+'" onchange="betNote=this.value" style="margin-bottom:10px"/>';
+    out+='<button class="btn btn-success btn-full" onclick="addBet()" '+(betInput.length!==6?'disabled':'')+'>✅ 確認記錄</button></div>';
+  }
+  if(myBets.length===0){out+='<div class="card" style="text-align:center;color:var(--dim);font-size:14px">還沒有記錄 🎯<br/><span style="font-size:11px">快新增你的投注吧！</span></div>';}
+  else{
+    for(var i=0;i<myBets.length;i++){
+      var b=myBets[i],hDraw=null;
+      for(var j=0;j<hist.length;j++) if(hist[j].draw===b.draw){hDraw=hist[j];break;}
+      var hit=hDraw?b.numbers.filter(function(n){return hDraw.numbers.includes(n);}).length:null;
+      var xHit=hDraw?b.numbers.includes(hDraw.extra):null;
+      var pn=hit!==null?prizeName(hit,xHit):'',won=pn&&!pn.includes('未中');
+      out+='<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      out+='<div><span style="font-size:12px;color:var(--accent);font-weight:800">'+b.draw+'</span><span style="font-size:10px;color:var(--dim);margin-left:8px">'+b.date+'</span></div>';
+      out+='<div style="display:flex;gap:6px;align-items:center">';
+      if(hDraw) out+='<span style="font-size:11px;font-weight:800;color:'+(won?'#2e7d32':'#c62828')+';background:'+(won?'#e8f5e9':'#ffebee')+';padding:2px 8px;border-radius:20px">'+pn+'</span>';
+      else out+='<span style="font-size:10px;color:var(--dim)">⏳ 待開獎</span>';
+      out+='<button onclick="deleteBet('+b.id+')" style="border:none;background:none;color:var(--dim);cursor:pointer;font-size:16px;padding:0">🗑</button></div></div>';
+      out+='<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
+      for(var j=0;j<b.numbers.length;j++) out+=ball(b.numbers[j],28,false,false,!!(hDraw&&hDraw.numbers.includes(b.numbers[j])),'#43a047');
+      out+='</div>';
+      if(b.note) out+='<div style="font-size:10px;color:var(--dim);margin-top:6px">📝 '+b.note+'</div>';
+      out+='</div>';
+    }
+  }
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+function toggleBetPick(n){if(betInput.includes(n))betInput=betInput.filter(function(x){return x!==n;});else if(betInput.length<6)betInput.push(n);render();}
+function addBet(){
+  var nd=calcNextDraw();
+  var draw=(document.getElementById('bet-draw-input').value||betDraw||nd.drawNum);
+  var note=(document.getElementById('bet-note-input').value||betNote||'');
+  if(betInput.length!==6){showToast('請選擇6個號碼','err');return;}
+  var nb={id:Date.now(),draw:draw,numbers:betInput.slice().sort(function(a,b){return a-b;}),note:note,date:new Date().toLocaleDateString('zh-HK'),scored:false};
+  myBets=[nb].concat(myBets);localStorage.setItem('ms_bets',JSON.stringify(myBets));
+  betInput=[];betDraw='';betNote='';showAddBet=false;
+  showToast('✅ 已記錄！等開獎啦～','ok');render();
+}
+function deleteBet(id){myBets=myBets.filter(function(b){return b.id!==id;});localStorage.setItem('ms_bets',JSON.stringify(myBets));render();}
+function prizeName(hit,xHit){if(hit===6)return'🏆 一獎';if(hit===5&&xHit)return'🥈 二獎';if(hit===5)return'🥉 三獎';if(hit===4&&xHit)return'🎖 四獎';if(hit===4)return'🏅 五獎';if(hit===3&&xHit)return'🎗 六獎';if(hit===3)return'🎗 七獎';return'😢 未中';}
+
+// ═══ BOARD ═══
+function renderBoard(){
+  var scored=boardEntries.filter(function(e){return e.scored;}).sort(function(a,b){return b.score-a.score;});
+  var pending=boardEntries.filter(function(e){return !e.scored;});
+  var medalBg=['#ffd700','#c0c0c0','#cd7f32'];
+  var out='<div class="card" style="border-top:4px solid #f57f17"><div style="font-size:15px;font-weight:900;color:#f57f17;margin-bottom:4px">🏆 預測準確率排行榜</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:12px;line-height:1.7">提交你對下期的預測！命中1正碼=10分，特別號=5分。純屬娛樂！</div>';
+  out+='<button class="btn btn-gold btn-full" onclick="showAddBoard=!showAddBoard;render()">'+(showAddBoard?'▲ 收起':'🎯 提交本期預測')+'</button></div>';
+  if(showAddBoard){
+    out+='<div class="card"><input type="text" id="board-name" placeholder="你的暱稱" value="'+boardName+'" onchange="boardName=this.value"/>';
+    out+='<div style="font-size:12px;font-weight:700;margin-bottom:8px">選擇 6 個號碼（'+boardPicks.length+'/6）</div>';
+    out+=grid49(boardPicks,'toggleBoardPick',boardPicks.length>=6);
+    if(boardPicks.length>0){out+='<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">';for(var i=0;i<boardPicks.length;i++) out+=ball(boardPicks[i],30);out+='</div>';}
+    out+='<button class="btn btn-gold btn-full" onclick="addBoardEntry()" '+(!boardName.trim()||boardPicks.length!==6?'disabled':'')+'>🏆 提交預測</button></div>';
+  }
+  if(scored.length>0){
+    out+='<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:8px">🏆 已計分排名</div>';
+    for(var i=0;i<scored.length;i++){var e=scored[i];out+='<div class="row-item"><div style="width:28px;height:28px;border-radius:50%;background:'+(i<3?medalBg[i]:'var(--track)')+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:'+(i<3?'#fff':'var(--sub)')+';flex-shrink:0">'+(i+1)+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">'+e.name+'</div><div style="font-size:9px;color:var(--dim)">'+e.draw+' · 命中'+e.hit+'個'+(e.xHit?' +特':'')+'</div><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:4px">';for(var j=0;j<e.numbers.length;j++) out+=ball(e.numbers[j],20);out+='</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:18px;font-weight:900;color:#f57f17">'+e.score+'</div><div style="font-size:9px;color:var(--dim)">分</div></div></div>';}
+  }
+  if(pending.length>0){
+    out+='<div style="font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 8px">⏳ 待開獎預測</div>';
+    for(var i=0;i<pending.length;i++){var e=pending[i];out+='<div class="row-item"><div style="flex:1"><div style="font-size:12px;font-weight:700">'+e.name+'</div><div style="font-size:9px;color:var(--dim)">'+e.draw+'</div><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:4px">';for(var j=0;j<e.numbers.length;j++) out+=ball(e.numbers[j],20);out+='</div></div><span style="font-size:10px;color:#f57f17;font-weight:700;background:#fff3e0;padding:3px 8px;border-radius:20px">待計分</span></div>';}
+  }
+  if(boardEntries.length===0) out+='<div class="card" style="text-align:center;color:var(--dim);font-size:14px">還沒有預測 🎯<br/><span style="font-size:11px">成為第一個預測者！</span></div>';
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+function toggleBoardPick(n){if(boardPicks.includes(n))boardPicks=boardPicks.filter(function(x){return x!==n;});else if(boardPicks.length<6)boardPicks.push(n);render();}
+function addBoardEntry(){
+  var name=(document.getElementById('board-name').value||boardName||'').trim();
+  if(!name){showToast('請輸入暱稱','err');return;}
+  if(boardPicks.length!==6){showToast('請選擇6個號碼','err');return;}
+  var nd=calcNextDraw();
+  var e={id:Date.now(),name:name,draw:nd.drawNum,numbers:boardPicks.slice().sort(function(a,b){return a-b;}),ts:new Date().toISOString(),scored:false,score:0,hit:0};
+  boardEntries=[e].concat(boardEntries).slice(0,200);
+  localStorage.setItem('ms_board',JSON.stringify(boardEntries));
+  boardPicks=[];boardName='';showAddBoard=false;
+  showToast('🎯 預測已提交！加油！','ok');render();
+}
+
+// ═══ PREDICT ═══
+var MATH_METHODS=[{key:'combined',label:'綜合評分',icon:'⚡'},{key:'golden',label:'黃金分割',icon:'φ'},{key:'fib',label:'費氏數列',icon:'∞'},{key:'gap',label:'遺漏回歸',icon:'↩'},{key:'parity',label:'奇偶平衡',icon:'⚖'},{key:'sumzone',label:'和值區間',icon:'Σ'},{key:'tail',label:'尾數分析',icon:'09'}];
+
+function renderPredict(){
+  var out='<div class="sub-tabs">';
+  var ptabs=[['math','📐 數學引擎','#e65100'],['ai','🤖 AI 預測','#6a1b9a']];
+  for(var i=0;i<ptabs.length;i++) out+='<button class="sub-tab '+(pTab===ptabs[i][0]?'active':'')+'" onclick="pTab=\''+ptabs[i][0]+'\';render()" style="'+(pTab===ptabs[i][0]?'color:'+ptabs[i][2]:'')+'">'+ptabs[i][1]+'</button>';
+  out+='</div>';
+  out+=pTab==='math'?renderMathPredict():renderAIPredict();
+  
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+}
+
+function renderMathPredict(){
+  var out='<div class="card" style="border-top:4px solid #e65100"><div style="font-size:14px;font-weight:900;color:#e65100;margin-bottom:14px">📐 數學預測引擎</div>';
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">';
+  for(var i=0;i<MATH_METHODS.length;i++){var m=MATH_METHODS[i];out+='<button onclick="mMethod=\''+m.key+'\';render()" style="padding:11px 12px;border-radius:11px;border:2px solid '+(mMethod===m.key?'#e65100':'var(--border)')+';background:'+(mMethod===m.key?'var(--accent-bg)':'var(--row)')+';cursor:pointer;text-align:left"><div style="font-size:15px;margin-bottom:3px">'+m.icon+'</div><div style="font-size:12px;font-weight:800;color:'+(mMethod===m.key?'#e65100':'var(--text)')+'">'+m.label+'</div></button>';}
+  out+='</div><button class="btn btn-gold btn-full" onclick="doMath()" '+(mLoading?'disabled':'')+'>'+(mLoading?'🔄 計算中...':'📐 開始分析')+'</button></div>';
+  if(mResult&&!mResult.error){
+    out+='<div class="result-card"><div style="font-size:11px;color:var(--dim);margin-bottom:10px;text-align:center">⚠️ 純屬娛樂，中獎係靠緣份！</div>';
+    out+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center">'+ballsRow(mResult.numbers,mResult.extra,50)+'</div></div>';
+    out+='<div class="card"><div style="font-size:13px;font-weight:800;margin-bottom:12px">📊 TOP 15 評分</div>';
+    for(var i=0;i<mResult.top15.length;i++){var item=mResult.top15[i],sel=mResult.numbers.includes(item.n),c=ZC[gz(item.n)];out+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px"><span style="color:'+(sel?'var(--accent)':'var(--dim)')+';font-size:11px;width:18px;text-align:right;font-weight:700">'+(i+1)+'</span>'+ball(item.n,32,false,false,sel,sel?'var(--accent)':'')+'<div style="flex:1"><div style="height:6px;background:var(--track);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+(item.score*100)+'%;background:'+(sel?'var(--accent)':c)+';border-radius:3px"></div></div></div><div style="background:'+(sel?'var(--accent-bg)':'var(--row)')+';padding:3px 8px;border-radius:8px"><span style="font-size:12px;font-weight:800;color:'+(sel?'var(--accent)':'var(--sub)')+'">'+Math.round(item.score*100)+'</span></div></div>';}
+    out+='</div>';
+  }
+  return out;
+}
+
+function renderAIPredict(){
+  function comb(n,k){if(k>n)return 0;var r=1;for(var i=0;i<k;i++) r=r*(n-i)/(i+1);return Math.round(r);}
+  var dc=pCount-sureCt,tickets=betMode==='combination'?comb(pCount,6):betMode==='bravery'?(function(){var need=6-sureCt;if(dc<need||need<1)return 0;return comb(dc,need);})():1;
+  var out='<div class="card" style="border-top:4px solid #6a1b9a"><div style="font-size:14px;font-weight:900;color:#6a1b9a;margin-bottom:14px">🤖 AI 號碼建議</div>';
+  out+='<div class="chips" style="margin-bottom:14px">';
+  var bmodes=[['standard','🎯 普通一注'],['combination','🎲 多寶'],['bravery','🦁 膽拖']];
+  for(var i=0;i<bmodes.length;i++) out+='<button class="pill '+(betMode===bmodes[i][0]?'active':'')+'" onclick="betMode=\''+bmodes[i][0]+'\';if(betMode!==\'standard\'&&pCount<7)pCount=7;render()" style="'+(betMode===bmodes[i][0]?'border-color:#6a1b9a;background:#f3e5f5;color:#6a1b9a':'')+'">'+bmodes[i][1]+'</button>';
+  out+='</div>';
+  if(betMode!=='standard'){out+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';for(var n=7;n<=12;n++) out+='<button onclick="pCount='+n+';render()" style="width:42px;height:42px;border-radius:11px;border:2px solid '+(pCount===n?'#6a1b9a':'var(--border)')+';background:'+(pCount===n?'#f3e5f5':'var(--card)')+';color:'+(pCount===n?'#6a1b9a':'var(--sub)')+';font-weight:800;font-size:15px;cursor:pointer">'+n+'</button>';out+='</div>';}
+  if(betMode==='bravery'){out+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">';for(var n=1;n<=Math.min(5,pCount-1);n++) out+='<button onclick="sureCt='+n+';render()" style="width:42px;height:42px;border-radius:11px;border:2px solid '+(sureCt===n?'#2e7d32':'var(--border)')+';background:'+(sureCt===n?'#e8f5e9':'var(--card)')+';color:'+(sureCt===n?'#2e7d32':'var(--sub)')+';font-weight:800;font-size:15px;cursor:pointer">'+n+'</button>';out+='</div>';}
+  out+='<div style="background:var(--row);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:11px;color:var(--sub)">'+(betMode==='standard'?'普通一注':betMode==='combination'?'C('+pCount+',6)='+comb(pCount,6)+'注':'膽'+sureCt+'拖'+dc)+'</div><div style="text-align:right"><div style="font-size:18px;font-weight:900;color:#e65100">HK$'+(tickets*10).toLocaleString()+'</div><div style="font-size:9px;color:var(--dim)">'+tickets+'注×$10</div></div></div>';
+  out+='<button class="btn btn-purple btn-full" onclick="doAI()" '+(pLoading?'disabled':'')+'>'+(pLoading?'🔮 AI 分析中...':'🔮 生成號碼建議')+'</button></div>';
+  if(aiResult){
+    if(aiResult.error) out+='<div class="card" style="text-align:center"><span style="color:#c62828;font-weight:700">❌ 生成失敗，請重試</span></div>';
+    else if(aiResult.type==='bravery'){out+='<div class="result-card"><div style="margin-bottom:12px"><div style="font-size:11px;color:#2e7d32;font-weight:800;margin-bottom:6px">膽碼</div><div style="display:flex;gap:6px;flex-wrap:wrap">';for(var i=0;i<aiResult.sure.length;i++) out+=ball(aiResult.sure[i],46,false,false,true,'#2e7d32');out+='</div></div><div style="margin-bottom:12px"><div style="font-size:11px;color:#e65100;font-weight:800;margin-bottom:6px">拖碼</div><div style="display:flex;gap:6px;flex-wrap:wrap">';for(var i=0;i<aiResult.drag.length;i++) out+=ball(aiResult.drag[i],46,false,false,true,'#e65100');out+='</div></div><div style="background:var(--row);border-radius:10px;padding:12px;font-size:12px;line-height:1.8">'+aiResult.analysis+'</div></div>';}
+    else{out+='<div class="result-card"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px">'+ballsRow(aiResult.numbers,aiResult.extra,48)+'</div><div style="background:var(--row);border-radius:10px;padding:12px;font-size:12px;line-height:1.8">'+aiResult.analysis+'</div></div>';}
+  }
+  return out;
+}
+
+function doMath(){
+  mLoading=true;mResult=null;render();
+  setTimeout(function(){
+    try{
+      var ranked=runMath();
+      var sortMap={golden:function(a,b){return b.golden-a.golden;},fib:function(a,b){return b.fib-a.fib;},gap:function(a,b){return b.gap-a.gap;},parity:function(a,b){return b.parity-a.parity;},sumzone:function(a,b){return b.sum-a.sum;},tail:function(a,b){return b.tail-a.tail;}};
+      var mr=sortMap[mMethod]?ranked.slice().sort(sortMap[mMethod]):ranked;
+      var top=mr.slice(0,6).map(function(x){return x.n;}).sort(function(a,b){return a-b;});
+      var extra=ranked.slice().sort(function(a,b){return b.gap-a.gap;}).find(function(x){return !top.includes(x.n);}).n;
+      mResult={numbers:top,extra:extra,top15:mr.slice(0,15)};
+    }catch(e){mResult={error:true};}
+    mLoading=false;render();
+  },80);
+}
+
+async function doAI(){
+  var apiKey=localStorage.getItem('ms_key')||'';
+  if(!apiKey){showToast('⚙️ 請先設定 API Key','err');return;}
+  pLoading=true;aiResult=null;render();
+  var ranked=runMath();
+  var mathTop=ranked.slice(0,10).map(function(r){return r.n+'('+Math.round(r.score*100)+')';}).join(',');
+  var recent=hist.slice(0,5).map(function(h){return h.draw+':'+h.numbers.join(',')+'+特'+h.extra;}).join('|');
+  var dc=pCount-sureCt,sp,um;
+  if(betMode==='bravery'){sp='六合彩分析師。只回JSON：{"sure":['+sureCt+'個膽碼],"drag":['+dc+'個拖碼],"extra":特別號,"analysis":"繁體60字"}';um='近期:'+recent+'\nTop10:'+mathTop+'\n膽'+sureCt+'拖'+dc;}
+  else{sp='六合彩分析師。只回JSON：{"numbers":['+pCount+'個1-49不重複],"extra":特別號,"analysis":"繁體60字"}';um='近期:'+recent+'\nTop10:'+mathTop+'\n建議'+pCount+'個';}
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,system:sp,messages:[{role:'user',content:um}]})});
+    var d=await res.json();
+    if(d.error) throw new Error(d.error.message);
+    var r=JSON.parse((d.content&&d.content[0]&&d.content[0].text||'').replace(/```json|```/g,'').trim());
+    if(betMode==='bravery'){if(r.sure&&r.sure.length===sureCt&&r.drag) aiResult=Object.assign({type:'bravery'},r);else throw 0;}
+    else{if(r.numbers&&r.numbers.length===pCount) aiResult=Object.assign({type:'standard'},r);else throw 0;}
+  }catch(e){aiResult={error:true};}
+  pLoading=false;render();
+}
+
+// ═══ DISCUSS ═══
+var disqusLoaded=false;
+function renderDiscuss(){
+  var out='';
+  if(selPost){
+    out+='<button class="btn btn-ghost" onclick="selPost=null;render()" style="margin-bottom:12px">← 返回</button>';
+    out+='<div class="result-card"><div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">';
+    out+='<span style="font-size:28px">'+selPost.emoji+'</span>';
+    out+='<div><div style="font-size:15px;font-weight:900;margin-bottom:4px">'+selPost.title+'</div>';
+    out+='<div style="font-size:10px;color:var(--sub)">管理員 · '+selPost.date+(selPost.likes>0?' · ❤️'+selPost.likes:'')+'</div></div></div>';
+    out+='<div style="font-size:13px;line-height:1.9;background:var(--row);border-radius:10px;padding:14px">'+selPost.content.replace(/\n/g,'<br/>')+'</div></div>';
+    
+  // 廣告位
+  out+='<div class="ad-slot" style="margin:10px 0;min-height:60px;background:var(--row);border:1px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center">';
+  out+='<span style="font-size:10px;color:var(--dim)">廣告位</span>';
+  out+='</div>';
+  return out;
+  }
+  out+='<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:8px">📌 置頂公告</div>';
+  for(var i=0;i<POSTS.length;i++){
+    var p=POSTS[i];
+    if(!p.pin) continue;
+    out+='<div class="post-card pinned" onclick="selPost=POSTS['+i+'];render()">';
+    out+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+p.emoji+'</span>';
+    out+='<div style="flex:1"><div class="post-title">'+p.title+'</div><div class="post-meta">管理員 · '+p.date+(p.likes>0?' · ❤️'+p.likes:'')+'</div></div></div>';
+    out+='<div class="post-preview">'+p.content.slice(0,70)+'...</div></div>';
+  }
+  out+='<div style="font-size:12px;color:var(--sub);font-weight:700;margin:14px 0 8px">💬 管理員討論</div>';
+  for(var i=0;i<POSTS.length;i++){
+    var p=POSTS[i];
+    if(p.pin) continue;
+    out+='<div class="post-card" onclick="selPost=POSTS['+i+'];render()">';
+    out+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">'+p.emoji+'</span>';
+    out+='<div style="flex:1"><div class="post-title">'+p.title+'</div><div class="post-meta">管理員 · '+p.date+' · ❤️'+p.likes+'</div></div></div>';
+    out+='<div class="post-preview">'+p.content.slice(0,80)+'...</div></div>';
+  }
+  out+='<div class="card" style="margin-top:4px"><div style="font-size:13px;font-weight:700;margin-bottom:4px">💬 加入討論</div>';
+  out+='<div style="font-size:11px;color:var(--sub);margin-bottom:12px;line-height:1.7">點任何帖子可查看全文，或在下方直接留言！</div>';
+  out+='<div id="disqus_thread" style="min-height:200px"></div></div>';
+  return out;
+}
+function initDisqus(){
+  try{
+    if(disqusLoaded){if(window.DISQUS)window.DISQUS.reset({reload:true,config:function(){this.page.url=window.location.href;this.page.identifier='liuhechuzhong-discuss';}});return;}
+    disqusLoaded=true;
+    window.disqus_config=function(){this.page.url=window.location.href;this.page.identifier='liuhechuzhong-discuss';};
+    var s=document.createElement('script');s.src='https://'+DISQUS_SHORTNAME+'.disqus.com/embed.js';s.async=true;
+    s.onerror=function(){var el=document.getElementById('disqus_thread');if(el)el.innerHTML='<div style="padding:14px;color:var(--sub);font-size:12px;text-align:center">💬 留言功能載入中，請稍後重試</div>';};
+    document.head.appendChild(s);
+  }catch(e){}
+}
+// ── Init ──
+window.onerror = function(msg, src, line, col, err) {
+  const c = document.getElementById('content');
+  if(c) c.innerHTML = '<div style="padding:20px;background:#ffebee;border-radius:12px;color:#c62828;font-size:12px;line-height:2">' +
+    '<strong>JS Error:</strong><br/>' + msg + '<br/>Line: ' + line + '<br/>' + (err?err.stack:'') + '</div>';
+  return false;
+};
+try {
+  updateHeader();
+  initLucky();
+  // Test: write directly to content first
+render();
+} catch(e) {
+  const c = document.getElementById('content');
+  if(c) c.innerHTML = '<div style="padding:20px;background:#ffebee;border-radius:12px;color:#c62828;font-size:12px;line-height:2">' +
+    '<strong>Init Error:</strong><br/>' + e.message + '<br/>' + e.stack + '</div>';
+}
+
+</script>
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border-radius:24px;padding:24px;max-width:360px;width:100%;max-height:90vh;overflow-y:auto">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:36px">🎱</div>
+      <div style="font-size:20px;font-weight:900;color:var(--accent)">歡迎使用六合常中</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:4px">輸入生日，獲取個人化運程分析</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">📅 出生日期</div>
+      <input type="date" id="ob-date" style="width:100%;box-sizing:border-box"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">⏰ 出生時間（可選，更準確）</div>
+      <input type="time" id="ob-time" placeholder="不知道可留空" style="width:100%;box-sizing:border-box"/>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">⚧ 性別（影響紫微斗數）</div>
+      <div style="display:flex;gap:8px">
+        <button id="ob-male" onclick="selectGender('male')" style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--card);font-size:13px;cursor:pointer">👨 男</button>
+        <button id="ob-female" onclick="selectGender('female')" style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--card);font-size:13px;cursor:pointer">👩 女</button>
+      </div>
+    </div>
+    <button onclick="saveProfile()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#ff6090);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;margin-bottom:8px">✨ 開始使用</button>
+    <button onclick="skipProfile()" style="width:100%;padding:10px;background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer">跳過（之後可在設定修改）</button>
+  </div>
+</div>
+</body>
+</html>
